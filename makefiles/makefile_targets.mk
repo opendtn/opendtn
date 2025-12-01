@@ -27,26 +27,26 @@
 #       ------------------------------------------------------------------------
 
 # DTN_OBJ              = $(patsubst %.c,%.o,$(DTN_SRC))
-DTN_OBJ_1            = $(notdir $(DTN_SRC))
-DTN_OBJ_2            = $(addprefix $(DTN_OBJDIR)/$(DTN_DIRNAME)/,$(DTN_OBJ_1))
-DTN_OBJ              = $(patsubst %.c,%.o,$(DTN_OBJ_2))
-DTN_DEP              = $(patsubst %.c,%.d,$(DTN_SRC))
-DTN_OBJ_EXEC         = $(addprefix $(DTN_OBJDIR)/$(DTN_DIRNAME)/,$(patsubst %,%.o,$(notdir $(DTN_EXECUTABLE))))
-DTN_OBJ_TEST         = $(addprefix $(DTN_OBJDIR)/$(DTN_DIRNAME)/,$(patsubst %.c,%.o,$(notdir $(DTN_TEST_SOURCES))))
-DTN_OBJ_IF_TEST      = $(addprefix $(DTN_OBJDIR)/$(DTN_DIRNAME)/,$(patsubst %.c,%.o,$(notdir $(DTN_TEST_IF_SRC))))
+DTN_OBJ_1       		= $(notdir $(DTN_SRC))
+DTN_OBJ_2       		= $(addprefix $(DTN_OBJDIR)/$(DTN_DIRNAME)/,$(DTN_OBJ_1))
+DTN_OBJ         		= $(patsubst %.c,%.o,$(DTN_OBJ_2))
+DTN_DEP         		= $(patsubst %.c,%.d,$(DTN_SRC))
+DTN_OBJ_EXEC    		= $(addprefix $(DTN_OBJDIR)/$(DTN_DIRNAME)/,$(patsubst %,%.o,$(notdir $(DTN_EXECUTABLE))))
+DTN_OBJ_TEST    		= $(addprefix $(DTN_OBJDIR)/$(DTN_DIRNAME)/,$(patsubst %.c,%.o,$(notdir $(DTN_TEST_SOURCES))))
+DTN_OBJ_IF_TEST 		= $(addprefix $(DTN_OBJDIR)/$(DTN_DIRNAME)/,$(patsubst %.c,%.o,$(notdir $(DTN_TEST_IF_SRC))))
 
-DTN_STATIC           = $(DTN_LIBDIR)/$(DTN_LIBNAME)$(DTN_EDITION).a
+DTN_STATIC				= $(DTN_LIBDIR)/$(DTN_LIBNAME)$(DTN_EDITION).a
 
-DTN_SHARED_LINKER_NAME = $(DTN_LIBNAME)$(DTN_EDITION).so
-DTN_SHARED_SONAME      = $(DTN_SHARED_LINKER_NAME).$(DTN_VERSION_MAJOR)
-DTN_SHARED_REAL        = $(DTN_SHARED_LINKER_NAME).$(DTN_VERSION)
-DTN_SHARED             = $(DTN_LIBDIR)/$(DTN_SHARED_REAL) $(DTN_LIBDIR)/$(DTN_SHARED_LINKER_NAME) $(DTN_LIBDIR)/$(DTN_SHARED_SONAME)
+DTN_SHARED_LINKER_NAME	= $(DTN_LIBNAME)$(DTN_EDITION).so
+DTN_SHARED_SONAME     	= $(DTN_SHARED_LINKER_NAME).$(DTN_VERSION_MAJOR)
+DTN_SHARED_REAL       	= $(DTN_SHARED_LINKER_NAME).$(DTN_VERSION)
+DTN_SHARED            	= $(DTN_LIBDIR)/$(DTN_SHARED_REAL) $(DTN_LIBDIR)/$(DTN_SHARED_LINKER_NAME) $(DTN_LIBDIR)/$(DTN_SHARED_SONAME)
 
 DTN_TEST_RESOURCE        = $(wildcard resources/test/*)
 DTN_TEST_RESOURCE_TARGET = $(addprefix $(DTN_TEST_RESOURCE_DIR)/,$(notdir $(DTN_TEST_RESOURCE)))
 
-L_SRCDIRS          := $(shell find . -name '*.c' -exec dirname {} \; | uniq)
-VPATH              := $(L_SRCDIRS)
+L_SRCDIRS      		:= $(shell find . -name '*.c' -exec dirname {} \; | uniq)
+VPATH          		:= $(L_SRCDIRS)
 
 all                 : target_prepare target_build_all target_install
 target_build_all    : target_sources

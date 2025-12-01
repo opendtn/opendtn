@@ -18,6 +18,6 @@ DTN_VERSION_BUILD_DATE := $(shell date '+%Y.%m.%d_%H:%M:%S')
 DTN_VERSION_COMPILER   := $(shell echo $(CC) && cc -dumpversion)
 DTN_VERSION_COMMIT_ID  := $(shell git log --format="%H" -n 1)
 
-
+-include $(DTN_ROOT)/openvocs/makefiles/makefile_version.mk
 
 #-----------------------------------------------------------------------------

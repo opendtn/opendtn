@@ -27,17 +27,17 @@
 include $(DTN_ROOT)/makefiles/makefile_version.mk
 
 # generic source files
-G_HEADERS            := $(wildcard include/*.h)
-G_SOURCES_C        := $(wildcard src/*.c)
-G_TEST_SOURCES     := $(wildcard src/*_test.c)
-G_TEST_IF_SRC    := $(wildcard src/*_test_interface.c)
-G_SOURCES        := $(filter-out $(G_TEST_SOURCES), $(G_SOURCES_C))
+G_HEADERS           := $(wildcard include/*.h)
+G_SOURCES_C         := $(wildcard src/*.c)
+G_TEST_SOURCES      := $(wildcard src/*_test.c)
+G_TEST_IF_SRC       := $(wildcard src/*_test_interface.c)
+G_SOURCES           := $(filter-out $(G_TEST_SOURCES), $(G_SOURCES_C))
 
 # const variables to use (generic may be overriden using L_* )
-DTN_HDR            := $(if $(L_HEADERS),$(L_HEADERS),$(G_HEADERS))
-DTN_SRC            := $(if $(L_SOURCES),$(L_SOURCES),$(G_SOURCES))
+DTN_HDR             := $(if $(L_HEADERS),$(L_HEADERS),$(G_HEADERS))
+DTN_SRC             := $(if $(L_SOURCES),$(L_SOURCES),$(G_SOURCES))
 DTN_TEST_SOURCES    := $(if $(L_TEST_SOURCES),$(L_TEST_SOURCES),$(G_TEST_SOURCES))
-DTN_TEST_IF_SRC    := $(if $(L_TEST_IF_SRC),$(L_TEST_IF_SRC),$(G_TEST_IF_SRC))
+DTN_TEST_IF_SRC     := $(if $(L_TEST_IF_SRC),$(L_TEST_IF_SRC),$(G_TEST_IF_SRC))
 
 # shell commands
 DTN_MKDIR           := mkdir -p
@@ -71,6 +71,8 @@ DTN_PLUGINDIR       := $(DTN_BUILDDIR)/plugins
 DTN_INSTALLDIR      := /usr/local/bin
 DTN_PLUGINS_INSTALLDIR   := /usr/lib/openvocs/plugins
 
+OPENVOCS_BUILD_DIR  := $(DTN_ROOT)/openvocs/build
+
 DTN_TEMPDIR         := /tmp
 
 DTN_INSTALL_PREFIX  := /usr/local
@@ -81,7 +83,7 @@ DTN_INSTALL_PREFIX  := /usr/local
 # DTN_DEPENDFILE      := .depend
 
 # include paths
-DTN_INC             := -Iinclude -I$(DTN_BUILDDIR) -I$(DTN_BUILDDIR)/include
+DTN_INC             := -Iinclude -I$(DTN_BUILDDIR) -I$(DTN_BUILDDIR)/include -I$(OPENVOCS_BUILD_DIR)/include
 
 DTN_DIRNAME         := $(notdir $(CURDIR))
 DTN_LIBNAME         := lib$(DTN_DIRNAME)
@@ -108,6 +110,12 @@ BUILD_DEFINITIONS = -D DTN_ROOT='"$(DTN_ROOT)"' \
                     -D DTN_VERSION_BUILD_DATE='"$(DTN_VERSION_BUILD_DATE)"' \
                     -D DTN_VERSION_COMPILER='"$(DTN_VERSION_COMPILER)"' \
                     -D DTN_PLUGINS_INSTALLDIR='"$(DTN_PLUGINS_INSTALLDIR)"' \
+                    -D OV_VERSION='"$(OV_VERSION)"' \
+                    -D OV_VERSION_BUILD_ID='"$(OV_VERSION_BUILD_ID)"' \
+                    -D OV_VERSION_COMMIT_ID='"$(OV_VERSION_COMMIT_ID)"' \
+                    -D OV_VERSION_BUILD_DATE='"$(OV_VERSION_BUILD_DATE)"' \
+                    -D OV_VERSION_COMPILER='"$(OV_VERSION_COMPILER)"' \
+                    -D OV_PLUGINS_INSTALLDIR='"$(OV_PLUGINS_INSTALLDIR)"' \
 
 #.............................................................................
 
