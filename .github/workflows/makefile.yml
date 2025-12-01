@@ -18,7 +18,7 @@ jobs:
       run: ./scripts/prepare_environment.sh debian ubuntu
 
     - name: Run check
-      run: make test
+      run: make && make test
 
     - name: Run distcheck
       run: ./scripts/testrunner.sh
