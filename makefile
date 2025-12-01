@@ -50,7 +50,7 @@ DTN_DIRECTORIES  += src/samples
 .PHONY: all depend clean debug
 .PHONY: target_prepare target_build_id_file target_build_all target_debug
 
-all                 : target_prepare target_build_all target_test openvocs
+all                 : target_prepare target_build_all target_test 
 
 no_tests            : target_build_all
 
