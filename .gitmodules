@@ -1,0 +1,3 @@
+[submodule "openvocs"]
+	path = openvocs
+	url = git@github.com:openvocs/openvocs.git
