@@ -26,12 +26,12 @@
 #
 #       ------------------------------------------------------------------------
 
-OPENVOCS_SUBDIR 	:= $(DTN_ROOT)/openvocs
-OPENVOCS_ROOT 		:= $(OPENVOCS_SUBDIR)
-OPENVOCS_LIBS 		= ${OPENVOCS_ROOT}/build/lib
-LD_LIBRARY_PATH 	= $OPENVOCS_LIBS
-OV_VALGRIND 		= DTN_VALGRIND
-OPENVOCS_TEST_SPARSE_OUT = DTN_TEST_SPARSE_OUT
+.phony: openvocs openvocs_clean
 
-target_openvocs: $(OPENVOCS_SUBDIR)
-	cd $(OPENVOCS_SUBDIR) && make all
+FORCE: ;
+
+openvocs: FORCE
+	cd $(OPENVOCS_ROOT) && export OPENVOCS_ROOT=$$(pwd) && make all
+
+openvocs_clean:
+	cd $(OPENVOCS_ROOT) && make clean
