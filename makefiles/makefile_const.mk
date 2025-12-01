@@ -72,6 +72,7 @@ DTN_INSTALLDIR      := /usr/local/bin
 DTN_PLUGINS_INSTALLDIR   := /usr/lib/openvocs/plugins
 
 OPENVOCS_BUILD_DIR  := $(DTN_ROOT)/openvocs/build
+OPENVOCS_LIBDIR     := $(DTN_ROOT)/openvocs/build/lib
 
 DTN_TEMPDIR         := /tmp
 

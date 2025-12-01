@@ -26,13 +26,15 @@ DTN_TARGET            = $(DTN_EXECUTABLE)
 
 DTN_FLAGS       =
 
-DTN_LIBS     	= -L$(DTN_LIBDIR)
+DTN_LIBS        = -L$(DTN_LIBDIR)
+OV_LIBS       	= -L$(OPENVOCS_LIBDIR)
 
 #-----------------------------------------------------------------------------
 
 DTN_LIBS       	+= -l dtn_event$(DTN_EDITION)
-DTN_LIBS      	+= -l ov_log$(OV_EDITION)
-DTN_LIBS      	+= -l ov_base$(OV_EDITION)
+
+OV_LIBS      	+= -l ov_log$(OV_EDITION)
+OV_LIBS      	+= -l ov_base$(OV_EDITION)
 
 #-----------------------------------------------------------------------------
 
