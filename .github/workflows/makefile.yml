@@ -21,4 +21,4 @@ jobs:
       run: source env.sh && make && make test
 
     - name: Run distcheck
-      run: ./scripts/testrunner.sh
+      run: source env.sh && ./scripts/testrunner.sh
