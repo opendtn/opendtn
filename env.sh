@@ -14,8 +14,8 @@ LD_LIBRARY_PATH=$OPENVOCS_LIBS $DTN_LIBS
 DEBUG=
 
 # Enable to show all commands triggered in make files in full length
-# OV_QUIET=
-# export OV_QUIET
+# DTN_QUIET=
+# export DTN_QUIET
 
 # Compiler to use
 
