@@ -14,7 +14,7 @@
 #       See the License for the specific language governing permissions and
 #       limitations under the License.
 #
-#       This file is part of the openvocs project. http://openvocs.org
+#       This file is part of the opendtn project. http://opendtn.com
 #
 #       ------------------------------------------------------------------------
 #
