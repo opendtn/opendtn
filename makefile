@@ -37,7 +37,7 @@
 #       ------------------------------------------------------------------------
 
 # note the '-' ...
--include ./makefiles/makefile_const.mk
+-include $(DTN_ROOT)/makefiles/makefile_const.mk
 
 # define (sub)directories to dive in
 DTN_DIRECTORIES   = src/lib
@@ -50,7 +50,7 @@ DTN_DIRECTORIES  += src/samples
 .PHONY: all depend clean debug
 .PHONY: target_prepare target_build_id_file target_build_all target_debug
 
-all                 : target_prepare target_build_all target_test
+all                 : target_prepare target_build_all target_test target_openvocs
 
 no_tests            : target_build_all
 
@@ -172,10 +172,12 @@ print-%  : ; @echo $* = $($*)
 
 #-----------------------------------------------------------------------------
 
--include ./makefiles/makefile_build_tools.mk
+-include $(DTN_ROOT)/makefiles/makefile_build_tools.mk
 
 #-----------------------------------------------------------------------------
 
--include ./makefiles/makefile_lib.mk
+-include $(DTN_ROOT)/makefiles/makefile_lib.mk
 
 #-----------------------------------------------------------------------------
+
+-include $(DTN_ROOT)/makefiles/makefile_openvocs.mk

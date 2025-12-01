@@ -4,6 +4,10 @@ DTN_ROOT=$(pwd)
 DTN_LIBS=${DTN_ROOT}/build/lib
 LD_LIBRARY_PATH=$DTN_LIBS
 
+OPENVOCS_ROOT=$(pwd)
+OPENVOCS_LIBS=${OPENVOCS_ROOT}/build/lib
+LD_LIBRARY_PATH=$OPENVOCS_LIBS $DTN_LIBS
+
 # Switch on debug build
 
 # DEBUG=1
@@ -25,6 +29,8 @@ DTN_TEST_SPARSE_OUT=
 
 export DTN_ROOT
 export DTN_LIBS
+export OPENVOCS_ROOT
+export OPENVOCS_LIBS
 export LD_LIBRARY_PATH
 export DEBUG
 export CC

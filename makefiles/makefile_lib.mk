@@ -27,7 +27,7 @@
 #
 #    
 
--include makefiles/makefile_const.mk
+-include $(DTN_ROOT)/makefiles/makefile_const.mk
 
 DTN_LIB_INSTALL_DIR      := /usr
 
