@@ -14,6 +14,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Pull & update submodules recursively
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
+
     - name: Install dependencies
       run: ./scripts/prepare_environment.sh debian ubuntu
 
@@ -22,3 +27,5 @@ jobs:
 
     - name: Run distcheck
       run: source env.sh && ./scripts/testrunner.sh
+
+      
