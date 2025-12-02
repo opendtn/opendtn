@@ -41,10 +41,11 @@ else
     items=`./openvocs/scripts/show_packages.sh $1`
     for item in $items
     do
-         sudo apt install -y $item; 
+        echo "installing " $item;
+        sudo apt install -y $item; 
     done 
 
-    source env.sh && make openvocs
+    #source env.sh && make openvocs
 
 fi
 
