@@ -45,5 +45,5 @@ cd openvocs
 git checkout origin development
 cd ..
 
-make openvocs
+source env.sh && make openvocs
 

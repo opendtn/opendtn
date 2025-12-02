@@ -41,7 +41,7 @@ DTN_FLAGS       =
 DTN_LIBS        = -L$(DTN_LIBDIR)
 OV_LIBS       	= -L$(OPENVOCS_LIBDIR)
 
-DTN_LIBS       	+= -l dtn_event$(DTN_EDITION)
+DTN_LIBS       	+= 
 
 OV_LIBS       	+= -l ov_arch$(OV_EDITION)
 OV_LIBS       	+= -l ov_log$(OV_EDITION)

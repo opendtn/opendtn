@@ -19,16 +19,16 @@
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_event.h
+        @file           dtn.h
         @author         Töpfer, Markus
 
-        @date           2025-12-01
+        @date           2025-12-02
 
 
         ------------------------------------------------------------------------
 */
-#ifndef dtn_event_h
-#define dtn_event_h
+#ifndef dtn_h
+#define dtn_h
 
 
 /*
@@ -40,4 +40,4 @@
  */
 
 
-#endif /* dtn_event_h */
+#endif /* dtn_h */

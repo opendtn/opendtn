@@ -31,7 +31,7 @@ OV_LIBS       	= -L$(OPENVOCS_LIBDIR)
 
 #-----------------------------------------------------------------------------
 
-DTN_LIBS       	+= -l dtn_event$(DTN_EDITION)
+DTN_LIBS       	+= -l dtn$(DTN_EDITION)
 
 OV_LIBS      	+= -l ov_log$(OV_EDITION)
 OV_LIBS      	+= -l ov_base$(OV_EDITION)

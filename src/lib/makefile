@@ -25,7 +25,7 @@
 
 include $(DTN_ROOT)/makefiles/makefile_const.mk
 
-DTN_LIB_DIRS      = dtn_event
+DTN_LIB_DIRS      = dtn
 
 all    : target_build_all
 depend : target_depend
@@ -52,7 +52,7 @@ target_test:
 	@echo "[BUILD  ] building tests"
 	@for dir in $(DTN_LIB_DIRS); do \
 		echo "[BUILD  ] entering $$dir ..."; \
-		$(MAKE) $(DTN_QUIET_MAKE) target_test -C $$dir || exit 1; \
+		$(MAKE) target_test -C $$dir || exit 1; \
 		echo "[BUILD  ] leaving $$dir ."; \
 	done
 	@echo "[BUILD  ] build tests done"

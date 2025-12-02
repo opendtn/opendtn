@@ -15,20 +15,20 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        This file is part of the openvocs project. https://openvocs.org
+        This file is part of the opendtn project. https://opendtn.org
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_event_test.c
+        @file           dtn_test.c
         @author         Töpfer, Markus
 
-        @date           2025-12-01
+        @date           2025-12-02
 
 
         ------------------------------------------------------------------------
 */
 #include <ov_test/testrun.h>
-#include "dtn_event.c"
+#include "dtn.c"
 
 /*
  *      ------------------------------------------------------------------------
@@ -39,9 +39,9 @@
  */
 
 int test_case(){
-        testrun(1 == 1);
+    testrun(1 == 1);
 
-        return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -56,10 +56,10 @@ int test_case(){
 
 int all_tests() {
 
-        testrun_init();
-        testrun_test(test_case);
+    testrun_init();
+    testrun_test(test_case);
 
-        return testrun_counter;
+    return testrun_counter;
 }
 
 /*

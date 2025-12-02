@@ -15,16 +15,16 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        This file is part of the openvocs project. https://openvocs.org
+        This file is part of the opendtn project. https://opendtn.com
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_event.c
+        @file           dtn.c
         @author         Töpfer, Markus
 
-        @date           2025-12-01
+        @date           2025-12-02
 
 
         ------------------------------------------------------------------------
 */
-#include "../include/dtn_event.h"
+#include "../include/dtn.h"
