@@ -32,6 +32,7 @@ if [ -z $1 ]; then
 else
 
     git submodule init
+    git submodule update
 
     cd openvocs 
     git checkout origin development
