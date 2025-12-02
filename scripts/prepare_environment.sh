@@ -33,6 +33,10 @@ else
 
     git submodule init
     git submodule update
+    
+    cd openvocs
+    source env.sh
+    cd ..
 
     items=`./openvocs/scripts/show_packages.sh $1`
     for item in $items
