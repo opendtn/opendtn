@@ -31,19 +31,21 @@ if [ -z $1 ]; then
 
 else
 
+    git submodule init
+
+    cd openvocs 
+    git checkout origin development
+    cd ..
+
     items=`./openvocs/scripts/show_packages.sh $1`
     for item in $items
     do
          sudo apt install -y $item; 
     done 
 
+    source env.sh && make openvocs
+
 fi
 
-git submodule init
 
-cd openvocs
-git checkout origin development
-cd ..
-
-source env.sh && make openvocs
 
