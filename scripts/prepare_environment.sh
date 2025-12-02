@@ -34,10 +34,6 @@ else
     git submodule init
     git submodule update
 
-    cd openvocs 
-    git checkout origin development
-    cd ..
-
     items=`./openvocs/scripts/show_packages.sh $1`
     for item in $items
     do
@@ -45,7 +41,7 @@ else
         sudo apt install -y $item; 
     done 
 
-    #source env.sh && make openvocs
+    source env.sh && make openvocs
 
 fi
 
