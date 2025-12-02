@@ -25,14 +25,15 @@
 #
 #       ------------------------------------------------------------------------
 
+source env.sh
+git submodule init
+git submodule update
+
 if [ -z $1 ]; then
 
     ./openvocs/scripts/show_packages.sh
 
 else
-
-    git submodule init
-    git submodule update
     
     cd openvocs
     source env.sh
@@ -46,8 +47,9 @@ else
     done 
 
     source env.sh && make openvocs
-
 fi
+
+
 
 
 
