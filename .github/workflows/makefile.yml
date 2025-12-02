@@ -27,3 +27,4 @@ jobs:
 
     - name: Run distcheck
       run: source env.sh && ./scripts/testrunner.sh
+      
