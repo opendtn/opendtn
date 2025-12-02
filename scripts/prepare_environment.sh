@@ -31,7 +31,7 @@ if [ -z $1 ]; then
 
 else
 
-    git submodule init
+    git submodule init --init --recursive
     git submodule update
 
     cd openvocs 
