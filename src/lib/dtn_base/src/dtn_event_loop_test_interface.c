@@ -887,13 +887,13 @@ int test_impl_event_loop_timer_set() {
    *      Add multiple timers and check timing.
    *
    */
-/*
+
   struct container2 data[max_timers];
   clear_container2(data, sizeof(data) / sizeof(data[0]));
 
   uint32_t timer_id[max_timers];
   memset(timer_id, 0, sizeof(timer_id));
-
+/*
   for (size_t i = 1; i < max_timers; i++) {
 
     data[i].timeout = 1000 * 100 * i; // i ms
