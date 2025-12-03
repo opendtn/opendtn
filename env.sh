@@ -4,8 +4,6 @@ DTN_ROOT=$(pwd)
 DTN_LIBS=${DTN_ROOT}/build/lib
 LD_LIBRARY_PATH=$DTN_LIBS
 
-OPENVOCS_ROOT=$DTN_ROOT/openvocs
-
 # Switch on debug build
 
 # DEBUG=1
