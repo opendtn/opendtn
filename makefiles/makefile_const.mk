@@ -111,12 +111,6 @@ BUILD_DEFINITIONS = -D DTN_ROOT='"$(DTN_ROOT)"' \
                     -D DTN_VERSION_BUILD_DATE='"$(DTN_VERSION_BUILD_DATE)"' \
                     -D DTN_VERSION_COMPILER='"$(DTN_VERSION_COMPILER)"' \
                     -D DTN_PLUGINS_INSTALLDIR='"$(DTN_PLUGINS_INSTALLDIR)"' \
-                    -D OV_VERSION='"$(OV_VERSION)"' \
-                    -D OV_VERSION_BUILD_ID='"$(OV_VERSION_BUILD_ID)"' \
-                    -D OV_VERSION_COMMIT_ID='"$(OV_VERSION_COMMIT_ID)"' \
-                    -D OV_VERSION_BUILD_DATE='"$(OV_VERSION_BUILD_DATE)"' \
-                    -D OV_VERSION_COMPILER='"$(OV_VERSION_COMPILER)"' \
-                    -D OV_PLUGINS_INSTALLDIR='"$(OV_PLUGINS_INSTALLDIR)"' \
 
 #.............................................................................
 

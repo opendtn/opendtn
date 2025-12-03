@@ -82,7 +82,7 @@ $(DTN_OBJDIR)/$(DTN_DIRNAME)/%_test_interface.o : %_test_interface.c $(DTN_TEST_
 $(DTN_TESTDIR)/$(DTN_DIRNAME)/%_test.run : $(DTN_OBJDIR)/$(DTN_DIRNAME)/%_test.o $(DTN_OBJ_IF_TEST) $(DTN_OBJ)
 	$(eval NO_SELF_DEPENDENCY := $(filter-out $(<:%_test.o=%.o) , $(DTN_OBJ)))
 	$(eval NO_SELF_DEPENDENCY := $(filter-out $(DTN_OBJ_EXEC) , $(NO_SELF_DEPENDENCY)))
-	$(DTN_QUIET)$(CC) -o $@  $< $(NO_SELF_DEPENDENCY) $(LFLAGS) $(DTN_LIBS) $(OV_LIBS)
+	$(DTN_QUIET)$(CC) -o $@  $< $(NO_SELF_DEPENDENCY) $(LFLAGS) $(DTN_LIBS)
 	@echo "[TEST EXEC] $(notdir $@ ) created"
 
 # ... will create the directory for the resources and copy resources
@@ -107,12 +107,12 @@ ifeq ($(DTN_UNAME), Linux)
 		-Wl,-soname,$(DTN_SHARED_SONAME) \
 		-Wl,--defsym -Wl,__DTN_LD_VERSION=0x$(DTN_VERSION_HEX) \
 		-Wl,--defsym -Wl,__DTN_LD_EDITION=0x$(DTN_EDITION) \
-		$(DTN_LIBS) $(OV_LIBS)
+		$(DTN_LIBS) 
 else ifeq ($(DTN_UNAME), Darwin)
 	$(DTN_QUIET)$(CC) -shared -o $@ $(DTN_OBJ) $(LFLAGS) \
 		-compatibility_version $(DTN_VERSION) \
 		-current_version $(DTN_VERSION) \
-		$(DTN_LIBS) $(OV_LIBS)
+		$(DTN_LIBS) 
 else
 	@echo "[SHARED ] OS $(DTN_UNAME) unsupported yet."
 endif
@@ -140,7 +140,7 @@ $(DTN_LIBDIR)/$(DTN_SHARED_SONAME): $(DTN_LIBDIR)/$(DTN_SHARED_REAL)
 #-----------------------------------------------------------------------------
 
 $(DTN_EXECUTABLE): $(DTN_OBJ)
-	$(DTN_QUIET)$(CC) -o $(DTN_EXECUTABLE) $(DTN_OBJ) $(LFLAGS) $(DTN_LIBS) $(OV_LIBS)
+	$(DTN_QUIET)$(CC) -o $(DTN_EXECUTABLE) $(DTN_OBJ) $(LFLAGS) $(DTN_LIBS) 
 	@echo "[EXEC   ] $(notdir $(DTN_EXECUTABLE)) created"
 
 #-----------------------------------------------------------------------------
