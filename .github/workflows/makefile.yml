@@ -17,9 +17,9 @@ jobs:
     - name: Install dependencies
       run: ./scripts/prepare_environment.sh debian ubuntu
 
-    - name: build sources
+    - name: Build sources
       run: source env.sh && make && make test
 
-    - name: run tests
+    - name: Run tests
       run: source env.sh && ./scripts/testrunner.sh
       
