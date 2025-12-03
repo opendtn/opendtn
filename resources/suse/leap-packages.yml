@@ -1,0 +1,16 @@
+ov_basic_packages:
+
+ov_test_packages:
+
+ov_dev_packages:
+  - git
+  - make
+  - gcc
+  - systemd-devel
+  - libopenssl-devel
+
+  - rpmlint
+  - rpmdevtools
+  - rpm-build
+
+ov_dev_helper_packages:

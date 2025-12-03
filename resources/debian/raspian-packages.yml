@@ -1,0 +1,8 @@
+ov_basic_packages:
+
+ov_dev_packages:
+  - libsystemd-dev
+  - libssl-dev
+  - dpkg-dev
+
+ov_dev_helper_packages:

@@ -27,7 +27,7 @@
 
         ------------------------------------------------------------------------
 */
-#include <ov_test/testrun.h>
+#include <dtn_base/testrun.h>
 #include "dtn.c"
 
 /*

@@ -26,27 +26,19 @@
 #       ------------------------------------------------------------------------
 
 source env.sh
-git submodule init
-git submodule update
 
 if [ -z $1 ]; then
 
-    ./openvocs/scripts/show_packages.sh
+    ./scripts/show_packages.sh
 
 else
-    
-    cd openvocs
-    source env.sh
-    cd ..
 
-    items=`./openvocs/scripts/show_packages.sh $1`
+    items=`./scripts/show_packages.sh $1`
     for item in $items
     do
         echo "installing " $item;
         sudo apt install -y $item; 
-    done 
-
-    source env.sh && make openvocs
+    done
 fi
 
 

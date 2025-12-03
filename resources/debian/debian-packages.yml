@@ -1,0 +1,20 @@
+ov_basic_packages:
+  - libssl-dev
+  - openssh-server
+
+ov_dev_packages:
+  - libsystemd-dev
+  - git
+  - gcc
+  - make
+  - pkg-config
+  - valgrind
+  - bear
+  - dpkg-dev
+
+ov_dev_helper_packages:
+  - clang
+  - clangd
+  - gperf
+  - tcpdump
+  - htop

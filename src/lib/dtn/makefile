@@ -39,13 +39,8 @@ include $(DTN_ROOT)/makefiles/makefile_const.mk
 DTN_FLAGS       =
 
 DTN_LIBS        = -L$(DTN_LIBDIR)
-OV_LIBS       	= -L$(OPENVOCS_LIBDIR)
 
-DTN_LIBS       	+= 
-
-OV_LIBS       	+= -l ov_arch$(OV_EDITION)
-OV_LIBS       	+= -l ov_log$(OV_EDITION)
-OV_LIBS       	+= -l ov_test$(OV_EDITION)
+DTN_LIBS       	+= -l dtn_base$(DTN_EDITION)
 
 DTN_LIBS       += -l m
 DTN_LIBS       += -pthread
