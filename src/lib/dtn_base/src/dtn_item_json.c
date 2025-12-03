@@ -30,9 +30,14 @@
 #include "../include/dtn_item_json.h"
 
 #include "../include/dtn_list.h"
+#include "../include/dtn_data_function.h"
 #include <ctype.h>
 #include <errno.h>
-#include <math.h>
+#include <math.h> 
+#include <sys/types.h>
+#include <dirent.h>
+#include <unistd.h>
+
 
 #define ENCODING_STRING_NULL "null"
 #define ENCODING_STRING_TRUE "true"
@@ -232,10 +237,10 @@ static int64_t json_string_decode(dtn_item **value, uint8_t *buffer,
   if (!dtn_json_match_string(&start, &end, size))
     return -1;
 
-  char string[end - start + 1];
-  memset(string, 0, end - start + 1);
+  char string[end - start + 2];
+  memset(string, 0, end - start + 2);
 
-  strncpy(string, (char *)start, end - start);
+  strncpy(string, (char *)start, end - start + 1);
 
   *value = dtn_item_string(string);
 
@@ -536,6 +541,7 @@ dtn_item *dtn_item_from_json(const char *string) {
   int64_t result = json_decode(&self, string, len);
   if (-1 == result)
     goto error;
+
   if (len != (size_t)result)
     goto error;
 
@@ -1902,4 +1908,270 @@ char *dtn_item_to_json(const dtn_item *self) {
   return out;
 error:
   return NULL;
+}
+
+
+/*----------------------------------------------------------------------------*/
+
+dtn_item *dtn_item_json_read_file(const char *path) {
+
+  char *buffer = NULL;
+  dtn_item *value = NULL;
+
+  if (!path)
+    goto error;
+
+  size_t size = 0;
+  size_t filesize = 0;
+  size_t read = 0;
+
+  if (access(path, F_OK) == -1) {
+
+    dtn_log_warning("JSON READ, file (%s) "
+                   "does not exist or no access.",
+                   path);
+
+    goto error;
+  }
+
+  FILE *fp = fopen(path, "r");
+
+  if (fp != NULL) {
+
+    if (fseek(fp, 0L, SEEK_END) == 0) {
+
+      filesize = ftell(fp);
+
+      if ((int)filesize == -1) {
+        dtn_log_error("JSON READ, file (%s) "
+                     "could not read file size.",
+                     path);
+        fclose(fp);
+        goto error;
+      }
+
+      size = filesize + 2;
+      buffer = calloc(size + 1, sizeof(char));
+
+      if (fseek(fp, 0L, SEEK_SET) == 0) {
+
+        read = fread(buffer, sizeof(char), filesize, fp);
+
+        if (read == 0) {
+
+          dtn_log_error("JSON READ, file (%s) "
+                       "could not read file.",
+                       path);
+          fclose(fp);
+          goto error;
+        }
+
+      } else {
+
+        dtn_log_error("JSON READ, file (%s) "
+                     "could not get back to start.",
+                     path);
+
+        fclose(fp);
+        goto error;
+      }
+    }
+
+    fclose(fp);
+
+  } else {
+
+    dtn_log_error("JSON READ, file (%s) "
+                 "could not open file.");
+
+    fclose(fp);
+    goto error;
+  }
+
+  int64_t r = json_decode(&value, buffer, size);
+
+  if (r < 0) goto error;
+
+  if (!value) {
+
+    dtn_log_error("JSON READ, file (%s) "
+                 "could not parse JSON.",
+                 path);
+    goto error;
+  }
+
+  if (buffer)
+    free(buffer);
+
+  return value;
+
+error:
+  if (buffer)
+    free(buffer);
+  dtn_item_free(value);
+  return NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+dtn_item *dtn_item_json_read_dir(const char *path, const char *extension) {
+
+  dtn_item *value = NULL;
+  dtn_item *content = NULL;
+
+  if (!path)
+    goto error;
+
+  errno = 0;
+
+  DIR *dp;
+  struct dirent *ep;
+
+  size_t extlen = 0;
+  size_t dirlen = strlen(path);
+
+  char filename[PATH_MAX + 1];
+  memset(filename, 0, PATH_MAX + 1);
+
+  int len, i;
+
+  if (extension) {
+    extlen = strlen(extension);
+    if (extlen == 0)
+      goto error;
+  }
+
+  value = dtn_item_object();
+  if (!value) {
+
+    dtn_log_error("Could not create object");
+    goto error;
+  }
+
+  dp = opendir(path);
+
+  if (dp == NULL) {
+
+    dtn_log_debug("JSON LOAD,"
+                 "could not open dir %s ERRNO %i | %s",
+                 path, errno, strerror(errno));
+    goto error;
+  }
+
+  while ((ep = readdir(dp))) {
+
+    content = NULL;
+    memset(filename, 0, PATH_MAX);
+
+    /*
+     *  Do not try to read /. or /..
+     */
+
+    if (0 == strcmp(ep->d_name, ".") || (0 == strcmp(ep->d_name, "..")))
+      continue;
+
+    strcpy(filename, path);
+    if (path[dirlen] != '/')
+      strncat(filename, "/", PATH_MAX);
+
+    strcat(filename, ep->d_name);
+
+    len = strlen(ep->d_name);
+    i = len;
+    while (i > 0) {
+      if (ep->d_name[i] == '.')
+        break;
+      i--;
+    }
+
+    if (extension) {
+
+      if (1 > 0) {
+
+        // file with extension
+        if (0 == strncmp(ep->d_name + i + 1, extension, extlen)) {
+
+          // same extension as input extension
+          content = dtn_item_json_read_file(filename);
+        }
+        // ignore files with wrong extension
+      }
+      // ignore files without extension
+
+    } else {
+
+      // read all
+      content = dtn_item_json_read_file(filename);
+    }
+
+    if (content) {
+
+      if (!dtn_item_object_set(value, ep->d_name, content)) {
+
+        dtn_log_debug("JSON LOAD, file (%s) "
+                     "failure adding content.",
+                     filename);
+
+        content = dtn_item_free(content);
+      }
+    }
+  }
+
+  (void)closedir(dp);
+
+  return value;
+error:
+  dtn_item_free(value);
+  return NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_item_json_write_file(const char *path, const dtn_item *value) {
+
+  if (!path || !value)
+    return false;
+
+  size_t count = 0;
+  char *string = dtn_item_to_json(value);
+
+  FILE *fp = fopen(path, "w");
+
+  if (fp != NULL) {
+
+    count = fprintf(fp, "%s\n", string);
+    fclose(fp);
+
+    if (count > 0) {
+      /*
+                  dtn_log_debug("JSON WRITE, file (%s), "
+                               "wrote %jd bytes.",
+                               path,
+                               count);
+      */
+    } else {
+
+      dtn_log_error("JSON WRITE, file (%s), "
+                   "could not write",
+                   path);
+
+      goto error;
+    }
+
+  } else {
+
+    dtn_log_error("JSON WRITE, file (%s), "
+                 "could not open path for write",
+                 path);
+
+    goto error;
+  }
+
+  string = dtn_data_pointer_free(string);
+
+  return true;
+
+error:
+  string = dtn_data_pointer_free(string);
+  return false;
 }

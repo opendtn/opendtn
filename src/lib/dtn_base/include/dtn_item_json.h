@@ -96,4 +96,8 @@ dtn_item_json_stringify_config dtn_item_json_config_stringify_default();
 char *dtn_item_to_json_with_config(const dtn_item *self,
                                   dtn_item_json_stringify_config config);
 
+bool dtn_item_json_write_file(const char *path, const dtn_item *value);
+dtn_item *dtn_item_json_read_dir(const char *path, const char *extension);
+dtn_item *dtn_item_json_read_file(const char *path);
+
 #endif /* dtn_item_json_h */

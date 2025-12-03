@@ -35,7 +35,7 @@ L_SOURCES      = $(filter-out $(L_TEST_SOURCES), $(L_SOURCES_C))
 include $(DTN_ROOT)/makefiles/makefile_const.mk
 
 ifeq ($(DTN_UNAME), Linux)
-	OV_FLAGS    = `pkg-config --cflags libsystemd`
+	DTN_FLAGS    = `pkg-config --cflags libsystemd`
 endif
 
 #-----------------------------------------------------------------------------
@@ -52,7 +52,7 @@ DTN_LIBS       += -pthread
 DTN_LIBS       += -ldl
 
 ifeq ($(DTN_UNAME), Linux)
-	OV_LIBS += `pkg-config --libs libsystemd`
+	DTN_LIBS += `pkg-config --libs libsystemd`
 endif
 
 #-----------------------------------------------------------------------------

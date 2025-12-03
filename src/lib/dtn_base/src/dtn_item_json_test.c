@@ -325,6 +325,13 @@ int test_dtn_item_from_json() {
   testrun(!dtn_item_is_empty(item));
   item = dtn_item_free(item);
 
+  item = dtn_item_from_json("{\"abc\":\"test\"}");
+  testrun(dtn_item_is_object(item));
+  testrun(!dtn_item_is_empty(item));
+  testrun_log("%s", dtn_item_to_json(item));
+  testrun(0 == strcmp("test", dtn_item_get_string(dtn_item_get(item, "/abc"))));
+  item = dtn_item_free(item);
+
   return testrun_log_success();
 }
 
