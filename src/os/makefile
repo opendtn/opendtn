@@ -20,16 +20,21 @@
 #       ------------------------------------------------------------------------
 #
 #       File            makefile
+#       Authors         Udo Haering
+#       Date            2020-01-21
+#
+#       Project         openvocs
 #
 #       ------------------------------------------------------------------------
 
 include $(DTN_ROOT)/makefiles/makefile_const.mk
 
 ifeq ($(DTN_UNAME), Linux)
-	DTN_LIB_DIRS   += 
+	DTN_LIB_DIRS   += dtn_os_linux
 endif
 
-DTN_LIB_DIRS      += 
+DTN_LIB_DIRS      += dtn_os
+
 
 all    : target_build_all
 depend : target_depend

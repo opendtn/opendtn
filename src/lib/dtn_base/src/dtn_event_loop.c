@@ -187,8 +187,8 @@ dtn_event_loop_config dtn_event_loop_config_default() {
 
   dtn_event_loop_config config = {
 
-      .max.sockets = dtn_EVENT_LOOP_MAX_SOCKETS_DEFAULT,
-      .max.timers = dtn_EVENT_LOOP_MAX_TIMERS_DEFAULT};
+      .max.sockets = DTN_EVENT_LOOP_MAX_SOCKETS_DEFAULT,
+      .max.timers = DTN_EVENT_LOOP_MAX_TIMERS_DEFAULT};
 
   return config;
 }
@@ -220,7 +220,7 @@ uint32_t dtn_event_loop_timer_set(dtn_event_loop *self, uint64_t relative_usec,
                                  bool (*callback)(uint32_t id, void *data)) {
 
   if (0 == self) {
-    return dtn_TIMER_INVALID;
+    return DTN_TIMER_INVALID;
   } else {
     return self->timer.set(self, relative_usec, data, callback);
   }
@@ -285,10 +285,10 @@ dtn_event_loop_config_adapt_to_runtime(dtn_event_loop_config config) {
 
   // Extend the config to DEFAULT in case of 0 to MIN
   if (config.max.sockets == 0)
-    config.max.sockets = dtn_EVENT_LOOP_SOCKETS_MIN;
+    config.max.sockets = DTN_EVENT_LOOP_SOCKETS_MIN;
 
   if (config.max.timers == 0)
-    config.max.timers = dtn_EVENT_LOOP_TIMERS_MIN;
+    config.max.timers = DTN_EVENT_LOOP_TIMERS_MIN;
 
   struct rlimit limit = {0};
 
@@ -369,7 +369,7 @@ static bool accept_callback(int socket_fd, uint8_t events, void *data) {
   if (socket_fd < 1)
     goto error;
 
-  if ((events & dtn_EVENT_IO_CLOSE) || (events & dtn_EVENT_IO_ERR)) {
+  if ((events & DTN_EVENT_IO_CLOSE) || (events & DTN_EVENT_IO_ERR)) {
 
     void *userdata = NULL;
 
@@ -384,7 +384,7 @@ static bool accept_callback(int socket_fd, uint8_t events, void *data) {
   }
 
   // accept MUST have some incoming IO
-  if (!(events & dtn_EVENT_IO_IN))
+  if (!(events & DTN_EVENT_IO_IN))
     goto error;
 
   struct sockaddr_storage remote_sa = {0};
@@ -512,7 +512,7 @@ bool dtn_event_add_default_connection_accept(
   container->callback = callback;
 
   if (!loop->callback.set(loop, socket,
-                          dtn_EVENT_IO_IN | dtn_EVENT_IO_CLOSE | dtn_EVENT_IO_ERR,
+                          DTN_EVENT_IO_IN | DTN_EVENT_IO_CLOSE | DTN_EVENT_IO_ERR,
                           container, accept_callback))
     goto error;
 

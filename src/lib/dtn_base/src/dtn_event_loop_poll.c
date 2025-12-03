@@ -146,20 +146,20 @@ bool flags_dtn_to_poll(uint8_t *dtn_flag, short *poll_event) {
 
   short flag = 0;
 
-  if (*dtn_flag & dtn_EVENT_IO_IN) {
+  if (*dtn_flag & DTN_EVENT_IO_IN) {
     flag |= POLLIN;
     flag |= POLLPRI;
   }
 
-  if (*dtn_flag & dtn_EVENT_IO_OUT) {
+  if (*dtn_flag & DTN_EVENT_IO_OUT) {
     flag |= POLLOUT;
   }
 
-  if (*dtn_flag & dtn_EVENT_IO_CLOSE) {
+  if (*dtn_flag & DTN_EVENT_IO_CLOSE) {
     flag |= POLLHUP;
   }
 
-  if (*dtn_flag & dtn_EVENT_IO_ERR) {
+  if (*dtn_flag & DTN_EVENT_IO_ERR) {
     flag |= POLLERR;
   }
 
@@ -284,10 +284,10 @@ bool poll_loop_init(PollLoop *loop, dtn_event_loop_config config) {
   loop->fds[loop->wakeup[0]].events = POLLIN | POLLERR;
   loop->fds[loop->wakeup[1]].events = POLLIN | POLLERR;
 
-  loop->cb.socket[loop->wakeup[0]].events = dtn_EVENT_IO_IN;
+  loop->cb.socket[loop->wakeup[0]].events = DTN_EVENT_IO_IN;
   loop->cb.socket[loop->wakeup[0]].data = loop;
   loop->cb.socket[loop->wakeup[0]].func = just_read_empty;
-  loop->cb.socket[loop->wakeup[1]].events = dtn_EVENT_IO_IN;
+  loop->cb.socket[loop->wakeup[1]].events = DTN_EVENT_IO_IN;
   loop->cb.socket[loop->wakeup[1]].data = loop;
   loop->cb.socket[loop->wakeup[1]].func = just_read_empty;
 
@@ -419,7 +419,7 @@ bool impl_poll_event_loop_stop(dtn_event_loop *self) {
 static int calculate_timeout_msec(PollLoop *loop, uint64_t start_usec,
                                   uint64_t max_usec, uint64_t now_usec) {
 
-  if (max_usec == dtn_RUN_ONCE)
+  if (max_usec == DTN_RUN_ONCE)
     return 0;
 
   if (now_usec - start_usec >= max_usec)
@@ -486,7 +486,7 @@ bool impl_poll_event_loop_run(dtn_event_loop *self, uint64_t max) {
 
   loop->running = true;
 
-  if (max == dtn_RUN_ONCE)
+  if (max == DTN_RUN_ONCE)
     loop->running = false;
 
   uint64_t start = dtn_time_get_current_time_usecs();
@@ -513,22 +513,22 @@ bool impl_poll_event_loop_run(dtn_event_loop *self, uint64_t max) {
         if ((loop->fds[i].revents & POLLIN) ||
             (loop->fds[i].revents & POLLPRI)) {
 
-          event |= dtn_EVENT_IO_IN;
+          event |= DTN_EVENT_IO_IN;
         }
 
         if (loop->fds[i].revents & POLLOUT) {
 
-          event |= dtn_EVENT_IO_OUT;
+          event |= DTN_EVENT_IO_OUT;
         }
 
         if (loop->fds[i].revents & POLLHUP) {
 
-          event |= dtn_EVENT_IO_CLOSE;
+          event |= DTN_EVENT_IO_CLOSE;
         }
 
         if (loop->fds[i].revents & POLLERR) {
 
-          event |= dtn_EVENT_IO_ERR;
+          event |= DTN_EVENT_IO_ERR;
         }
 
         // check if event interest is set
@@ -738,7 +738,7 @@ uint32_t impl_poll_event_loop_timer_set(dtn_event_loop *self,
 
   return i;
 error:
-  return dtn_TIMER_INVALID;
+  return DTN_TIMER_INVALID;
 }
 
 /*------------------------------------------------------------------*/

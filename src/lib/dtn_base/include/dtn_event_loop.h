@@ -67,27 +67,27 @@
 #ifndef dtn_event_loop_h
 #define dtn_event_loop_h
 
-#define dtn_EVENT_IO_IN 0x01
-#define dtn_EVENT_IO_OUT 0x02
-#define dtn_EVENT_IO_ERR 0x04
+#define DTN_EVENT_IO_IN 0x01
+#define DTN_EVENT_IO_OUT 0x02
+#define DTN_EVENT_IO_ERR 0x04
 /**
  * Do *not* rely on the CLOSE event - it is not triggered
  * as you might expect!
  * Instead, check for EOF in your io_callbacks.
  */
-#define dtn_EVENT_IO_CLOSE 0x08
-#define dtn_EVENT_IO_OPEN 0x10
+#define DTN_EVENT_IO_CLOSE 0x08
+#define DTN_EVENT_IO_OPEN 0x10
 
-#define dtn_TIMER_INVALID 0
-#define dtn_TIMER_MAX UINT_MAX
-#define dtn_RUN_MAX UINT64_MAX
-#define dtn_RUN_ONCE 0
+#define DTN_TIMER_INVALID 0
+#define DTN_TIMER_MAX UINT_MAX
+#define DTN_RUN_MAX UINT64_MAX
+#define DTN_RUN_ONCE 0
 
-#define dtn_EVENT_LOOP_MAX_SOCKETS_DEFAULT 1024
-#define dtn_EVENT_LOOP_MAX_TIMERS_DEFAULT 1024
+#define DTN_EVENT_LOOP_MAX_SOCKETS_DEFAULT 1024
+#define DTN_EVENT_LOOP_MAX_TIMERS_DEFAULT 1024
 
-#define dtn_EVENT_LOOP_SOCKETS_MIN 1
-#define dtn_EVENT_LOOP_TIMERS_MIN 1
+#define DTN_EVENT_LOOP_SOCKETS_MIN 1
+#define DTN_EVENT_LOOP_TIMERS_MIN 1
 
 #include <stdbool.h>
 #include <stdint.h>

@@ -51,8 +51,8 @@ int test_dtn_event_loop_config_default() {
 
   dtn_event_loop_config config = dtn_event_loop_config_default();
 
-  testrun(config.max.sockets == dtn_EVENT_LOOP_MAX_SOCKETS_DEFAULT);
-  testrun(config.max.timers == dtn_EVENT_LOOP_MAX_TIMERS_DEFAULT);
+  testrun(config.max.sockets == DTN_EVENT_LOOP_MAX_SOCKETS_DEFAULT);
+  testrun(config.max.timers == DTN_EVENT_LOOP_MAX_TIMERS_DEFAULT);
 
   return testrun_log_success();
 }
@@ -76,14 +76,14 @@ int test_dtn_event_loop_config_adapt_to_runtime() {
   // testrun(file_limit.rlim_max != RLIM_INFINITY);
 
   config = dtn_event_loop_config_adapt_to_runtime(config);
-  testrun(config.max.sockets == dtn_EVENT_LOOP_SOCKETS_MIN);
-  testrun(config.max.timers == dtn_EVENT_LOOP_TIMERS_MIN);
+  testrun(config.max.sockets == DTN_EVENT_LOOP_SOCKETS_MIN);
+  testrun(config.max.timers == DTN_EVENT_LOOP_TIMERS_MIN);
 
   config.max.sockets = file_limit.rlim_max + 1;
 
   config = dtn_event_loop_config_adapt_to_runtime(config);
   // testrun(config.max.sockets == file_limit.rlim_max);
-  testrun(config.max.timers == dtn_EVENT_LOOP_TIMERS_MIN);
+  testrun(config.max.timers == DTN_EVENT_LOOP_TIMERS_MIN);
 
   return testrun_log_success();
 }
@@ -303,34 +303,34 @@ int test_dtn_event_add_default_connection_accept() {
 
   testrun(!dtn_event_add_default_connection_accept(NULL, 0, 0, NULL, NULL));
   testrun(!dtn_event_add_default_connection_accept(NULL, socketTCP,
-                                                  dtn_EVENT_IO_IN, &buffer, cb));
-  testrun(!dtn_event_add_default_connection_accept(loop, 0, dtn_EVENT_IO_IN,
+                                                  DTN_EVENT_IO_IN, &buffer, cb));
+  testrun(!dtn_event_add_default_connection_accept(loop, 0, DTN_EVENT_IO_IN,
                                                   &buffer, cb));
   testrun(
       !dtn_event_add_default_connection_accept(loop, socketTCP, 0, &buffer, cb));
   testrun(!dtn_event_add_default_connection_accept(loop, socketTCP,
-                                                  dtn_EVENT_IO_IN, NULL, NULL));
+                                                  DTN_EVENT_IO_IN, NULL, NULL));
 
   // TCP OK
   testrun(dtn_event_add_default_connection_accept(loop, socketTCP,
-                                                 dtn_EVENT_IO_IN, &buffer, cb));
+                                                 DTN_EVENT_IO_IN, &buffer, cb));
 
   // LOCAL OK
   testrun(dtn_event_add_default_connection_accept(loop, socketLOCAL,
-                                                 dtn_EVENT_IO_IN, &buffer, cb));
+                                                 DTN_EVENT_IO_IN, &buffer, cb));
 
   // UDP NOK
   testrun(!dtn_event_add_default_connection_accept(loop, socketUDP,
-                                                  dtn_EVENT_IO_IN, &buffer, cb));
+                                                  DTN_EVENT_IO_IN, &buffer, cb));
 
   testrun(dtn_socket_get_config(socketTCP, &socket_config, NULL, NULL));
   int client = dtn_socket_create(socket_config, true, NULL);
   testrun(client > 0);
   testrun(strlen(buffer) == 0);
-  loop->run(loop, dtn_RUN_ONCE);
+  loop->run(loop, DTN_RUN_ONCE);
   testrun(0 < send(client, "1234", 4, 0));
   usleep(10000);
-  loop->run(loop, dtn_RUN_ONCE);
+  loop->run(loop, DTN_RUN_ONCE);
 
   fprintf(stdout, "buffer %s\n", buffer);
 

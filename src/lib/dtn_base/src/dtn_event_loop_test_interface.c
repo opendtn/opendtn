@@ -93,7 +93,7 @@ static void *run_the_loop(void *arg) {
   if (!loop)
     goto error;
 
-  if (!loop->run(loop, dtn_RUN_MAX))
+  if (!loop->run(loop, DTN_RUN_MAX))
     goto error;
 
   // DONE exit anyway
@@ -303,7 +303,7 @@ int test_impl_event_loop_free() {
   testrun(0 == getsockopt(client, SOL_SOCKET, SO_ERROR, &opt, &len));
   testrun(0 == opt);
 
-  testrun(loop->callback.set(loop, socket, dtn_EVENT_IO_IN, NULL,
+  testrun(loop->callback.set(loop, socket, DTN_EVENT_IO_IN, NULL,
                              dummy_socket_callback));
 
   uint32_t timer_id =
@@ -391,7 +391,7 @@ int test_impl_event_loop_stop() {
   int client = dtn_socket_create(socket_config, true, NULL);
   testrun(client > 0);
 
-  testrun(loop->callback.set(loop, socket, dtn_EVENT_IO_IN, NULL,
+  testrun(loop->callback.set(loop, socket, DTN_EVENT_IO_IN, NULL,
                              dummy_socket_callback));
 
   uint32_t timer_id =
@@ -483,7 +483,7 @@ int test_impl_event_loop_run() {
 
   // run once
   testrun(loop->run(loop, 0));
-  testrun(loop->run(loop, dtn_RUN_ONCE));
+  testrun(loop->run(loop, DTN_RUN_ONCE));
   testrun(loop->is_running(loop) == false);
 
   // run 1 usec
@@ -492,7 +492,7 @@ int test_impl_event_loop_run() {
   testrun(loop->is_running(loop) == false);
 
   // run max
-  container.timemax_usec = dtn_RUN_MAX;
+  container.timemax_usec = DTN_RUN_MAX;
   testrun(0 ==
           pthread_create(&thread, NULL, run_the_loop_with_timeout, &container));
 
@@ -509,7 +509,7 @@ int test_impl_event_loop_run() {
   testrun(socket > 0);
 
   // open a socket callback
-  testrun(loop->callback.set(loop, socket, dtn_EVENT_IO_IN, &scount,
+  testrun(loop->callback.set(loop, socket, DTN_EVENT_IO_IN, &scount,
                              counting_called_callback));
 
   // stop running
@@ -568,14 +568,14 @@ int test_impl_event_loop_callback_set() {
   // check behaviour
   testrun(!loop->callback.set(NULL, 0, 0, NULL, NULL));
   testrun(
-      !loop->callback.set(NULL, first, dtn_EVENT_IO_IN, NULL, dummy_callback));
-  testrun(!loop->callback.set(loop, 0, dtn_EVENT_IO_IN, NULL, dummy_callback));
+      !loop->callback.set(NULL, first, DTN_EVENT_IO_IN, NULL, dummy_callback));
+  testrun(!loop->callback.set(loop, 0, DTN_EVENT_IO_IN, NULL, dummy_callback));
   testrun(!loop->callback.set(loop, first, 0, NULL, dummy_callback));
-  testrun(!loop->callback.set(loop, first, dtn_EVENT_IO_IN, NULL, NULL));
+  testrun(!loop->callback.set(loop, first, DTN_EVENT_IO_IN, NULL, NULL));
 
   int counter = 0;
 
-  testrun(loop->callback.set(loop, first, dtn_EVENT_IO_IN, &counter,
+  testrun(loop->callback.set(loop, first, DTN_EVENT_IO_IN, &counter,
                              counting_called_callback));
 
   /*
@@ -592,7 +592,7 @@ int test_impl_event_loop_callback_set() {
 
   // add auto accept server socket callback
   testrun(dtn_event_add_default_connection_accept(
-      loop, last, dtn_EVENT_IO_IN, &counter, counting_called_callback));
+      loop, last, DTN_EVENT_IO_IN, &counter, counting_called_callback));
 
   // create client
   testrun(dtn_socket_get_config(last, &socket_config, NULL, NULL));
@@ -640,26 +640,26 @@ int test_impl_event_loop_callback_set() {
 
   // override callback
   testrun(
-      loop->callback.set(loop, last, dtn_EVENT_IO_IN, &counter, dummy_callback));
+      loop->callback.set(loop, last, DTN_EVENT_IO_IN, &counter, dummy_callback));
 
-  testrun(loop->callback.set(loop, last, dtn_EVENT_IO_IN, &counter,
+  testrun(loop->callback.set(loop, last, DTN_EVENT_IO_IN, &counter,
                              counting_called_callback));
 
   testrun(
-      loop->callback.set(loop, last, dtn_EVENT_IO_IN, &counter, dummy_callback));
+      loop->callback.set(loop, last, DTN_EVENT_IO_IN, &counter, dummy_callback));
 
   testrun(
-      loop->callback.set(loop, last, dtn_EVENT_IO_IN, &counter, dummy_callback));
+      loop->callback.set(loop, last, DTN_EVENT_IO_IN, &counter, dummy_callback));
 
   // try to add without event
   testrun(!loop->callback.set(loop, last, 0, &counter, dummy_callback));
 
   testrun(
-      loop->callback.set(loop, last, dtn_EVENT_IO_IN, &counter, dummy_callback));
+      loop->callback.set(loop, last, DTN_EVENT_IO_IN, &counter, dummy_callback));
 
   // try to add with closed socket
   close(last);
-  testrun(!loop->callback.set(loop, last, dtn_EVENT_IO_IN, &counter,
+  testrun(!loop->callback.set(loop, last, DTN_EVENT_IO_IN, &counter,
                               dummy_callback));
 
   testrun(NULL == dtn_event_loop_free(loop));
@@ -699,7 +699,7 @@ int test_impl_event_loop_callback_unset() {
   // set a callback
   int counter = 0;
 
-  testrun(loop->callback.set(loop, socket, dtn_EVENT_IO_IN, &counter,
+  testrun(loop->callback.set(loop, socket, DTN_EVENT_IO_IN, &counter,
                              counting_called_callback));
 
   // check behaviour
@@ -723,7 +723,7 @@ int test_impl_event_loop_callback_unset() {
   };
 
   // set callback
-  testrun(loop->callback.set(loop, socket, dtn_EVENT_IO_IN, &counter,
+  testrun(loop->callback.set(loop, socket, DTN_EVENT_IO_IN, &counter,
                              counting_called_callback));
 
   testrun(0 ==
@@ -778,7 +778,7 @@ int test_impl_event_loop_callback_unset() {
   usleep(TEST_DEFAULT_WAIT_USEC);
 
   // reset callback
-  testrun(loop->callback.set(loop, socket, dtn_EVENT_IO_IN, &counter,
+  testrun(loop->callback.set(loop, socket, DTN_EVENT_IO_IN, &counter,
                              counting_called_callback));
 
   // another run
@@ -841,7 +841,7 @@ int test_impl_event_loop_timer_set() {
   /* It is NOT GUARANTEED that the first timer will receive ID 1 ! -> See
    * specs */
   id = loop->timer.set(loop, 0, NULL, counting_timer_cb);
-  testrun(dtn_TIMER_INVALID != id);
+  testrun(DTN_TIMER_INVALID != id);
 
   testrun(loop->timer.unset(loop, id, NULL));
 
@@ -863,7 +863,7 @@ int test_impl_event_loop_timer_set() {
     id = loop->timer.set(loop, container.timeout, &container,
                          counting_timestamped_cb);
     start = dtn_time_get_current_time_usecs();
-    testrun(dtn_TIMER_INVALID != id);
+    testrun(DTN_TIMER_INVALID != id);
     while (0 == container.counter) {
       loop->run(loop, idle_usec);
     }
@@ -884,7 +884,7 @@ int test_impl_event_loop_timer_set() {
     container.timestamp = 0;
     id = loop->timer.set(loop, container.timeout, &container,
                          counting_timestamped_cb);
-    testrun(dtn_TIMER_INVALID != id);
+    testrun(DTN_TIMER_INVALID != id);
     start = dtn_time_get_current_time_usecs();
     while (0 == container.counter) {
       loop->run(loop, idle_usec);
@@ -911,7 +911,7 @@ int test_impl_event_loop_timer_set() {
     timer_id[i] = loop->timer.set(loop, data[i].timeout, &data[i],
                                   counting_timestamped_cb);
 
-    testrun(dtn_TIMER_INVALID != timer_id);
+    testrun(DTN_TIMER_INVALID != timer_id);
   }
 
   testrun_log("Check %zd parallel timers with different "
@@ -955,7 +955,7 @@ int test_impl_event_loop_timer_set() {
     data[i].loop = loop;
     timer_id[i] = loop->timer.set(loop, data[i].timeout, &data[i],
                                   counting_timestamped_reset_cb);
-    testrun(dtn_TIMER_INVALID != timer_id[i]);
+    testrun(DTN_TIMER_INVALID != timer_id[i]);
   }
 
   idle_usec = data[1].timeout;
@@ -1008,16 +1008,16 @@ int test_impl_event_loop_timer_unset() {
   testrun(loop);
   testrun(loop->is_running(loop) == false);
 
-  uint32_t id = dtn_TIMER_INVALID;
+  uint32_t id = DTN_TIMER_INVALID;
 
   id = loop->timer.set(loop, rel_timeout_usecs, &counter, counting_timer_cb);
-  testrun(id != dtn_TIMER_INVALID);
+  testrun(id != DTN_TIMER_INVALID);
 
   testrun(loop->run(loop, 3 * rel_timeout_usecs / 2));
   testrun(1 == counter);
 
   testrun(!loop->timer.unset(NULL, 0, NULL));
-  testrun(!loop->timer.unset(loop, dtn_TIMER_INVALID, NULL));
+  testrun(!loop->timer.unset(loop, DTN_TIMER_INVALID, NULL));
   testrun(!loop->timer.unset(NULL, id, NULL));
 
   // unset timer id which is set
@@ -1033,7 +1033,7 @@ int test_impl_event_loop_timer_unset() {
 
   // Set and immediately unset timer again to check that it won't be triggered
   id = loop->timer.set(loop, rel_timeout_usecs, &counter, counting_timer_cb);
-  testrun(id != dtn_TIMER_INVALID);
+  testrun(id != DTN_TIMER_INVALID);
 
   testrun(loop->timer.unset(loop, id, 0));
 

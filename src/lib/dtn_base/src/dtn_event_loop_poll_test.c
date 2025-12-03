@@ -102,32 +102,32 @@ int check_flags_dtn_to_poll() {
   testrun(dtn_flag == 0);
   testrun(poll_flag == 0);
 
-  dtn_flag = dtn_EVENT_IO_IN;
+  dtn_flag = DTN_EVENT_IO_IN;
   testrun(flags_dtn_to_poll(&dtn_flag, &poll_flag));
-  testrun(dtn_flag == dtn_EVENT_IO_IN);
+  testrun(dtn_flag == DTN_EVENT_IO_IN);
   testrun(poll_flag == (POLLIN | POLLPRI));
 
-  dtn_flag = dtn_EVENT_IO_OUT;
+  dtn_flag = DTN_EVENT_IO_OUT;
   testrun(flags_dtn_to_poll(&dtn_flag, &poll_flag));
-  testrun(dtn_flag == dtn_EVENT_IO_OUT);
+  testrun(dtn_flag == DTN_EVENT_IO_OUT);
   testrun(poll_flag == POLLOUT);
 
-  dtn_flag = dtn_EVENT_IO_CLOSE;
+  dtn_flag = DTN_EVENT_IO_CLOSE;
   testrun(flags_dtn_to_poll(&dtn_flag, &poll_flag));
-  testrun(dtn_flag == dtn_EVENT_IO_CLOSE);
+  testrun(dtn_flag == DTN_EVENT_IO_CLOSE);
   testrun(poll_flag == POLLHUP);
 
-  dtn_flag = dtn_EVENT_IO_ERR;
+  dtn_flag = DTN_EVENT_IO_ERR;
   testrun(flags_dtn_to_poll(&dtn_flag, &poll_flag));
-  testrun(dtn_flag == dtn_EVENT_IO_ERR);
+  testrun(dtn_flag == DTN_EVENT_IO_ERR);
   testrun(poll_flag == POLLERR);
 
   dtn_flag =
-      dtn_EVENT_IO_IN | dtn_EVENT_IO_OUT | dtn_EVENT_IO_CLOSE | dtn_EVENT_IO_ERR;
+      DTN_EVENT_IO_IN | DTN_EVENT_IO_OUT | DTN_EVENT_IO_CLOSE | DTN_EVENT_IO_ERR;
 
   testrun(flags_dtn_to_poll(&dtn_flag, &poll_flag));
-  testrun(dtn_flag == (dtn_EVENT_IO_ERR | dtn_EVENT_IO_IN | dtn_EVENT_IO_OUT |
-                      dtn_EVENT_IO_CLOSE));
+  testrun(dtn_flag == (DTN_EVENT_IO_ERR | DTN_EVENT_IO_IN | DTN_EVENT_IO_OUT |
+                      DTN_EVENT_IO_CLOSE));
 
   testrun(poll_flag == (POLLIN | POLLPRI | POLLERR | POLLHUP | POLLOUT));
 
@@ -231,7 +231,7 @@ static bool counting_callback(uint32_t id, void *data) {
   container->id = container->loop->timer.set(
       container->loop, container->timeout_usec, container, counting_callback);
 
-  testrun(dtn_TIMER_INVALID != container->id);
+  testrun(DTN_TIMER_INVALID != container->id);
 
   return true;
 }
@@ -311,7 +311,7 @@ int check_calculate_timeout_msec() {
   int64_t result = 0;
 
   uint64_t now = dtn_time_get_current_time_usecs();
-  uint64_t max = dtn_TIMER_MAX;
+  uint64_t max = DTN_TIMER_MAX;
 
   result = calculate_timeout_msec(AS_POLL_LOOP(loop), now, max, now);
   testrun_log("time %" PRIi64, result);

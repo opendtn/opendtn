@@ -205,7 +205,7 @@ static bool setup_msg_to_loop_signalling(dtn_thread_loop *self) {
    * one message AT MOST
    */
   bool register_successful = self->event_loop->callback.set(
-      self->event_loop, sp[1], dtn_EVENT_IO_IN, self, msg_to_loop_handler);
+      self->event_loop, sp[1], DTN_EVENT_IO_IN, self, msg_to_loop_handler);
 
   if (!register_successful) {
 

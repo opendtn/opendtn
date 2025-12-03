@@ -41,8 +41,8 @@
 #include <stdlib.h>
 
 #include "dtn_constants.h"
-#include "../include/dtn_arch_compile.h"
-#include "../include/dtn_log.h"
+#include "dtn_arch_compile.h"
+#include "dtn_log.h"
 
 /*----------------------------------------------------------------------------*/
 
