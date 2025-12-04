@@ -38,6 +38,8 @@
 dtn_item *dtn_item_from_json(const char *string);
 char *dtn_item_to_json(const dtn_item *self);
 
+dtn_item *dtn_item_from_json_string(const char* string, size_t len);
+
 /*
  *      ------------------------------------------------------------------------
  *

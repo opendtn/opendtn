@@ -2175,3 +2175,17 @@ error:
   string = dtn_data_pointer_free(string);
   return false;
 }
+
+dtn_item *dtn_item_from_json_string(const char* string, size_t size){
+
+  dtn_item *out = NULL;
+  if (!string || !size) goto error;
+
+  int64_t len = json_decode(&out, string, size);
+  if (len != (int64_t) size) goto error;
+
+  return out;
+error:
+  dtn_item_free(out);
+  return NULL;
+}
