@@ -81,6 +81,8 @@ typedef struct Connection {
 
   struct {
 
+    dtn_thread_lock lock;
+
     bool (*callback)(int, uint8_t, void *);
 
     struct {
@@ -121,6 +123,30 @@ struct dtn_io {
   dtn_list *reconnects;
   dtn_dict *connections;
 };
+
+/*----------------------------------------------------------------------------*/
+
+Connection *connection_create(dtn_io *self){
+
+  if (!self) goto error;
+
+  Connection *conn = calloc(1, sizeof(Connection));
+  if (!conn)
+    goto error;
+
+  conn->io = self;
+  if (!dtn_thread_lock_init(&conn->io_data.lock, self->config.limits.threadlock_timeout_usec)){
+    conn = dtn_data_pointer_free(conn);
+    goto error;
+  }
+
+  conn->io_data.out.queue =
+      dtn_linked_list_create((dtn_list_config){.item.free = dtn_buffer_free});
+
+  return conn;
+error:
+  return NULL;
+}
 
 /*----------------------------------------------------------------------------*/
 
@@ -175,6 +201,7 @@ static void *connection_free(void *self) {
 
   conn->io_data.out.queue = dtn_list_free(conn->io_data.out.queue);
 
+  dtn_thread_lock_clear(&conn->io_data.lock);
   conn = dtn_data_pointer_free(conn);
   return NULL;
 }
@@ -475,6 +502,9 @@ static bool init_config(dtn_io_config *config) {
   if (0 == config->limits.timeout_usec)
     config->limits.timeout_usec = 3000000;
 
+  if (0 == config->limits.threadlock_timeout_usec)
+    config->limits.threadlock_timeout_usec = 1000000;
+
   return true;
 error:
   return false;
@@ -691,7 +721,13 @@ static bool stream_send(dtn_io *self, Connection *conn) {
 
   } else {
 
+    if (!dtn_thread_lock_try_lock(&conn->io_data.lock))
+      goto error;
+
     dtn_buffer *buffer = dtn_list_queue_pop(conn->io_data.out.queue);
+
+    if (!dtn_thread_lock_unlock(&conn->io_data.lock))
+      goto error;
 
     if (!buffer) {
 
@@ -912,7 +948,13 @@ static bool io_stream_ssl_send(dtn_io *self, Connection *conn) {
 
   } else {
 
+    if (!dtn_thread_lock_try_lock(&conn->io_data.lock))
+      goto error;
+
     dtn_buffer *buffer = dtn_list_queue_pop(conn->io_data.out.queue);
+
+    if (!dtn_thread_lock_unlock(&conn->io_data.lock))
+      goto error;
 
     if (!buffer) {
 
@@ -1079,7 +1121,7 @@ static Connection *accept_stream_base(
       goto error;
   }
 
-  Connection *conn = calloc(1, sizeof(Connection));
+  Connection *conn = connection_create(self);
   if (!conn)
     goto error;
 
@@ -1092,13 +1134,9 @@ static Connection *accept_stream_base(
   conn->socket = nfd;
   conn->listener = socket;
   conn->config = listener->config;
-  conn->io = self;
   conn->created_usec = dtn_time_get_current_time_usecs();
   conn->last_update_usec = 0;
   conn->io_data.callback = callback;
-  conn->io_data.out.queue = dtn_list_free(conn->io_data.out.queue);
-  conn->io_data.out.queue =
-      dtn_linked_list_create((dtn_list_config){.item.free = dtn_buffer_free});
 
   if (!dtn_event_loop_set(self->config.loop, nfd,
                          DTN_EVENT_IO_IN | DTN_EVENT_IO_ERR | DTN_EVENT_IO_CLOSE,
@@ -1436,7 +1474,7 @@ int dtn_io_open_listener(dtn_io *self, dtn_io_socket_config config) {
   if (!dtn_socket_ensure_nonblocking(listener))
     goto error;
 
-  Connection *conn = calloc(1, sizeof(Connection));
+  Connection *conn = connection_create(self);
   if (!conn)
     goto error;
 
@@ -1945,6 +1983,10 @@ int dtn_io_open_connection(dtn_io *self, dtn_io_socket_config config) {
 
   if (!self)
     goto error;
+
+  if (!config.callbacks.userdata)
+    goto error;
+
   if (!config.callbacks.io)
     goto error;
 
@@ -1995,7 +2037,7 @@ int dtn_io_open_connection(dtn_io *self, dtn_io_socket_config config) {
     goto error;
   }
 
-  Connection *conn = calloc(1, sizeof(Connection));
+  Connection *conn = connection_create(self);
   if (!conn)
     goto error;
 
@@ -2008,13 +2050,9 @@ int dtn_io_open_connection(dtn_io *self, dtn_io_socket_config config) {
   conn->listener = -1;
   conn->type = dtn_IO_CLIENT_CONNECTION;
   conn->config = config;
-  conn->io = self;
   conn->io_data.callback = io;
   conn->io_data.out.buffer = NULL;
-  conn->io_data.out.queue = dtn_list_free(conn->io_data.out.queue);
-  conn->io_data.out.queue =
-      dtn_linked_list_create((dtn_list_config){.item.free = dtn_buffer_free});
-
+  
   if (TLS == config.socket.type) {
 
     if (!init_ssl_client(self, conn)) {
@@ -2106,6 +2144,11 @@ bool dtn_io_send(dtn_io *self, int socket, const dtn_memory_pointer buffer) {
     uint8_t *ptr = (uint8_t *)buffer.start;
     size_t len = 0;
 
+    if (!dtn_thread_lock_try_lock(&conn->io_data.lock))
+        goto error;
+
+    bool result = true;
+
     while (open > 0) {
 
       temp = dtn_buffer_create(max);
@@ -2120,12 +2163,8 @@ bool dtn_io_send(dtn_io *self, int socket, const dtn_memory_pointer buffer) {
 
       if (!dtn_buffer_set(temp, ptr, len)) {
         temp = dtn_buffer_free(temp);
-        goto error;
-      }
-
-      if (!dtn_list_queue_push(conn->io_data.out.queue, temp)) {
-        temp = dtn_buffer_free(temp);
-        goto error;
+        result = false;
+        goto stop;
       }
 
       temp = NULL;
@@ -2133,11 +2172,23 @@ bool dtn_io_send(dtn_io *self, int socket, const dtn_memory_pointer buffer) {
 
       if (open > 0)
         ptr = ptr + max;
+
+      if (!dtn_list_queue_push(conn->io_data.out.queue, temp)) {
+        temp = dtn_buffer_free(temp);
+        result = false;
+        goto stop;
     }
+  }
+stop:
+
+  if (!dtn_thread_lock_unlock(&conn->io_data.lock))
+    goto error;
+
+  if (!result) goto error;
 
     /* Return here to not increase io counters, and let processing be done
      * in next eventloop run */
-    return true;
+  return true;
   }
 
   // Push to queue
@@ -2149,10 +2200,16 @@ bool dtn_io_send(dtn_io *self, int socket, const dtn_memory_pointer buffer) {
   if (!dtn_buffer_push(buf, (void *)buffer.start, buffer.length))
     goto error;
 
+  if (!dtn_thread_lock_try_lock(&conn->io_data.lock))
+        goto error;
+
   if (!dtn_list_queue_push(conn->io_data.out.queue, buf)) {
     buf = dtn_buffer_free(buf);
     goto error;
   }
+
+  if (!dtn_thread_lock_unlock(&conn->io_data.lock))
+        goto error;
 
   return true;
 
