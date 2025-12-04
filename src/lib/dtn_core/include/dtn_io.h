@@ -60,6 +60,7 @@ typedef struct dtn_io_config {
 
     uint64_t reconnect_interval_usec;
     uint64_t timeout_usec;
+    uint64_t threadlock_timeout_usec;
 
   } limits;
 
@@ -165,6 +166,9 @@ bool dtn_io_close(dtn_io *self, int socket);
 
 /*----------------------------------------------------------------------------*/
 
+/**
+ *  Threadsafe send function 
+ */
 bool dtn_io_send(dtn_io *self, int socket, const dtn_memory_pointer buffer);
 
 /*----------------------------------------------------------------------------*/
