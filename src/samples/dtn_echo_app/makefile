@@ -19,43 +19,35 @@
 #
 #       ------------------------------------------------------------------------
 #
-#       File            makefile
+#       Authors         Udo Haering, Michael J. Beer, Markus Töpfer
+#       Date            2020-01-21
 #
 #       ------------------------------------------------------------------------
 
-include $(DTN_ROOT)/makefiles/makefile_const.mk
+-include $(DTN_ROOT)/makefiles/makefile_const.mk
 
-DTN_LIB_DIRS      = dtn_echo_app
-
-all    : target_build_all
-depend : target_depend
+DTN_EXECUTABLE        = $(DTN_BINDIR)/$(DTN_DIRNAME)
+DTN_TARGET            = $(DTN_EXECUTABLE)
 
 #-----------------------------------------------------------------------------
-target_depend:
-	@echo "[DEPEND ] src/lib: scanning dependencies"
-	@for dir in $(DTN_LIB_DIRS); do \
-		echo "[DEPEND ] entering $$dir ..."; \
-		$(MAKE) depend -C $$dir || exit 1; \
-		echo "[DEPEND ] leaving $$dir ."; \
-	done
-	@echo "[DEPEND ] src/lib: dependencies done"
-#-----------------------------------------------------------------------------
-target_build_all:
-	@for dir in $(DTN_LIB_DIRS); do \
-		echo "[BUILD  ] entering $$dir ..."; \
-		$(MAKE) -C $$dir || exit 1; \
-		echo "[BUILD  ] leaving $$dir ."; \
-	done
-	@echo "[BUILD  ] build done"
-#-----------------------------------------------------------------------------
-target_test:
-	@echo "[BUILD  ] building tests"
-	@for dir in $(DTN_LIB_DIRS); do \
-		echo "[BUILD  ] entering $$dir ..."; \
-		$(MAKE) $(DTN_QUIET_MAKE) target_test -C $$dir || exit 1; \
-		echo "[BUILD  ] leaving $$dir ."; \
-	done
-	@echo "[BUILD  ] build tests done"
+
+DTN_FLAGS       += `pkg-config --cflags openssl`
+
 #-----------------------------------------------------------------------------
 
+DTN_LIBS        = -L$(DTN_LIBDIR)
 
+DTN_LIBS        += -l dtn_base$(DTN_EDITION)
+DTN_LIBS        += -l dtn_core$(DTN_EDITION)
+DTN_LIBS        += -l dtn_os$(DTN_EDITION)
+
+DTN_LIBS       	+= -l m
+DTN_LIBS       	+= -pthread
+	
+DTN_LIBS       	+= -ldl
+	
+DTN_LIBS       	+= `pkg-config --libs openssl`
+
+#-----------------------------------------------------------------------------
+
+-include $(DTN_ROOT)/makefiles/makefile_targets.mk

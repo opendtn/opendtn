@@ -36,6 +36,7 @@
 #include <dtn_base/dtn_log.h>
 #include <dtn_base/dtn_dict.h>
 #include <dtn_base/dtn_string.h>
+#include <dtn_base/dtn_id.h>
 
 #include <dtn_base/dtn_thread_pool.h>
 #include <dtn_base/dtn_thread_loop.h>
@@ -50,6 +51,8 @@ struct dtn_app {
 
     uint16_t magic_bytes;
     dtn_app_config config;
+
+    dtn_id id;
 
     bool debug;
 
@@ -307,6 +310,8 @@ dtn_app *dtn_app_create(dtn_app_config config){
 
     if (!dtn_thread_loop_start_threads(self->thread_loop)) goto error;
 
+    dtn_id_fill_with_uuid(self->id);
+
     return self;
 error:
     dtn_app_free(self);
@@ -351,6 +356,31 @@ dtn_app *dtn_app_cast(const void *data){
         return NULL;
 
     return (dtn_app *)data;
+}
+
+/*----------------------------------------------------------------------------*/
+
+dtn_app_config dtn_app_config_from_item(const dtn_item *item){
+
+    dtn_app_config out = {0};
+
+    const dtn_item *config = dtn_item_get(item, "/app");
+    if (!config) config = item;
+
+    const char *name = dtn_item_get_string(dtn_item_get(config, "/name"));
+    if (name)
+        strncpy(out.name, name, PATH_MAX);
+
+    out.limits.threadlock_timeout_usec = 
+        dtn_item_get_number(dtn_item_get(config, "/limits/threadlock_timeout_usec"));
+
+    out.limits.message_queue_capacity = 
+        dtn_item_get_number(dtn_item_get(config, "/limits/message_queue_capacity"));
+
+    out.limits.threads = 
+        dtn_item_get_number(dtn_item_get(config, "/limits/threads"));
+
+    return out;
 }
 
 /*
@@ -401,6 +431,19 @@ static void cb_connected(void *userdata, int connection){
         local.port,
         remote.host,
         remote.port);
+
+    if (self->config.register_client){
+
+        dtn_item *event = dtn_item_object();
+        dtn_item_object_set(event, "event", dtn_item_string("register"));
+        dtn_item *par = dtn_item_object();
+        dtn_item_object_set(event, "paramater", par);
+        dtn_item_object_set(par, "name", dtn_item_string(self->config.name));
+        dtn_item_object_set(par, "uuid", dtn_item_string(self->id));
+
+        dtn_app_send_json(self, connection, event);
+        event = dtn_item_free(event);
+    }
 
 error:
     return;
@@ -480,7 +523,11 @@ int dtn_app_open_connection(dtn_app *self, dtn_io_socket_config config){
                 .callbacks.connected = cb_connected
             });
 
-    if (-1 == connection) goto error;
+    if (-1 == connection) {
+        goto error;
+    } else  {
+        cb_connected(self, connection);
+    }
 
     return connection;
 

@@ -1,0 +1,29 @@
+{
+	"log" : {
+
+		"systemd" : false,
+		"file" : "stdout",
+		"level" : "debug"
+	},
+	"io" : {
+		"limits" : {
+
+			"reconnect_usecs" : 100000,
+			"timeout_usecs" : 10000
+		}
+	},
+	"app" : {
+		"limits" : {
+
+			"threadlock_timeout_usec" : 100000,
+			"message_queue_capacity" : 10000,
+			"threads": 4
+		}
+	},
+	"as_client" : true,
+	"socket" :{
+		"type" : "TCP",
+		"host" : "localhost",
+		"port" : 10000
+	}
+}
