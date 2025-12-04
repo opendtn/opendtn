@@ -36,7 +36,7 @@ include $(DTN_ROOT)/makefiles/makefile_const.mk
 
 #-----------------------------------------------------------------------------
 
-DTN_FLAGS       =
+DTN_FLAGS       += `pkg-config --cflags openssl`
 
 DTN_LIBS        = -L$(DTN_LIBDIR)
 
@@ -46,6 +46,8 @@ DTN_LIBS       += -l m
 DTN_LIBS       += -pthread
 
 DTN_LIBS       += -ldl
+
+DTN_LIBS       += `pkg-config --libs openssl`
 
 #-----------------------------------------------------------------------------
 

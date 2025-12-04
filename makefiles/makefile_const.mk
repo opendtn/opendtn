@@ -91,6 +91,13 @@ DTN_LIBNAME         := lib$(DTN_DIRNAME)
 
 DTN_UNAME             := $(shell uname)
 
+DTN_TEST_CERT           := $(DTN_ROOT)/resources/certificate/opendtn.test.crt
+DTN_TEST_CERT_KEY       := $(DTN_ROOT)/resources/certificate/opendtn.test.key
+DTN_TEST_CERT_ONE       := $(DTN_ROOT)/resources/certificate/one.crt
+DTN_TEST_CERT_ONE_KEY   := $(DTN_ROOT)/resources/certificate/one.key
+DTN_TEST_CERT_TWO       := $(DTN_ROOT)/resources/certificate/two.crt
+DTN_TEST_CERT_TWO_KEY   := $(DTN_ROOT)/resources/certificate/two.key
+
 #.............................................................................
 # distinguish libs and executables
 #
@@ -115,6 +122,12 @@ BUILD_DEFINITIONS = -D DTN_ROOT='"$(DTN_ROOT)"' \
 #.............................................................................
 
 TEST_DEFINITIONS =  -D DTN_TEST_RESOURCE_DIR='"$(DTN_TEST_RESOURCE_DIR)"' \
+                    -D DTN_TEST_CERT='"$(DTN_TEST_CERT)"' \
+                    -D DTN_TEST_CERT_KEY='"$(DTN_TEST_CERT_KEY)"' \
+                    -D DTN_TEST_CERT_ONE='"$(DTN_TEST_CERT_ONE)"' \
+                    -D DTN_TEST_CERT_ONE_KEY='"$(DTN_TEST_CERT_ONE_KEY)"' \
+                    -D DTN_TEST_CERT_TWO='"$(DTN_TEST_CERT_TWO)"' \
+                    -D DTN_TEST_CERT_TWO_KEY='"$(DTN_TEST_CERT_TWO_KEY)"' \
 
 #.............................................................................
 
