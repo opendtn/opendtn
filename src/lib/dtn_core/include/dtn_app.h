@@ -46,6 +46,8 @@ typedef struct dtn_app_config {
     dtn_event_loop *loop;
     dtn_io *io;
 
+    bool register_client; // used in clients to automatically send a register
+
     char name[PATH_MAX];
 
     struct {
@@ -71,6 +73,8 @@ dtn_app *dtn_app_free(dtn_app *self);
 dtn_app *dtn_app_cast(const void *data);
 
 void dtn_app_set_debug(dtn_app *self, bool value);
+
+dtn_app_config dtn_app_config_from_item(const dtn_item *item);
 
 /*
  *      ------------------------------------------------------------------------
@@ -105,13 +109,10 @@ bool dtn_app_send_json(dtn_app *self, int socket, const dtn_item *output);
 
 bool dtn_app_register(dtn_app *self, 
         const char *event,
-        bool (*function)(void *userdata, int socket, dtn_item *input),
+        bool (*callback)(void *userdata, int socket, dtn_item *input),
         void *userdata);
 
 bool dtn_app_deregister(dtn_app *self,
         const char *event);
-
-
-
 
 #endif /* dtn_app_h */
