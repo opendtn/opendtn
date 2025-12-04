@@ -26,7 +26,6 @@
 include $(DTN_ROOT)/makefiles/makefile_const.mk
 
 DTN_LIB_DIRS      = dtn_base
-DTN_LIB_DIRS      += dtn_encryption
 DTN_LIB_DIRS      += dtn_core
 DTN_LIB_DIRS      += dtn
 
