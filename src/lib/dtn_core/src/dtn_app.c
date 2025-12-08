@@ -480,14 +480,14 @@ static void cb_close(void *userdata, int connection){
 
 /*----------------------------------------------------------------------------*/
 
-int dtn_app_open_listener(dtn_app *self, dtn_io_socket_config config){
+int dtn_app_open_listener(dtn_app *self, dtn_socket_configuration config){
 
     if (!self) goto error;
 
     int listener = dtn_io_open_listener(self->config.io,
             (dtn_io_socket_config){
-                .socket = config.socket,
-                .ssl = config.ssl,
+                .socket = config,
+                .ssl = (dtn_io_ssl_config){0},
                 .callbacks.userdata = self,
                 .callbacks.accept = cb_accept,
                 .callbacks.io = cb_io,
@@ -504,18 +504,20 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-int dtn_app_open_connection(dtn_app *self, dtn_io_socket_config config){
+int dtn_app_open_connection(dtn_app *self, 
+    dtn_socket_configuration config,
+    dtn_io_ssl_config ssl){
 
     if (!self) goto error;
 
-    if (!config.socket.host[0]) goto error;
-    if (0 == config.socket.port) goto error;
+    if (!config.host[0]) goto error;
+    if (0 == config.port) goto error;
 
     int connection = dtn_io_open_connection(self->config.io,
             (dtn_io_socket_config){
                 .auto_reconnect = true,
-                .socket = config.socket,
-                .ssl = config.ssl,
+                .socket = config,
+                .ssl = ssl,
                 .callbacks.userdata = self,
                 .callbacks.accept = cb_accept,
                 .callbacks.io = cb_io,

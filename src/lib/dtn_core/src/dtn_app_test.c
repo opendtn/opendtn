@@ -241,12 +241,11 @@ int test_dtn_app_open_listener(){
     dtn_app *app = dtn_app_create(config);
     testrun(app);
 
-    dtn_io_socket_config socket_config = (dtn_io_socket_config){
-        .socket = dtn_socket_load_dynamic_port(
+    dtn_socket_configuration socket_config = dtn_socket_load_dynamic_port(
             (dtn_socket_configuration){
                 .type = TCP,
                 .host = "localhost"
-            })};
+            });
 
     int socket = dtn_app_open_listener(app, socket_config);
     testrun(socket > 0);
@@ -281,23 +280,19 @@ int test_dtn_app_open_connection(){
     dtn_app *app = dtn_app_create(config);
     testrun(app);
 
-    dtn_io_socket_config socket_config = (dtn_io_socket_config){
-        .socket = dtn_socket_load_dynamic_port(
+    dtn_socket_configuration socket_config =dtn_socket_load_dynamic_port(
             (dtn_socket_configuration){
                 .type = TCP,
                 .host = "127.0.0.1"
-            })};;
+            });;
 
     int socket = dtn_app_open_listener(app, socket_config);
     testrun(socket > 0);
 
-    dtn_io_socket_config client_config = (dtn_io_socket_config){
-        .auto_reconnect = true,
-        .socket = socket_config.socket};
-
     testrun(dtn_event_loop_run(loop, DTN_RUN_ONCE));
 
-    int connection = dtn_app_open_connection(app, client_config);
+    int connection = dtn_app_open_connection(app, 
+        socket_config, (dtn_io_ssl_config){0});
     testrun(connection > socket);
     
     testrun(dtn_event_loop_run(loop, DTN_RUN_ONCE));
@@ -329,23 +324,19 @@ int test_dtn_app_close(){
     dtn_app *app = dtn_app_create(config);
     testrun(app);
 
-    dtn_io_socket_config socket_config = (dtn_io_socket_config){
-        .socket = dtn_socket_load_dynamic_port(
+    dtn_socket_configuration socket_config = dtn_socket_load_dynamic_port(
             (dtn_socket_configuration){
                 .type = TCP,
                 .host = "127.0.0.1"
-            })};;
+            });;
 
     int socket = dtn_app_open_listener(app, socket_config);
     testrun(socket > 0);
 
-    dtn_io_socket_config client_config = (dtn_io_socket_config){
-        .auto_reconnect = true,
-        .socket = socket_config.socket};
-
     testrun(dtn_event_loop_run(loop, DTN_RUN_ONCE));
 
-    int connection = dtn_app_open_connection(app, client_config);
+    int connection = dtn_app_open_connection(app, 
+        socket_config, (dtn_io_ssl_config){0});
     testrun(connection > socket);
 
     testrun(dtn_app_close(app, connection));
@@ -382,12 +373,11 @@ int test_dtn_app_send(){
     dtn_app *app = dtn_app_create(config);
     testrun(app);
 
-    dtn_io_socket_config socket_config = (dtn_io_socket_config){
-        .socket = dtn_socket_load_dynamic_port(
+    dtn_socket_configuration socket_config =  dtn_socket_load_dynamic_port(
             (dtn_socket_configuration){
                 .type = TCP,
                 .host = "127.0.0.1"
-            })};;
+            });;
 
     int socket = dtn_app_open_listener(app, socket_config);
     testrun(socket > 0);
@@ -395,14 +385,10 @@ int test_dtn_app_send(){
     testrun(dtn_app_register(app, "key", dummy_function, &dummy));
 
     testrun(dtn_event_loop_run(loop, DTN_RUN_ONCE));
-
-    dtn_io_socket_config client_config = (dtn_io_socket_config){
-        .auto_reconnect = true,
-        .socket = socket_config.socket};
-
     testrun(dtn_event_loop_run(loop, DTN_RUN_ONCE));
 
-    int connection = dtn_app_open_connection(app, client_config);
+    int connection = dtn_app_open_connection(app, 
+        socket_config, (dtn_io_ssl_config){0});
     testrun(connection > socket);
     
     testrun(dtn_event_loop_run(loop, DTN_RUN_ONCE));
@@ -448,12 +434,11 @@ int test_dtn_app_send_json(){
     dtn_app *app = dtn_app_create(config);
     testrun(app);
 
-    dtn_io_socket_config socket_config = (dtn_io_socket_config){
-        .socket = dtn_socket_load_dynamic_port(
+    dtn_socket_configuration socket_config = dtn_socket_load_dynamic_port(
             (dtn_socket_configuration){
                 .type = TCP,
                 .host = "127.0.0.1"
-            })};;
+            });;
 
     int socket = dtn_app_open_listener(app, socket_config);
     testrun(socket > 0);
@@ -461,14 +446,10 @@ int test_dtn_app_send_json(){
     testrun(dtn_app_register(app, "key", dummy_function, &dummy));
 
     testrun(dtn_event_loop_run(loop, DTN_RUN_ONCE));
-
-    dtn_io_socket_config client_config = (dtn_io_socket_config){
-        .auto_reconnect = true,
-        .socket = socket_config.socket};
-
     testrun(dtn_event_loop_run(loop, DTN_RUN_ONCE));
 
-    int connection = dtn_app_open_connection(app, client_config);
+    int connection = dtn_app_open_connection(app, 
+        socket_config, (dtn_io_ssl_config){0});
     testrun(connection > socket);
     
     testrun(dtn_event_loop_run(loop, DTN_RUN_ONCE));
