@@ -151,19 +151,17 @@ int main(int argc, char **argv) {
     if (dtn_item_is_true(dtn_item_get(config, "/as_client"))){
 
         socket = dtn_app_open_connection(app, 
-            (dtn_io_socket_config){
-                .auto_reconnect = true,
-                .socket = dtn_socket_configuration_from_item(
-                    dtn_item_get(config, "/socket"))
-            });
+            dtn_socket_configuration_from_item(
+                    dtn_item_get(config, "/socket")),
+            (dtn_io_ssl_config){0}
+            );
     
     } else {
 
         socket = dtn_app_open_listener(app, 
-            (dtn_io_socket_config){
-                .socket = dtn_socket_configuration_from_item(
+            dtn_socket_configuration_from_item(
                     dtn_item_get(config, "/socket"))
-            });
+            );
 
         if (socket < 1){
             dtn_log_error("Failed to open server socket. Abort.");

@@ -84,8 +84,8 @@ dtn_app_config dtn_app_config_from_item(const dtn_item *item);
  *      ------------------------------------------------------------------------
  */
 
-int dtn_app_open_listener(dtn_app *self, dtn_io_socket_config config);
-int dtn_app_open_connection(dtn_app *self, dtn_io_socket_config config);
+int dtn_app_open_listener(dtn_app *self, dtn_socket_configuration config);
+int dtn_app_open_connection(dtn_app *self, dtn_socket_configuration config, dtn_io_ssl_config ssl);
 bool dtn_app_close(dtn_app *self, int socket);
 
 /*
