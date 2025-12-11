@@ -85,6 +85,36 @@ int test_dtn_sdnv_decode(){
     testrun(out == expect);
     testrun(next == input + 1);
 
+    input[0] = 0x92;
+    input[1] = 0x9a;
+    input[2] = 0x95;
+    input[3] = 0xcf;
+    input[4] = 0x09;
+    input[5] = 0x00;
+    input[6] = 0x00;
+    input[7] = 0x00;
+
+    expect = 0x123456789;
+
+    testrun(dtn_sdnv_decode(input, 25, &out, &next));
+    testrun(out == expect);
+    testrun(next == input + 5);
+
+    input[0] = 0x80;
+    input[1] = 0x9F;
+    input[2] = 0xFF;
+    input[3] = 0xFF;
+    input[4] = 0xFF;
+    input[5] = 0xFF;
+    input[6] = 0x7F;
+    input[7] = 0x00;
+
+    expect = 0xFFffffFFFF;
+
+    testrun(dtn_sdnv_decode(input, 25, &out, &next));
+    testrun(out == expect);
+    testrun(next == input + 7);
+
     return testrun_log_success();
 }
 
@@ -92,7 +122,7 @@ int test_dtn_sdnv_decode(){
 
 int test_dtn_sdnv_encode(){
     
-    uint8_t buffer[10] = {0};
+    uint8_t buffer[25] = {0};
     uint8_t *next = NULL;
 
     memset(buffer, 0, 10);
@@ -105,7 +135,7 @@ int test_dtn_sdnv_encode(){
     testrun(buffer[1] == 0x3C);
     testrun(buffer[2] == 0x00);
 
-    memset(buffer, 0, 10);
+    memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x1234, buffer, 10, &next));
     testrun(next == buffer + 2);
 
@@ -116,7 +146,7 @@ int test_dtn_sdnv_encode(){
     testrun(buffer[2] == 0x00);
     testrun(buffer[3] == 0x00);
 
-    memset(buffer, 0, 10);
+    memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x4234, buffer, 10, &next));
     testrun(next == buffer + 3);
 
@@ -127,7 +157,7 @@ int test_dtn_sdnv_encode(){
     testrun(buffer[2] == 0x34);
     testrun(buffer[3] == 0x00);
 
-    memset(buffer, 0, 10);
+    memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x7F, buffer, 10, &next));
     testrun(next == buffer + 1);
 
@@ -135,6 +165,292 @@ int test_dtn_sdnv_encode(){
     testrun(buffer[1] == 0x00);
     testrun(buffer[2] == 0x00);
     testrun(buffer[3] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x123456789, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 5);
+
+    testrun(buffer[0] == 0x92);
+    testrun(buffer[1] == 0x9a);
+    testrun(buffer[2] == 0x95);
+    testrun(buffer[3] == 0xcf);
+    testrun(buffer[4] == 0x09);
+    testrun(buffer[5] == 0x00);
+    testrun(buffer[6] == 0x00);
+    testrun(buffer[7] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x213456789, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 5);
+
+    testrun(buffer[0] == 0xa1);
+    testrun(buffer[1] == 0x9a);
+    testrun(buffer[2] == 0x95);
+    testrun(buffer[3] == 0xcf);
+    testrun(buffer[4] == 0x09);
+    testrun(buffer[5] == 0x00);
+    testrun(buffer[6] == 0x00);
+    testrun(buffer[7] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0xFFffffFFFF, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 6);
+
+    testrun(buffer[0] == 0x9F);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0xFF);
+    testrun(buffer[5] == 0x7F);
+    testrun(buffer[6] == 0x00);
+    testrun(buffer[7] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x1FffFF, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 3);
+
+    testrun(buffer[0] == 0xFF);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0x7F);
+    testrun(buffer[3] == 0x00);
+    testrun(buffer[4] == 0x00);
+    testrun(buffer[5] == 0x00);
+    testrun(buffer[6] == 0x00);
+    testrun(buffer[7] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x2FffFF, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 4);
+
+    testrun(buffer[0] == 0x81);
+    testrun(buffer[1] == 0xbf);
+    testrun(buffer[2] == 0xff);
+    testrun(buffer[3] == 0x7f);
+    testrun(buffer[4] == 0x00);
+    testrun(buffer[5] == 0x00);
+    testrun(buffer[6] == 0x00);
+    testrun(buffer[7] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0xFffFFff, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 4);
+
+    testrun(buffer[0] == 0xFF);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0x7f);
+    testrun(buffer[4] == 0x00);
+    testrun(buffer[5] == 0x00);
+    testrun(buffer[6] == 0x00);
+    testrun(buffer[7] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x1FffFFff, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 5);
+
+    testrun(buffer[0] == 0x81);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0x7F);
+    testrun(buffer[5] == 0x00);
+    testrun(buffer[6] == 0x00);
+    testrun(buffer[7] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x7FffFFffFF, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 5);
+
+    testrun(buffer[0] == 0xFF);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0x7F);
+    testrun(buffer[5] == 0x00);
+    testrun(buffer[6] == 0x00);
+    testrun(buffer[7] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x8FffFFffFF, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 6);
+
+    testrun(buffer[0] == 0x91);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0xFF);
+    testrun(buffer[5] == 0x7F);
+    testrun(buffer[6] == 0x00);
+    testrun(buffer[7] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x3FFffFFffFF, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 6);
+
+    testrun(buffer[0] == 0xFF);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0xFF);
+    testrun(buffer[5] == 0x7F);
+    testrun(buffer[6] == 0x00);
+    testrun(buffer[7] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x4FFffFFffFF, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 7);
+
+    testrun(buffer[0] == 0x81);
+    testrun(buffer[1] == 0x9F);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0xFF);
+    testrun(buffer[5] == 0xFF);
+    testrun(buffer[6] == 0x7F);
+    testrun(buffer[7] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x1FFffFFffFFff, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 7);
+
+    testrun(buffer[0] == 0xFF);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0xFF);
+    testrun(buffer[5] == 0xFF);
+    testrun(buffer[6] == 0x7F);
+    testrun(buffer[7] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x2FFffFFffFFff, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 8);
+
+    testrun(buffer[0] == 0x81);
+    testrun(buffer[1] == 0xbf);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0xFF);
+    testrun(buffer[5] == 0xFF);
+    testrun(buffer[6] == 0xFF);
+    testrun(buffer[7] == 0x7F);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0xFFffFFffFFffFF, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 8);
+
+    testrun(buffer[0] == 0xFF);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0xFF);
+    testrun(buffer[5] == 0xFF);
+    testrun(buffer[6] == 0xFF);
+    testrun(buffer[7] == 0x7F);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x1FFffFFffFFffFF, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 9);
+
+    testrun(buffer[0] == 0x81);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0xFF);
+    testrun(buffer[5] == 0xFF);
+    testrun(buffer[6] == 0xFF);
+    testrun(buffer[7] == 0xFF);
+    testrun(buffer[8] == 0x7F);
+    testrun(buffer[9] == 0x00);
+    testrun(buffer[10] == 0x00);
+    testrun(buffer[11] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x7fFFffFFffFFffFF, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 9);
+
+    testrun(buffer[0] == 0xFF);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0xFF);
+    testrun(buffer[5] == 0xFF);
+    testrun(buffer[6] == 0xFF);
+    testrun(buffer[7] == 0xFF);
+    testrun(buffer[8] == 0x7F);
+    testrun(buffer[9] == 0x00);
+    testrun(buffer[10] == 0x00);
+    testrun(buffer[11] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0x8fFFffFFffFFffFF, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 10);
+
+    testrun(buffer[0] == 0x81);
+    testrun(buffer[1] == 0x8F);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0xFF);
+    testrun(buffer[5] == 0xFF);
+    testrun(buffer[6] == 0xFF);
+    testrun(buffer[7] == 0xFF);
+    testrun(buffer[8] == 0xFF);
+    testrun(buffer[9] == 0x7F);
+    testrun(buffer[10] == 0x00);
+    testrun(buffer[11] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(0xFFFFFFFFFFFFFFFF, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 10);
+
+    testrun(buffer[0] == 0x81);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0xFF);
+    testrun(buffer[5] == 0xFF);
+    testrun(buffer[6] == 0xFF);
+    testrun(buffer[7] == 0xFF);
+    testrun(buffer[8] == 0xFF);
+    testrun(buffer[9] == 0x7F);
+    testrun(buffer[10] == 0x00);
+    testrun(buffer[11] == 0x00);
+
+    memset(buffer, 0, 25);
+    testrun(dtn_sdnv_encode(UINT64_MAX, buffer, 25, &next));
+    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    testrun(next == buffer + 10);
+
+    testrun(buffer[0] == 0x81);
+    testrun(buffer[1] == 0xFF);
+    testrun(buffer[2] == 0xFF);
+    testrun(buffer[3] == 0xFF);
+    testrun(buffer[4] == 0xFF);
+    testrun(buffer[5] == 0xFF);
+    testrun(buffer[6] == 0xFF);
+    testrun(buffer[7] == 0xFF);
+    testrun(buffer[8] == 0xFF);
+    testrun(buffer[9] == 0x7F);
+    testrun(buffer[10] == 0x00);
+    testrun(buffer[11] == 0x00);
 
     return testrun_log_success();
 }
