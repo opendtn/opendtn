@@ -15,7 +15,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        This file is part of the openvocs project. https://openvocs.org
+        This file is part of the opendtn project. https://opendtn.com
 
         ------------------------------------------------------------------------
 *//**
@@ -42,7 +42,7 @@
 
 int test_dtn_sdnv_decode(){
     
-    uint8_t input[10] = {0};
+    uint8_t input[25] = {0};
 
     input[0] = 0x95;
     input[1] = 0x3C;
@@ -114,6 +114,35 @@ int test_dtn_sdnv_decode(){
     testrun(dtn_sdnv_decode(input, 25, &out, &next));
     testrun(out == expect);
     testrun(next == input + 7);
+
+    input[0] = 0x82;
+    input[1] = 0xFF;
+    input[2] = 0xFF;
+    input[3] = 0xFF;
+    input[4] = 0xFF;
+    input[5] = 0xFF;
+    input[6] = 0xFF;
+    input[7] = 0xFF;
+    input[8] = 0xFF;
+    input[9] = 0x7F;
+    input[10] = 0x00;
+
+    testrun(!dtn_sdnv_decode(input, 25, &out, &next));
+
+    input[0] = 0xFF;
+    input[1] = 0xFF;
+    input[2] = 0xFF;
+    input[3] = 0xFF;
+    input[4] = 0xFF;
+    input[5] = 0xFF;
+    input[6] = 0xFF;
+    input[7] = 0xFF;
+    input[8] = 0xFF;
+    input[9] = 0xFF;
+    input[10] = 0x7F;
+
+    testrun(!dtn_sdnv_decode(input, 25, &out, &next));
+
 
     return testrun_log_success();
 }

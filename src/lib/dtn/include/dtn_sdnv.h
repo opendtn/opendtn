@@ -15,7 +15,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        This file is part of the openvocs project. https://openvocs.org
+        This file is part of the opendtn project. https://opendtn.com
 
         ------------------------------------------------------------------------
 *//**
@@ -24,7 +24,9 @@
 
         @date           2025-12-08
 
-        RFC 5050 Self Delimiting Numeric Values
+        RFC 6256 Using Self-Delimiting Numeric Values in Protocols
+
+        Implementation of Self Delimiting Numeric Values up to UIN64_MAX
 
         ------------------------------------------------------------------------
 */
@@ -35,25 +37,38 @@
 #include <inttypes.h>
 #include <stddef.h>
 
-/*
- *      ------------------------------------------------------------------------
- *
- *      GENERIC FUNCTIONS
- *
- *      ------------------------------------------------------------------------
- */
+/*----------------------------------------------------------------------------*/
 
+/**
+ *      Decode a max uint64_t number from a buffer.
+ * 
+ *      @param buffer   start of the buffer
+ *      @param size     size of the input buffer
+ *      @param out      pointer to parsed value
+ *      @param next     pointer to next byte in buffer after number
+ *                      (will be set to next byte after number)
+ */
 bool dtn_sdnv_decode(
-        const uint8_t *pointer, 
+        const uint8_t *buffer, 
         size_t size,
         uint64_t *out,
         uint8_t **next);
 
+/*----------------------------------------------------------------------------*/
+
+/**
+ *      Encode a max uint64_t number from a buffer.
+ * 
+ *      @param number   number to encode
+ *      @param buffer   start of the buffer
+ *      @param size     size of the buffer
+ *      @param next     pointer to next byte in buffer after number
+ *                      (will be set to next byte after encoded number)
+ */
 bool dtn_sdnv_encode(
         const uint64_t number,
         uint8_t *buffer, 
         size_t size,
         uint8_t **next);
-
 
 #endif /* dtn_sdnv_h */
