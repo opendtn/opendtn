@@ -29,6 +29,8 @@
 */
 #include "../include/dtn_sdnv.h"
 
+#include <dtn_base/dtn_utils.h>
+
 #include <stdio.h>
 
 
@@ -91,49 +93,43 @@ bool dtn_sdnv_encode(
 
     if (!buffer || size < 1 || !next) goto error;
 
-    if (number > 0x7FFffffFFFFffff) {
-
-        if (size < 11) goto error;
-
-        last = buffer + 10;
-
-    } else if (number > 0x3ffFFFFffffFFFF) {
+    if (number > 0x7fFFffFFffFFffFF) {
 
         if (size < 10) goto error;
 
         last = buffer + 9;
 
-    } else if (number > 0xfFFFFffffFFFF) {
+    } else if (number > 0xFFffFFffFFffFF) {
 
         if (size < 9) goto error;
 
         last = buffer + 8;
 
-    } else if (number > 0x3FFFffffFFFF) {
+    } else if (number > 0x1FFffFFffFFff) {
 
         if (size < 8) goto error;
 
         last = buffer + 7;
 
-    } else if (number > 0x7FffffFFFF) {
+    } else if (number > 0x3FFffFFffFF) {
 
         if (size < 7) goto error;
 
         last = buffer + 6;
 
-    } else if (number > 0x1FFFFffff) {
+    } else if (number > 0x7FffFFffFF) {
 
         if (size < 6) goto error;
 
         last = buffer + 5;
 
-    } else if (number > 0x7ffFFFF) {
+    } else if (number > 0xFffFFff) {
 
         if (size < 5) goto error;
 
         last = buffer + 4;
 
-    } else if (number > 0x1ffffF) {
+    } else if (number > 0x1FffFF) {
 
         if (size < 4) goto error;
 
