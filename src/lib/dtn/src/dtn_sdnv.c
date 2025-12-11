@@ -15,7 +15,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        This file is part of the openvocs project. https://openvocs.org
+        This file is part of the opendtn project. https://opendtn.com
 
         ------------------------------------------------------------------------
 *//**
@@ -46,11 +46,19 @@ bool dtn_sdnv_decode(
     uint8_t *ptr = (uint8_t*) start;
 
     uint64_t nbr = 0;
+    uint64_t count = 0;
+
     int64_t ssize = size;
 
     while(!last){
 
         ssize--;
+        count++;
+
+        if (count > 10){
+            dtn_log_error("Input number > uint64_t max - stopping");
+            goto error;
+        }
 
         if (0 > ssize) goto error;
 
@@ -63,6 +71,20 @@ bool dtn_sdnv_decode(
     }
 
     ptr = (uint8_t*) start;
+
+    if ( (last - start) > 9){
+
+        dtn_log_error("Input number > uint64_t max - stopping");
+        goto error;
+
+    } else if (last - start == 9){
+
+        if (start[0] > 0x81){
+
+            dtn_log_error("Input number > uint64_t max - stopping");
+            goto error;
+        }
+    }
 
     while (ptr < last){
         
