@@ -34,6 +34,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+/*----------------------------------------------------------------------------*/
+
 typedef enum dtn_cbor_type {
 
     DTN_CBOR_UNDEF = 0,
@@ -88,9 +90,28 @@ typedef struct dtn_cbor_config {
  *      ------------------------------------------------------------------------
  */
 
-dtn_cbor *dtn_cbor_create(dtn_cbor_type type);
-dtn_cbor *dtn_cbor_free(dtn_cbor *self);
+dtn_cbor *dtn_cbor_map();
+dtn_cbor *dtn_cbor_array();
+dtn_cbor *dtn_cbor_string(const char *string);
+dtn_cbor *dtn_cbor_utf8(const uint8_t *buffer , size_t size);
+dtn_cbor *dtn_cbor_true();
+dtn_cbor *dtn_cbor_false();
+dtn_cbor *dtn_cbor_null();
+dtn_cbor *dtn_cbor_undef();
+dtn_cbor *dtn_cbor_uint(uint64_t value);
+dtn_cbor *dtn_cbor_int(int64_t value);
+dtn_cbor *dtn_cbor_time(const char *timestamp);
+dtn_cbor *dtn_cbor_time_epoch(uint64_t value);
+dtn_cbor *dtn_cbor_ubignum(const char *num);
+dtn_cbor *dtn_cbor_ibignum(const char *num);
+dtn_cbor *dtn_cbor_dec_fraction(dtn_cbor *array);
+dtn_cbor *dtn_cbor_bigfloat(dtn_cbor *array);
+dtn_cbor *dtn_cbor_tag(uint64_t tag);
+dtn_cbor *dtn_cbor_simple(uint64_t nbr);
+dtn_cbor *dtn_cbor_float(float nbr);
+dtn_cbor *dtn_cbor_double(double nbr);
 
+dtn_cbor *dtn_cbor_free(dtn_cbor *self);
 dtn_cbor_type dtn_cbor_get_type(const dtn_cbor *self);
 
 /*----------------------------------------------------------------------------*/
@@ -103,7 +124,13 @@ dtn_cbor_type dtn_cbor_get_type(const dtn_cbor *self);
  */
 bool dtn_cbor_configure(dtn_cbor_config config);
 
-/*----------------------------------------------------------------------------*/
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      DE/ENCODER
+ *
+ *      ------------------------------------------------------------------------
+ */
 
 typedef enum dtn_cbor_match {
 
@@ -113,13 +140,7 @@ typedef enum dtn_cbor_match {
 
 } dtn_cbor_match;
 
-/*
- *      ------------------------------------------------------------------------
- *
- *      DE/ENCODER
- *
- *      ------------------------------------------------------------------------
- */
+/*----------------------------------------------------------------------------*/
 
 /**
  *  Decode a CBOR buffer to some value.
@@ -158,13 +179,39 @@ uint64_t dtn_cbor_encoding_size(const dtn_cbor *value);
 /*
  *      ------------------------------------------------------------------------
  *
- *      ITEM ACCESS
+ *      ITEM CHECKS
  *
  *      ------------------------------------------------------------------------
  */
 
-dtn_cbor *dtn_cbor_map();
 bool dtn_cbor_is_map(const dtn_cbor *self);
+bool dtn_cbor_is_array(const dtn_cbor *self);
+bool dtn_cbor_is_string(const dtn_cbor *self);
+bool dtn_cbor_is_uft8(const dtn_cbor *self);
+bool dtn_cbor_is_true(const dtn_cbor *self);
+bool dtn_cbor_is_false(const dtn_cbor *self);
+bool dtn_cbor_is_null(const dtn_cbor *self);
+bool dtn_cbor_is_undef(const dtn_cbor *self);
+bool dtn_cbor_is_uint(const dtn_cbor *self);
+bool dtn_cbor_is_int(const dtn_cbor *self);
+bool dtn_cbor_is_time(const dtn_cbor *self);
+bool dtn_cbor_is_time_epoch(const dtn_cbor *self);
+bool dtn_cbor_is_ubignum(const dtn_cbor *self);
+bool dtn_cbor_is_ibignum(const dtn_cbor *self);
+bool dtn_cbor_is_dec_fraction(const dtn_cbor *self);
+bool dtn_cbor_is_bigfloat(const dtn_cbor *self);
+bool dtn_cbor_is_tag(const dtn_cbor *self);
+bool dtn_cbor_is_simple(const dtn_cbor *self);
+bool dtn_cbor_is_float(const dtn_cbor *self);
+bool dtn_cbor_is_double(const dtn_cbor *self);
+
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      MAP GETTER / SETTER
+ *
+ *      ------------------------------------------------------------------------
+ */
 
 /**
  *  Set some key / value pair, 
@@ -175,123 +222,173 @@ bool dtn_cbor_is_map(const dtn_cbor *self);
  */
 bool dtn_cbor_map_set(dtn_cbor *map, dtn_cbor *key, dtn_cbor *val);
 
+/*----------------------------------------------------------------------------*/
+
+/**
+ *  Get some map value based on a dtn_cbor key.
+ *  @param map  map instance
+ *  @param key  key to get
+ */
+dtn_cbor *dtn_cbor_map_get(const dtn_cbor *map, const dtn_cbor *key);
+
+/*----------------------------------------------------------------------------*/
+
+/**
+ *  Set some value at a string key, the dtn_cbor_string for the key
+ *  will be autgenerated. 
+ *  This is a convinience function for usage of string key based maps. 
+ * 
+ *  @param map  map instance
+ *  @param key  string to set 
+ *  @param val  value to be set at key, value will become part of the map
+ */
 bool dtn_cbor_map_set_string(dtn_cbor *map, const char *key, dtn_cbor *val);
 
-dtn_cbor *dtn_cbor_map_get(const dtn_cbor *map, const dtn_cbor *key);
-dtn_cbor *dtn_cbor_map_get_string(const dtn_cbor *map, const char *string);
+/*----------------------------------------------------------------------------*/
 
-uint64_t dtn_cbor_map_count(const dtn_cbor *map);
+/**
+ *  Get some string based key using the string instead of a dtn_cbor string.
+ *  This is a convinience function for usage of string key based maps.
+ * 
+ *  @param map  map instance
+ *  @param key  keystring to search
+ */
+dtn_cbor *dtn_cbor_map_get_string(const dtn_cbor *map, const char *key);
 
+/*----------------------------------------------------------------------------*/
+
+/**
+ *  This function will apply the function input on any item of the map. 
+ *  Use with care and don't delete keys or values using this function. 
+ *  
+ *  @param map      map instance
+ *  @param data     custom userdata to be used as input to the function
+ *  @param function function to be applied to any key/value pair 
+ */
 bool dtn_cbor_map_for_each(dtn_cbor *map,
     void *data,
     bool (*function)(const void *key, void *val, void *data));
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_array();
-bool dtn_cbor_is_array(const dtn_cbor *self);
+uint64_t dtn_cbor_map_count(const dtn_cbor *map);
 
-uint64_t dtn_cbor_array_count(const dtn_cbor *array);
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      ARRAY GETTER / SETTER
+ *
+ *      ------------------------------------------------------------------------
+ */
 
-bool dtn_cbor_array_push(dtn_cbor *self, dtn_cbor *val);
-
+/**
+ *  Get some item out of the array. 
+ *  
+ *  @param self     array instance
+ *  @param index    index 0 ... max
+ */
 const dtn_cbor *dtn_cbor_array_get(dtn_cbor *self, uint64_t index);
 
+/*----------------------------------------------------------------------------*/
+
+/**
+ *  Push some item to the end of the array. 
+ *  
+ *  @param self     array instance
+ *  @param val      value to be set within the array.
+ */
+bool dtn_cbor_array_push(dtn_cbor *self, dtn_cbor *val);
+
+/*----------------------------------------------------------------------------*/
+
+/**
+ *  Pop some item from the front of the array FIFO. 
+ */
 dtn_cbor *dtn_cbor_array_pop_queue(dtn_cbor *self);
+
+/*----------------------------------------------------------------------------*/
+
+/**
+ *  Pop some item from the back of the array LIFO. 
+ */
 dtn_cbor *dtn_cbor_array_pop_stack(dtn_cbor *self);
 
+/*----------------------------------------------------------------------------*/
+
+/**
+ *  This function will apply the function input on any item of the array. 
+ *  Use with care and don't delete values using this function. 
+ *  
+ *  @param self     array instance
+ *  @param data     custom userdata to be used as input to the function
+ *  @param function function to be applied to any key/value pair 
+ */
 bool dtn_cbor_array_for_each(dtn_cbor *self, 
     void *data,
     bool (*function)(void *item, void *data));
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_string(const char *string);
-bool dtn_cbor_is_string(const dtn_cbor *self);
+uint64_t dtn_cbor_array_count(const dtn_cbor *array);
+
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      GETTER / SETTER
+ *
+ *      ------------------------------------------------------------------------
+ */
+
 const char *dtn_cbor_get_string(const dtn_cbor *self);
 bool dtn_cbor_set_string(dtn_cbor *self, const char *string);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_utf8(const uint8_t *buffer , size_t size);
-bool dtn_cbor_is_uft8(const dtn_cbor *self);
 bool dtn_cbor_get_utf8(dtn_cbor *self, uint8_t **buffer, size_t *size);
 bool dtn_cbor_set_utf8(dtn_cbor *self, const uint8_t *buffer, size_t size);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_true();
-bool dtn_cbor_is_true(const dtn_cbor *self);
-
-dtn_cbor *dtn_cbor_false();
-bool dtn_cbor_is_false(const dtn_cbor *self);
-
-dtn_cbor *dtn_cbor_null();
-bool dtn_cbor_is_null(const dtn_cbor *self);
-
-dtn_cbor *dtn_cbor_undef();
-bool dtn_cbor_is_undef(const dtn_cbor *self);
-
-/*----------------------------------------------------------------------------*/
-
-dtn_cbor *dtn_cbor_uint(uint64_t value);
-bool dtn_cbor_is_uint(const dtn_cbor *self);
 uint64_t dtn_cbor_get_uint(const dtn_cbor *self);
 bool dtn_cbor_set_uint(dtn_cbor *self, uint64_t value);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_int(int64_t value);
-bool dtn_cbor_is_int(const dtn_cbor *self);
 int64_t dtn_cbor_get_int(const dtn_cbor *self);
 bool dtn_cbor_set_int(dtn_cbor *self, int64_t value);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_time(const char *timestamp);
-bool dtn_cbor_is_time(const dtn_cbor *self);
 const char *dtn_cbor_get_time(const dtn_cbor *self);
 bool dtn_cbor_set_time(dtn_cbor *self, const char *timestamp);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_time_epoch(uint64_t value);
-bool dtn_cbor_is_time_epoch(const dtn_cbor *self);
 uint64_t dtn_cbor_get_time_epoch(const dtn_cbor *self);
 bool dtn_cbor_set_time_epoch(dtn_cbor *self, uint64_t value);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_ubignum(const char *num);
-bool dtn_cbor_is_ubignum(const dtn_cbor *self);
 const char *dtn_cbor_get_ubignum(const dtn_cbor *self);
 bool dtn_cbor_set_ubignum(dtn_cbor *self, const char *num);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_ibignum(const char *num);
-bool dtn_cbor_is_ibignum(const dtn_cbor *self);
 const char *dtn_cbor_get_ibignum(const dtn_cbor *self);
 bool dtn_cbor_set_ibignum(dtn_cbor *self, const char *num);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_dec_fraction(dtn_cbor *array);
-bool dtn_cbor_is_dec_fraction(const dtn_cbor *self);
 const dtn_cbor *dtn_cbor_get_dec_fraction(const dtn_cbor *self);
 bool dtn_cbor_set_dec_fraction(dtn_cbor *self, dtn_cbor *array);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_bigfloat(dtn_cbor *array);
-bool dtn_cbor_is_bigfloat(const dtn_cbor *self);
 const dtn_cbor *dtn_cbor_get_bigfloat(const dtn_cbor *self);
 bool dtn_cbor_set_bigfloat(dtn_cbor *self, dtn_cbor *array);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_tag(uint64_t tag);
-bool dtn_cbor_is_tag(const dtn_cbor *self);
 uint64_t dtn_cbor_get_tag(const dtn_cbor *self);
 uint64_t dtn_cbor_get_tag_value(const dtn_cbor *self);
 const dtn_cbor *dtn_cbor_get_tag_data(const dtn_cbor *self);
@@ -301,8 +398,6 @@ bool dtn_cbor_set_tag_value(dtn_cbor *self, uint64_t val);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_simple(uint64_t nbr);
-bool dtn_cbor_is_simple(const dtn_cbor *self);
 uint64_t dtn_cbor_get_simple_value(const dtn_cbor *self);
 uint64_t dtn_cbor_get_simple(const dtn_cbor *self);
 bool dtn_cbor_set_simple(dtn_cbor *self, uint64_t nbr);
@@ -310,17 +405,12 @@ bool dtn_cbor_set_simple_value(dtn_cbor *self, uint64_t nbr);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_float(float nbr);
-bool dtn_cbor_is_float(const dtn_cbor *self);
 float dtn_cbor_get_float(const dtn_cbor *self);
 bool dtn_cbor_set_float(dtn_cbor *self, float nbr);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_double(double nbr);
-bool dtn_cbor_is_double(const dtn_cbor *self);
 double dtn_cbor_get_double(const dtn_cbor *self);
 bool dtn_cbor_set_double(dtn_cbor *self, double nbr);
-
 
 #endif /* dtn_cbor_h */

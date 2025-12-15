@@ -66,6 +66,10 @@ struct dtn_cbor {
 
 /*----------------------------------------------------------------------------*/
 
+static dtn_cbor *dtn_cbor_create(dtn_cbor_type type);
+
+/*----------------------------------------------------------------------------*/
+
 static void *cbor_free(void *source){
 
     if (!source) return false;
@@ -570,7 +574,7 @@ static dtn_dict_config dtn_cbor_dict_config(uint64_t slots){
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_cbor_create(dtn_cbor_type type){
+static dtn_cbor *dtn_cbor_create(dtn_cbor_type type){
 
     dtn_cbor *self = calloc(1, sizeof(dtn_cbor));
     if (!self) goto error;
