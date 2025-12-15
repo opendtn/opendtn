@@ -104,7 +104,7 @@ static bool cbor_clear(void *source){
 
         case DTN_CBOR_DEC_FRACTION:
         case DTN_CBOR_BIGFLOAT:
-            self->data = dtn_list_free(self->data);
+            self->data = cbor_free(self->data);
             break;
 
         case DTN_CBOR_UTF8:
@@ -159,7 +159,7 @@ static void *cbor_copy(void **destination, const void *source){
         case DTN_CBOR_DEC_FRACTION:
         case DTN_CBOR_BIGFLOAT:
             copy->data = NULL;
-            result = dtn_list_copy((void**)&copy->data, self->data);
+            result = cbor_copy((void**)&copy->data, self->data);
             break;
 
         case DTN_CBOR_STRING:
@@ -199,8 +199,6 @@ static bool cbor_dump(FILE *stream, const void *source){
 
     dtn_cbor *self = (dtn_cbor*) source;
 
-
-
     switch (self->type) {
 
         case DTN_CBOR_MAP:
@@ -235,7 +233,7 @@ static bool cbor_dump(FILE *stream, const void *source){
             break;
         case DTN_CBOR_DEC_FRACTION:
             fprintf(stream, "\nDTN_CBOR_DEC_FRACTION\n");
-            return dtn_list_dump(stream, self->data);
+            return cbor_dump(stream, self->data);
             break;
         case DTN_CBOR_DATE_TIME_EPOCH:
             fprintf(stream, "\nDTN_CBOR_DATE_TIME_EPOCH\n");
@@ -243,7 +241,7 @@ static bool cbor_dump(FILE *stream, const void *source){
             break;
         case DTN_CBOR_BIGFLOAT:
             fprintf(stream, "\nDTN_CBOR_BIGFLOAT\n");
-            return dtn_list_dump(stream, self->data);
+            return cbor_dump(stream, self->data);
             break;
         case DTN_CBOR_TAG:
             fprintf(stream, "\nDTN_CBOR_TAG\n");
@@ -485,12 +483,12 @@ static bool cbor_match(const void *key, const void *value){
             }
             break;
         case DTN_CBOR_DEC_FRACTION:
-            count1 = dtn_list_count(one->data);
-            count2 = dtn_list_count(two->data);
+            count1 = dtn_cbor_array_count(one->data);
+            count2 = dtn_cbor_array_count(two->data);
             if (count1 == count2){
                 for (size_t i = 1; i <= count1; i++){
-                    dtn_cbor *a = dtn_list_get(one->data, i);
-                    dtn_cbor *b = dtn_list_get(two->data, i);
+                    const dtn_cbor *a = dtn_cbor_array_get(one->data, i);
+                    const dtn_cbor *b = dtn_cbor_array_get(two->data, i);
                     if (cbor_match(a, b)) continue;
                     return false;
                 }
@@ -499,9 +497,16 @@ static bool cbor_match(const void *key, const void *value){
             break;
             break;
         case DTN_CBOR_BIGFLOAT:
-            if (one->nbr_uint == two->nbr_uint){
-                if (0 == memcmp(one->bytes, two->bytes, one->nbr_uint))
-                    return true;
+            count1 = dtn_cbor_array_count(one->data);
+            count2 = dtn_cbor_array_count(two->data);
+            if (count1 == count2){
+                for (size_t i = 1; i <= count1; i++){
+                    const dtn_cbor *a = dtn_cbor_array_get(one->data, i);
+                    const dtn_cbor *b = dtn_cbor_array_get(two->data, i);
+                    if (cbor_match(a, b)) continue;
+                    return false;
+                }
+                return true;
             }
             break;
         case DTN_CBOR_TAG:
@@ -2044,10 +2049,11 @@ static dtn_cbor_match decode_tag(
             break;
 
         case 0xc4:
-            match = decode_array(buffer + 1, size - 1, &self, next);
+            match = decode_array(buffer + 1, size - 1, &child, next);
             switch(match){
                 case DTN_CBOR_MATCH_FULL:
-                    self->type = DTN_CBOR_DEC_FRACTION;
+                    self = dtn_cbor_create(DTN_CBOR_DEC_FRACTION);
+                    self->data = child;
                     goto done;
                 default:
                     return match;
@@ -2056,10 +2062,11 @@ static dtn_cbor_match decode_tag(
             break;
 
         case 0xc5:
-            match = decode_array(buffer + 1, size - 1, &self, next);
+            match = decode_array(buffer + 1, size - 1, &child, next);
             switch(match){
                 case DTN_CBOR_MATCH_FULL:
-                    self->type = DTN_CBOR_BIGFLOAT;
+                    self = dtn_cbor_create(DTN_CBOR_BIGFLOAT);
+                    self->data = child;
                     goto done;
                 default:
                     return match;
@@ -2499,6 +2506,8 @@ static uint64_t cbor_array_encoding_size(const dtn_cbor *self){
 
     if (!self) goto error;
 
+    if (!self->data) return 1;
+
     if (dtn_list_is_empty(self->data))
                 return 1;
 
@@ -2711,12 +2720,12 @@ static uint64_t cbor_encoding_size(const dtn_cbor *self){
 
         case DTN_CBOR_DEC_FRACTION:
 
-            return cbor_array_encoding_size(self);
+            return 1 + cbor_array_encoding_size(self->data);
             break;
 
         case DTN_CBOR_BIGFLOAT:
 
-            return cbor_array_encoding_size(self);
+            return 1 + cbor_array_encoding_size(self->data);
             break;
 
         case DTN_CBOR_TAG:
@@ -3727,7 +3736,7 @@ static bool encode_fraction(const dtn_cbor *self,
 
     buffer[0] = 0xc4;
 
-    if (dtn_list_count(self->data) == 0){
+    if (dtn_cbor_array_count(self->data) == 0){
         
         if (size < 2) goto error;   
         buffer[1] = 0x80;
@@ -3737,10 +3746,10 @@ static bool encode_fraction(const dtn_cbor *self,
     }
 
     uint64_t items = 0;
-    for (uint64_t i = 1; i <= dtn_list_count(self->data); i++){
+    for (uint64_t i = 0; i < dtn_cbor_array_count(self->data); i++){
 
         items += dtn_cbor_encoding_size(
-            dtn_list_get(self->data, i));
+            dtn_cbor_array_get(self->data, i));
 
     }
 
@@ -3818,9 +3827,9 @@ static bool encode_fraction(const dtn_cbor *self,
         ptr = buffer + 10;
     }
 
-    for (uint64_t i = 1; i <= dtn_list_count(self->data); i++){
+    for (uint64_t i = 0; i < dtn_cbor_array_count(self->data); i++){
 
-        dtn_cbor *item = dtn_list_get(self->data, i);
+        const dtn_cbor *item = dtn_cbor_array_get(self->data, i);
 
         if (!dtn_cbor_encode(
             item, 
@@ -3855,7 +3864,7 @@ static bool encode_bigfloat(const dtn_cbor *self,
 
     buffer[0] = 0xc5;
 
-    if (dtn_list_count(self->data) == 0){
+    if (dtn_cbor_array_count(self->data) == 0){
         
         if (size < 2) goto error;   
         buffer[1] = 0x80;
@@ -3865,10 +3874,10 @@ static bool encode_bigfloat(const dtn_cbor *self,
     }
 
     uint64_t items = 0;
-    for (uint64_t i = 1; i <= dtn_list_count(self->data); i++){
+    for (uint64_t i = 0; i < dtn_cbor_array_count(self->data); i++){
 
         items += dtn_cbor_encoding_size(
-            dtn_list_get(self->data, i));
+            dtn_cbor_array_get(self->data, i));
 
     }
 
@@ -3946,9 +3955,9 @@ static bool encode_bigfloat(const dtn_cbor *self,
         ptr = buffer + 10;
     }
 
-    for (uint64_t i = 1; i <= dtn_list_count(self->data); i++){
+    for (uint64_t i = 0; i < dtn_cbor_array_count(self->data); i++){
 
-        dtn_cbor *item = dtn_list_get(self->data, i);
+        const dtn_cbor *item = dtn_cbor_array_get(self->data, i);
 
         if (!dtn_cbor_encode(
             item, 
@@ -4325,6 +4334,44 @@ error:
     return false;
 }
 
+/*----------------------------------------------------------------------------*/
+
+bool dtn_cbor_encode_array_of_indefinite_length(
+    const dtn_cbor *value,
+    uint8_t *buffer, 
+    size_t size,
+    uint8_t **next){
+
+    if (!value || !buffer || size < 2 || !next) goto error;
+
+    if (!dtn_cbor_is_array(value)) goto error;
+
+    uint64_t count = dtn_cbor_array_count(value);
+    uint8_t *ptr = NULL;
+
+    // encode the array header 
+    buffer[0] = 0x9F;
+    ptr = buffer + 1;
+
+    for (uint64_t i = 0; i < count; i++){
+
+        if (!dtn_cbor_encode(
+            dtn_cbor_array_get(value, i),
+            ptr, 
+            size - (ptr - buffer),
+            &ptr)) goto error;
+    
+    }
+
+    if (ptr - buffer == (int64_t) size) goto error;
+    
+    ptr[0] = 0xFF;
+    *next = ptr + 1;
+    
+    return true;
+error:
+    return false;
+}
 /*
  *      ------------------------------------------------------------------------
  *
@@ -4528,7 +4575,7 @@ bool dtn_cbor_array_for_each(dtn_cbor *self,
 
 /*----------------------------------------------------------------------------*/
 
-const dtn_cbor *dtn_cbor_array_get(dtn_cbor *self, uint64_t index){
+const dtn_cbor *dtn_cbor_array_get(const dtn_cbor *self, uint64_t index){
 
     if (!self || self->type != DTN_CBOR_ARRAY) return NULL;
 
