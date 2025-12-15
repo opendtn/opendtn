@@ -2853,6 +2853,7 @@ int test_decode_array(){
         count++;
     }
 
+
     // check limitation
 
     testrun(dtn_cbor_configure((dtn_cbor_config){
@@ -2879,6 +2880,27 @@ int test_decode_array(){
     testrun(out);
     testrun(out->type == DTN_CBOR_ARRAY);
     testrun(8 == dtn_list_count(out->data));
+    testrun(next);
+    testrun(next == buffer + 10);
+    out = cbor_free(out);
+
+    // check valid items with 0xFF included
+    buffer[0] = 0x9F;
+    buffer[1] = 0x18;
+    buffer[2] = 0xFF;
+    buffer[3] = 0x03;
+    buffer[4] = 0x18;
+    buffer[5] = 0xFF;
+    buffer[6] = 0x06;
+    buffer[7] = 0x18;
+    buffer[8] = 0xFF;
+    buffer[9] = 0xff;
+
+    match = decode_array(buffer, 10 , &out, &next);
+    testrun(match == DTN_CBOR_MATCH_FULL);
+    testrun(out);
+    testrun(out->type == DTN_CBOR_ARRAY);
+    testrun(5 == dtn_list_count(out->data));
     testrun(next);
     testrun(next == buffer + 10);
     out = cbor_free(out);

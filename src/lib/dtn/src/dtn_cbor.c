@@ -1595,7 +1595,7 @@ static dtn_cbor_match decode_array(
             self = dtn_cbor_create(DTN_CBOR_ARRAY);
             if (!self) goto error;
 
-            ptr = (uint8_t*) buffer;
+            ptr = (uint8_t*) buffer + 1;
 
             self->data = dtn_linked_list_create((dtn_list_config){
                 .item.free = cbor_free
@@ -1603,26 +1603,19 @@ static dtn_cbor_match decode_array(
 
             if (!self->data) goto error;
 
-            while(ptr[0] != 0xFF){
+            uint64_t counter = 0;
 
-                size--;
-                if (size == 0) goto partial;
+            while((size - (ptr - buffer)) > 0){
 
-                ptr++;
-            }
+                counter++;
 
-            uint8_t* last = ptr;
-            ptr = (uint8_t*) buffer + 1;
-
-            if ( (uint64_t) (last-ptr) > g_config.limits.undef_length_array)
-                goto error;
-
-            while(ptr < last){
+                if (counter == g_config.limits.undef_length_array)
+                    goto error;
 
                 dtn_cbor *item = NULL;
 
                 dtn_cbor_match match = dtn_cbor_decode(
-                    ptr, last - ptr, &item, &ptr);
+                    ptr, (size - (ptr - buffer)), &item, &ptr);
     
                 switch (match){
 
@@ -1634,6 +1627,8 @@ static dtn_cbor_match decode_array(
                             item = dtn_cbor_free(item);
                             goto error;
                         }
+
+                        if (ptr[0] == 0xFF) goto out;
                 
                         break;
 
@@ -1641,8 +1636,10 @@ static dtn_cbor_match decode_array(
                     goto error;
                 }
             }
-            
-            len = last - (uint8_t*) buffer +1;
+out:
+            if (ptr[0] != 0xff) goto error;
+            ptr++;
+            len = ptr - (uint8_t*) buffer;
             goto done;
             break;    
         default:
