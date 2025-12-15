@@ -24,6 +24,7 @@
 
         @date           2025-12-12
 
+        Implementation of RFC 8949 Concise Binary Object Representation (CBOR)
 
         ------------------------------------------------------------------------
 */
@@ -174,6 +175,23 @@ bool dtn_cbor_encode(
 
 /*----------------------------------------------------------------------------*/
 
+/**
+ *  Encode a CBOR array as a indefinite_length value to some buffer.
+ *  This is the implemetation required for DTN bundle protocol RFC 9171
+ *  
+ *  @param value    value to encode
+ *  @param buffer   pointer to buffer
+ *  @param size     size of buffer
+ *  @param next     pointer to next byte after encoded value
+ */
+bool dtn_cbor_encode_array_of_indefinite_length(
+    const dtn_cbor *value,
+    uint8_t *buffer, 
+    size_t size,
+    uint8_t **next);
+
+/*----------------------------------------------------------------------------*/
+
 uint64_t dtn_cbor_encoding_size(const dtn_cbor *value);
 
 /*
@@ -287,7 +305,7 @@ uint64_t dtn_cbor_map_count(const dtn_cbor *map);
  *  @param self     array instance
  *  @param index    index 0 ... max
  */
-const dtn_cbor *dtn_cbor_array_get(dtn_cbor *self, uint64_t index);
+const dtn_cbor *dtn_cbor_array_get(const dtn_cbor *self, uint64_t index);
 
 /*----------------------------------------------------------------------------*/
 
