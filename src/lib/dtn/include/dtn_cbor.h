@@ -305,8 +305,9 @@ uint64_t dtn_cbor_map_count(const dtn_cbor *map);
  *  @param self     array instance
  *  @param index    index 0 ... max
  */
-const dtn_cbor *dtn_cbor_array_get(const dtn_cbor *self, uint64_t index);
+dtn_cbor *dtn_cbor_array_get(const dtn_cbor *self, uint64_t index);
 
+bool dtn_cbor_array_set(dtn_cbor *self, uint64_t pos, dtn_cbor *value);
 /*----------------------------------------------------------------------------*/
 
 /**

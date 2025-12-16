@@ -124,5 +124,11 @@ uint32_t dtn_crc32_ogg(uint32_t init, uint8_t const *data, size_t len_octets);
  */
 uint32_t dtn_crc32_zlib(uint32_t init, uint8_t const *data, size_t len_octets);
 
+/**
+ * Calculate CRC32 with the Castagnoli polynom, 
+ * may be faster if hardware acceleration is used.
+ */
+uint32_t dtn_crc32c(uint8_t const *data, size_t len_octets);
+
 /*----------------------------------------------------------------------------*/
 #endif

@@ -2896,6 +2896,15 @@ int test_decode_array(){
     buffer[8] = 0xFF;
     buffer[9] = 0xff;
 
+    for(int i = 0; i < 10;i++){
+
+        // fprintf(stdout, "i == %i\n", i);
+
+        testrun(DTN_CBOR_MATCH_PARTIAL == 
+            decode_array(buffer, i , &out, &next));
+
+    }
+
     match = decode_array(buffer, 10 , &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
     testrun(out);

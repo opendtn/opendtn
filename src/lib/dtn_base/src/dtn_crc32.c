@@ -217,3 +217,16 @@ uint32_t dtn_crc32_zlib(uint32_t init, uint8_t const *data, size_t len_octets) {
 }
 
 /*----------------------------------------------------------------------------*/
+
+uint32_t dtn_crc32c(uint8_t const *data, size_t len_octets) {
+
+  static bool initialized = false;
+  static uint32_t lookup[0x100] = {0};
+
+  if (!initialized) {
+    dtn_crc32_generate_table_for(0x1EDC6F41, true, lookup);
+    initialized = true;
+  }
+
+  return 0xffffffff ^ dtn_crc32_sum(0xFFFFFFFF, data, len_octets, true, true, lookup);
+}

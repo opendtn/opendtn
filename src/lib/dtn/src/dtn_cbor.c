@@ -1592,20 +1592,17 @@ static dtn_cbor_match decode_array(
             
         case 0x9F:
 
-            self = dtn_cbor_create(DTN_CBOR_ARRAY);
+            self = dtn_cbor_array();
             if (!self) goto error;
 
             ptr = (uint8_t*) buffer + 1;
-
-            self->data = dtn_linked_list_create((dtn_list_config){
-                .item.free = cbor_free
-            });
+            if ((size - (ptr - buffer)) == 0) goto partial;
 
             if (!self->data) goto error;
 
             uint64_t counter = 0;
 
-            while((size - (ptr - buffer)) > 0){
+            while((int64_t)(size - (ptr - buffer) - 1) > 0){
 
                 counter++;
 
@@ -1615,7 +1612,7 @@ static dtn_cbor_match decode_array(
                 dtn_cbor *item = NULL;
 
                 dtn_cbor_match match = dtn_cbor_decode(
-                    ptr, (size - (ptr - buffer)), &item, &ptr);
+                    ptr, (size - (ptr - buffer) - 1), &item, &ptr);
     
                 switch (match){
 
@@ -1633,11 +1630,13 @@ static dtn_cbor_match decode_array(
                         break;
 
                 default:
-                    goto error;
+                    self = dtn_cbor_free(self);
+                    return match;
                 }
             }
 out:
-            if (ptr[0] != 0xff) goto error;
+            if ((int64_t)(size - ((ptr - buffer)) <= 0)) goto partial;
+            if (ptr[0] != 0xff) goto partial;
             ptr++;
             len = ptr - (uint8_t*) buffer;
             goto done;
@@ -1646,12 +1645,8 @@ out:
             goto error;
     }
 
-    self = dtn_cbor_create(DTN_CBOR_ARRAY);
+    self = dtn_cbor_array();
     if (!self) goto error;
-
-    self->data = dtn_linked_list_create((dtn_list_config){
-            .item.free = cbor_free
-    });
 
     if (!self->data) goto error;
 
@@ -1662,8 +1657,8 @@ out:
         dtn_cbor *item = NULL;
 
         dtn_cbor_match match = dtn_cbor_decode(
-            ptr, size - (ptr - buffer) +1, &item, &ptr);
-    
+            ptr, size - (ptr - buffer) - len + 1, &item, &ptr);
+
         switch (match){
 
             case DTN_CBOR_MATCH_FULL:
@@ -1678,6 +1673,7 @@ out:
                 break;
 
             default:
+                self = dtn_cbor_free(self);
                 return match;
         }
     }
@@ -4565,11 +4561,26 @@ bool dtn_cbor_array_for_each(dtn_cbor *self,
 
 /*----------------------------------------------------------------------------*/
 
-const dtn_cbor *dtn_cbor_array_get(const dtn_cbor *self, uint64_t index){
+dtn_cbor *dtn_cbor_array_get(const dtn_cbor *self, uint64_t index){
 
     if (!self || self->type != DTN_CBOR_ARRAY) return NULL;
 
     return dtn_list_get(self->data, index + 1);
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_cbor_array_set(dtn_cbor *self, 
+    uint64_t index, dtn_cbor *data){
+
+    if (!self || self->type != DTN_CBOR_ARRAY) return false;
+
+    dtn_cbor *out = NULL;
+
+    bool result = dtn_list_set(self->data, index + 1, data, (void**)&out);
+    out = dtn_cbor_free(out);
+    return result;
+
 }
 
 /*----------------------------------------------------------------------------*/

@@ -152,6 +152,36 @@ static int test_dtn_crc32_zlib() {
   return testrun_log_success();
 }
 
+/*----------------------------------------------------------------------------*/
+
+static int test_dtn_crc32c() {
+
+  uint8_t buffer[0xff] = {0};
+
+    buffer[0] = 0x12;
+    buffer[1] = 0x34;
+    buffer[2] = 0x56;
+    buffer[3] = 0x78;
+    buffer[4] = 0x00;
+
+    uint32_t expext = 0x4300918A;
+    uint32_t result = dtn_crc32c(buffer, 4);
+    testrun(expext == result);
+
+    buffer[0] = 0xab;
+    buffer[1] = 0xfd;
+    buffer[2] = 0xef;
+    buffer[3] = 0x12;
+    buffer[4] = 0x00;
+
+    expext = 0xEAAD6793;
+    result = dtn_crc32c(buffer, 4);
+    testrun(expext == result);
+
+
+  return testrun_log_success();
+}
+
 /*
  *      ------------------------------------------------------------------------
  *
@@ -167,6 +197,7 @@ int all_tests() {
   testrun_test(test_dtn_crc32_posix);
   testrun_test(test_dtn_crc32_ogg);
   testrun_test(test_dtn_crc32_zlib);
+  testrun_test(test_dtn_crc32c);
 
   return testrun_counter;
 }

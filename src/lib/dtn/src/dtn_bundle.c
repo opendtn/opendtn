@@ -28,3 +28,1116 @@
         ------------------------------------------------------------------------
 */
 #include "../include/dtn_bundle.h"
+
+#include <stdlib.h>
+#include <dtn_base/dtn_utils.h>
+#include <dtn_base/dtn_data_function.h>
+#include <dtn_base/dtn_buffer.h>
+#include <dtn_base/dtn_crc16.h>
+#include <dtn_base/dtn_crc32.h>
+
+/*----------------------------------------------------------------------------*/
+
+struct dtn_bundle {
+
+    dtn_cbor *data;   
+
+};
+
+/*----------------------------------------------------------------------------*/
+
+dtn_bundle *dtn_bundle_create(){
+
+    dtn_bundle *self = calloc(1, sizeof(dtn_bundle));
+    if (!self) goto error;
+
+    return self;
+error:
+    dtn_bundle_free(self);
+    return NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+dtn_bundle *dtn_bundle_free(dtn_bundle *self){
+
+    if (!self) return self;
+
+    self->data = dtn_cbor_free(self->data);
+
+    self = dtn_data_pointer_free(self);
+    return NULL;
+
+}
+
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      DE/ENCODER
+ *
+ *      ------------------------------------------------------------------------
+ */
+
+static bool check_crc(const dtn_cbor *block, 
+    const char *alg, const dtn_cbor *crc){
+
+    bool crc_check = false;
+    dtn_buffer *buffer = NULL;
+
+    if (!block || !alg || !crc) goto error;
+
+    uint8_t *next = NULL;
+    uint64_t length = dtn_cbor_encoding_size(block);
+    buffer = dtn_buffer_create(length);
+
+    if (!dtn_cbor_encode(block, buffer->start, buffer->capacity, &next))
+        goto error;
+
+    buffer->length = next - buffer->start;
+
+    const uint8_t *crc_num = (const uint8_t*) dtn_cbor_get_string(crc);
+
+    if (0 == strcmp(alg, DTN_BUNDLE_CRC16)){
+
+        buffer->start[buffer->length] = 0x00;
+        buffer->start[buffer->length - 1] = 0x00;
+
+        uint16_t crc_sum = crc16x25(buffer->start, buffer->length);
+
+        if (    (crc_num[0] & crc_sum >> 8) && 
+                (crc_num[1] & crc_sum)){
+
+            crc_check = true;
+        } 
+
+    } else if (0 == strcmp(alg, DTN_BUNDLE_CRC32)){
+
+        buffer->start[buffer->length] = 0x00;
+        buffer->start[buffer->length - 1] = 0x00;
+        buffer->start[buffer->length - 2] = 0x00;
+        buffer->start[buffer->length - 3] = 0x00;
+
+        uint32_t crc_sum = dtn_crc32c(buffer->start, buffer->length);
+
+        if (    (crc_num[0] & crc_sum >> 24) && 
+                (crc_num[1] & crc_sum >> 16) &&
+                (crc_num[2] & crc_sum >> 8) && 
+                (crc_num[3] & crc_sum)){
+
+            crc_check = true;
+        } 
+
+    } else {
+
+        goto error;
+    }
+
+    if (!crc_check) dtn_log_error("CRC check failed.");
+
+    buffer = dtn_buffer_free(buffer);
+    return crc_check;
+error:
+    dtn_buffer_free(buffer);
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static bool check_primary_block(dtn_bundle *self){
+
+    if (!self) goto error;
+
+    const dtn_cbor *data = dtn_cbor_array_get(self->data, 0);
+    if (!dtn_cbor_is_array(data)) goto error;
+
+    uint64_t count = dtn_cbor_array_count(data);
+    if (count < 8) goto error;
+
+    const dtn_cbor *version = dtn_cbor_array_get(data, 0);
+    if (!dtn_cbor_is_uint(version)) goto error;
+
+    if (0x07 != dtn_cbor_get_uint(version)) goto error;
+
+    const dtn_cbor *flags = dtn_cbor_array_get(data, 1);
+    if (!dtn_cbor_is_uint(flags)) goto error;
+
+    uint64_t flag = dtn_cbor_get_uint(flags);
+
+    const dtn_cbor *crc_type = dtn_cbor_array_get(data, 2);
+    if (!dtn_cbor_is_uint(crc_type)) goto error;
+
+    uint64_t crc_flags = dtn_cbor_get_uint(crc_type);
+    const char *crc_alg = NULL;
+
+    switch (crc_flags){
+
+        case 0x00:
+            crc_alg = NULL;
+            break;
+        case 0x01:
+            crc_alg = DTN_BUNDLE_CRC16;
+            break;
+        case 0x02:
+            crc_alg = DTN_BUNDLE_CRC32;
+            break;
+        default:
+            goto error;
+
+    }
+
+    const dtn_cbor *dest = dtn_cbor_array_get(data, 3);
+    if (!dtn_cbor_is_string(dest)) goto error;
+
+    const dtn_cbor *source = dtn_cbor_array_get(data, 4);
+    if (!dtn_cbor_is_string(source)) goto error;
+
+    const dtn_cbor *report = dtn_cbor_array_get(data, 5);
+    if (!dtn_cbor_is_string(report)) goto error;
+    
+    const dtn_cbor *timestamp = dtn_cbor_array_get(data, 6);
+    if (!dtn_cbor_is_array(timestamp)) goto error;
+    if (2 != dtn_cbor_array_count(timestamp)) goto error;
+
+    const dtn_cbor *lifetime = dtn_cbor_array_get(data, 7);
+    if (!dtn_cbor_is_uint(lifetime)) goto error;
+
+    const dtn_cbor *fragment = NULL;
+    const dtn_cbor *total = NULL;
+    const dtn_cbor *crc = NULL;
+
+    if (flag & 0x000001){
+
+        if (count < 10) goto error;
+
+        fragment = dtn_cbor_array_get(data, 8);
+        if (!dtn_cbor_is_uint(fragment)) goto error;
+
+        total = dtn_cbor_array_get(data, 9);
+        if (!dtn_cbor_is_uint(total)) goto error;
+
+        if (crc_alg){
+
+            crc = dtn_cbor_array_get(data, 10);
+            if (!check_crc(data, crc_alg, crc)) goto error;
+        }
+
+    } else {
+
+        if (crc_alg){
+
+            crc = dtn_cbor_array_get(data, 8);
+            if (!check_crc(data, crc_alg, crc)) goto error;
+        }
+    }
+
+    return true;
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static bool check_canonical_block(const dtn_cbor *array){
+
+    if (!dtn_cbor_is_array(array)) goto error;
+
+    const dtn_cbor *code = NULL;
+    const dtn_cbor *num = NULL;
+    const dtn_cbor *flags = NULL;
+    const dtn_cbor *crc_type = NULL;
+    const dtn_cbor *data = NULL;
+    const dtn_cbor *crc = NULL;
+
+    uint64_t count = dtn_cbor_array_count(array);
+    if (count < 5) goto error;
+
+    code = dtn_cbor_array_get(array, 0);
+    if (!dtn_cbor_is_uint(code)) goto error;
+
+    num = dtn_cbor_array_get(array, 1);
+    if (!dtn_cbor_is_uint(num)) goto error;
+
+    flags = dtn_cbor_array_get(array, 2);
+    if (!dtn_cbor_is_uint(flags)) goto error;
+
+    crc_type = dtn_cbor_array_get(array, 3);
+    if (!dtn_cbor_is_uint(crc_type)) goto error;
+
+    uint64_t crc_flags = dtn_cbor_get_uint(crc_type);
+    const char *crc_alg = NULL;
+
+    switch (crc_flags){
+
+        case 0x00:
+            crc_alg = NULL;
+            break;
+        case 0x01:
+            crc_alg = DTN_BUNDLE_CRC16;
+            break;
+        case 0x02:
+            crc_alg = DTN_BUNDLE_CRC32;
+            break;
+        default:
+            goto error;
+
+    }
+
+    data = dtn_cbor_array_get(array, 4);
+    if (!dtn_cbor_is_string(data)) goto error;
+
+    if (crc_alg){
+
+        crc = dtn_cbor_array_get(array, 5);
+        if (!check_crc(array, crc_alg, crc)) goto error;
+    }
+
+
+
+    return true;
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static bool check_canonical_blocks(const dtn_bundle *self){
+
+    if (!self) goto error;
+
+    uint64_t count = dtn_cbor_array_count(self->data);
+
+    for (uint64_t i = 1; i < count; i++){
+
+        dtn_cbor *item = dtn_cbor_array_get(self->data, i);
+
+        if (!check_canonical_block(item))
+            goto error;
+
+    }
+
+    return true;
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static bool check_payload_block(dtn_bundle *self){
+
+    if (!self) goto error;
+
+    // NOTE CRC checks and item count already done in check_canonical_blocks
+
+    const dtn_cbor *payload = NULL;
+    uint64_t count = dtn_cbor_array_count(self->data);
+
+    payload = dtn_cbor_array_get(self->data, count - 1);
+    if (!dtn_cbor_is_array(payload)) goto error;
+
+    const dtn_cbor *code = dtn_cbor_array_get(payload, 0);
+    if (!dtn_cbor_is_uint(code)) goto error;
+    if (1 != dtn_cbor_get_uint(code)) goto error;
+
+    return true;
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+dtn_cbor_match dtn_bundle_decode(
+    const uint8_t *buffer, 
+    size_t size,
+    dtn_bundle **out, 
+    uint8_t **next){
+
+    dtn_bundle *bundle = NULL;
+
+    if (!buffer || !out || !next) goto error;
+
+    if (!dtn_cbor_configure((dtn_cbor_config){
+        .limits.string_size = UINT16_MAX,
+        .limits.utf8_string_size = UINT16_MAX,
+        .limits.array_size = UINT16_MAX,
+        .limits.undef_length_array = UINT16_MAX,
+        .limits.map_size = UINT16_MAX,
+        .limits.undef_length_map = UINT16_MAX
+    })) goto error;
+
+    dtn_cbor *data = NULL;
+
+    dtn_cbor_match match = dtn_cbor_decode(buffer, size, &data, next);
+
+    switch(match){
+
+        case DTN_CBOR_MATCH_FULL:
+            break;
+        default:
+            return match;
+    }
+
+    bundle = dtn_bundle_create();
+    bundle->data = data;
+
+    uint64_t count = dtn_cbor_array_count(bundle->data);
+    if (count < 2) goto error;
+
+    if (!dtn_bundle_verify(bundle)) goto error;
+    
+    *out = bundle;
+    return DTN_CBOR_MATCH_FULL;
+error:
+    dtn_bundle_free(bundle);
+    return DTN_CBOR_NO_MATCH;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_encode(
+    const dtn_bundle *self,
+    uint8_t *buffer, 
+    size_t size,
+    uint8_t **next){
+
+    if (!self || !buffer || size < 1 || !next) goto error;
+
+    return dtn_cbor_encode(self->data, buffer, size, next);
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_verify(dtn_bundle *self){
+
+    if (!self) goto error;
+
+    if (!check_primary_block(self)) goto error;
+    if (!check_canonical_blocks(self)) goto error;
+    if (!check_payload_block(self)) goto error;
+
+    return true;
+error:
+    return false;
+}
+
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      GETTER / SETTER PRIMARY
+ *
+ *      ------------------------------------------------------------------------
+ */
+
+
+dtn_cbor *dtn_bundle_add_primary_block(
+        dtn_bundle *self, 
+        uint64_t flags, 
+        uint64_t crc_type,
+        const char *destination,
+        const char *source,
+        const char *report_to,
+        uint64_t time,
+        uint64_t seq,
+        uint64_t lifetime,
+        uint64_t offset,
+        uint64_t length){
+
+    if (!self) goto error;
+    if (!self->data) self->data = dtn_cbor_array();
+
+    if (dtn_cbor_array_get(self->data, 0)){
+        dtn_log_error("Primary bundle already set - abort.");
+        goto error;
+    }
+
+    if (!dtn_bundle_primary_set_version(self)) goto error;
+    if (!dtn_bundle_primary_set_flags(self, flags)) goto error;
+    if (!dtn_bundle_primary_set_crc_type(self, crc_type)) goto error;
+    if (!dtn_bundle_primary_set_destination(self, destination)) goto error;
+    if (!dtn_bundle_primary_set_source(self, source)) goto error;
+    if (!dtn_bundle_primary_set_report(self, report_to)) goto error;
+    if (!dtn_bundle_primary_set_timestamp(self, time, seq)) goto error;
+    if (!dtn_bundle_primary_set_lifetime(self, lifetime)) goto error;
+    if (0 != offset)
+        if (!dtn_bundle_primary_set_fragment_offset(self, offset)) goto error;
+    if (0 != length)
+        if (!dtn_bundle_primary_set_total_data_length(self, length))goto error;
+
+    return dtn_cbor_array_get(self->data, 0);
+error:
+    return NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t dtn_bundle_primary_get_version(const dtn_bundle *self){
+
+    if (!self || !self->data) goto error;
+
+    const dtn_cbor *block = dtn_cbor_array_get(self->data, 0);
+    const dtn_cbor *item = dtn_cbor_array_get(block, 0);
+    return dtn_cbor_get_uint(item);
+
+error:
+    return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_primary_set_version(dtn_bundle *self){
+
+    if (!self) goto error;
+
+    if (!self->data) self->data = dtn_cbor_array();
+
+    dtn_cbor *block = (dtn_cbor*)dtn_cbor_array_get(self->data, 0);
+    if (!block){
+        block = dtn_cbor_array();
+        if (!dtn_cbor_array_push((dtn_cbor*)self->data, block)) {
+            block = dtn_cbor_free(block);
+            goto error;
+        }
+    }
+    dtn_cbor *item =(dtn_cbor*) dtn_cbor_array_get(block, 0);
+    if (!item){
+        item = dtn_cbor_uint(0x07);
+        if (!dtn_cbor_array_push(block, item)){
+            item = dtn_cbor_free(item);
+            goto error;
+        }
+    }
+    return dtn_cbor_set_uint(item, 0x07);
+
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t dtn_bundle_primary_get_flags(const dtn_bundle *self){
+
+    if (!self || !self->data) goto error;
+
+    const dtn_cbor *block = dtn_cbor_array_get(self->data, 0);
+    const dtn_cbor *item = dtn_cbor_array_get(block, 1);
+    return dtn_cbor_get_uint(item);
+
+error:
+    return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_primary_set_flags(dtn_bundle *self, uint64_t flags){
+
+    if (!self || !self->data) goto error;
+
+    dtn_cbor *block = (dtn_cbor*)dtn_cbor_array_get(self->data, 0);
+    if (!block) goto error;
+
+    dtn_cbor *item = (dtn_cbor*)dtn_cbor_array_get(block, 1);
+    if (!item){
+        item = dtn_cbor_uint(flags);
+        if (!dtn_cbor_array_push((dtn_cbor*)block, item)){
+            item = dtn_cbor_free(item);
+            goto error;
+        }
+    }
+    return dtn_cbor_set_uint(item, flags);
+
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t dtn_bundle_primary_get_crc_type(const dtn_bundle *self){
+    
+    if (!self || !self->data) goto error;
+
+    const dtn_cbor *block = dtn_cbor_array_get(self->data, 0);
+    const dtn_cbor *item = dtn_cbor_array_get(block, 2);
+    return dtn_cbor_get_uint(item);
+
+error:
+    return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_primary_set_crc_type(dtn_bundle *self, uint64_t type){
+
+    if (!self || !self->data) goto error;
+
+    dtn_cbor *block =(dtn_cbor*) dtn_cbor_array_get(self->data, 0);
+    if (!block) goto error;
+
+    dtn_cbor *item = (dtn_cbor*) dtn_cbor_array_get(block, 2);
+    if (!item){
+        item = dtn_cbor_uint(type);
+        if (!dtn_cbor_array_push((dtn_cbor*)block, item)){
+            item = dtn_cbor_free(item);
+            goto error;
+        }
+    }
+    return dtn_cbor_set_uint(item, type);
+
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+const char *dtn_bundle_primary_get_destination(const dtn_bundle *self){
+
+    if (!self || !self->data) goto error;
+
+    const dtn_cbor *block = dtn_cbor_array_get(self->data, 0);
+    const dtn_cbor *item = dtn_cbor_array_get(block, 3);
+    if (!dtn_cbor_is_string(item)) goto error;
+    return dtn_cbor_get_string(item);
+
+error:
+    return NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_primary_set_destination(
+        dtn_bundle *self, const char *value){
+
+    if (!self || !self->data) goto error;
+
+    dtn_cbor *block = (dtn_cbor*)dtn_cbor_array_get(self->data, 0);
+    if (!block) goto error;
+
+    dtn_cbor *item = (dtn_cbor*)dtn_cbor_array_get(block, 3);
+    if (!item){
+
+        item = dtn_cbor_string(value);
+        if (!dtn_cbor_array_push((dtn_cbor*)block, item)){
+            item = dtn_cbor_free(item);
+            goto error;
+        }
+    
+    } else {
+
+        if (!dtn_cbor_is_string(item)) goto error;
+    }
+   
+    return dtn_cbor_set_string(item, value);
+
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+const char *dtn_bundle_primary_get_source(const dtn_bundle *self){
+
+    if (!self || !self->data) goto error;
+
+    const dtn_cbor *block = dtn_cbor_array_get(self->data, 0);
+    const dtn_cbor *item = dtn_cbor_array_get(block, 4);
+    if (!dtn_cbor_is_string(item)) goto error;
+    return dtn_cbor_get_string(item);
+
+error:
+    return NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_primary_set_source(
+        dtn_bundle *self, const char *value){
+
+    if (!self || !self->data) goto error;
+
+    dtn_cbor *block = (dtn_cbor*)dtn_cbor_array_get(self->data, 0);
+    if (!block) goto error;
+
+    dtn_cbor *item = (dtn_cbor*)dtn_cbor_array_get(block, 4);
+    if (!item){
+
+        item = dtn_cbor_string(value);
+        if (!dtn_cbor_array_push((dtn_cbor*)block, item)){
+            item = dtn_cbor_free(item);
+            goto error;
+        }
+    
+    } else {
+
+        if (!dtn_cbor_is_string(item)) goto error;
+    }
+   
+    return dtn_cbor_set_string(item, value);
+
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+const char *dtn_bundle_primary_get_report(const dtn_bundle *self){
+
+    if (!self || !self->data) goto error;
+
+    const dtn_cbor *block = dtn_cbor_array_get(self->data, 0);
+    const dtn_cbor *item = dtn_cbor_array_get(block, 5);
+    if (!dtn_cbor_is_string(item)) goto error;
+    return dtn_cbor_get_string(item);
+
+error:
+    return NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_primary_set_report(
+        dtn_bundle *self, const char *value){
+
+    if (!self || !self->data) goto error;
+
+    dtn_cbor *block = (dtn_cbor*)dtn_cbor_array_get(self->data, 0);
+    if (!block) goto error;
+
+    dtn_cbor *item = (dtn_cbor*)dtn_cbor_array_get(block, 5);
+    if (!item){
+
+        item = dtn_cbor_string(value);
+        if (!dtn_cbor_array_push((dtn_cbor*)block, item)){
+            item = dtn_cbor_free(item);
+            goto error;
+        }
+    
+    } else {
+
+        if (!dtn_cbor_is_string(item)) goto error;
+    }
+   
+    return dtn_cbor_set_string(item, value);
+
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_primary_get_timestamp(const dtn_bundle *self, 
+        uint64_t *time, uint64_t *sequence_number){
+
+    if (!self || !self->data || !time || !sequence_number) goto error;
+
+    const dtn_cbor *block = dtn_cbor_array_get(self->data, 0);
+    const dtn_cbor *item = dtn_cbor_array_get(block, 6);
+    if (!dtn_cbor_is_array(item)) goto error;
+
+    const dtn_cbor *timestamp = dtn_cbor_array_get(item, 0);
+    if (timestamp){
+        *time = dtn_cbor_get_uint(timestamp);
+    } else {
+        goto error;
+    }
+
+    const dtn_cbor *sequence = dtn_cbor_array_get(item, 1);
+    if (sequence){
+        *sequence_number = dtn_cbor_get_uint(sequence);
+    } else {
+        goto error;
+    }
+
+    return true;
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_primary_set_timestamp(dtn_bundle *self, 
+        uint64_t time, uint64_t sequence_number){
+
+    if (!self || !self->data) goto error;
+
+    dtn_cbor *block = (dtn_cbor*)dtn_cbor_array_get(self->data, 0);
+    if (!block) goto error;
+
+    dtn_cbor *item = (dtn_cbor*)dtn_cbor_array_get(block, 6);
+    if (!item){
+
+        item = dtn_cbor_array();
+        if (!dtn_cbor_array_push((dtn_cbor*)block, item)){
+            item = dtn_cbor_free(item);
+            goto error;
+        }
+    
+    } else {
+
+        if (!dtn_cbor_is_array(item)) goto error;
+    }
+
+    dtn_cbor *timestamp = (dtn_cbor*)dtn_cbor_array_get(item, 0);
+    if (timestamp){
+        dtn_cbor_set_uint(timestamp, time);
+    } else {
+        timestamp = dtn_cbor_uint(time);
+        if (!dtn_cbor_array_push((dtn_cbor*)item, timestamp)){
+            timestamp = dtn_cbor_free(timestamp);
+            goto error;
+        }
+    }
+
+    dtn_cbor *sequence = (dtn_cbor*)dtn_cbor_array_get(item, 1);
+    if (sequence){
+        dtn_cbor_set_uint(sequence, sequence_number);
+    } else {
+        sequence = dtn_cbor_uint(sequence_number);
+        if (!dtn_cbor_array_push((dtn_cbor*)item, sequence)){
+            sequence = dtn_cbor_free(sequence);
+            goto error;
+        }
+    }
+   
+    return true;
+
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t dtn_bundle_primary_get_lifetime(const dtn_bundle *self){
+
+    if (!self || !self->data) goto error;
+
+    const dtn_cbor *block = dtn_cbor_array_get(self->data, 0);
+    const dtn_cbor *item = dtn_cbor_array_get(block, 7);
+    if (!dtn_cbor_is_uint(item)) goto error;
+    return dtn_cbor_get_uint(item);
+
+error:
+    return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_primary_set_lifetime(dtn_bundle *self, uint64_t type){
+
+    if (!self || !self->data) goto error;
+
+    dtn_cbor *block = (dtn_cbor*)dtn_cbor_array_get(self->data, 0);
+    if (!block) goto error;
+
+    dtn_cbor *item = (dtn_cbor*)dtn_cbor_array_get(block, 7);
+    if (!item){
+
+        item = dtn_cbor_uint(type);
+        if (!dtn_cbor_array_push((dtn_cbor*)block, item)){
+            item = dtn_cbor_free(item);
+            goto error;
+        }
+    
+    } else {
+
+        if (!dtn_cbor_is_uint(item)) goto error;
+    }
+   
+    return dtn_cbor_set_uint(item, type);
+
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t dtn_bundle_primary_get_fragment_offset(const dtn_bundle *self){
+
+    if (!self || !self->data) goto error;
+
+    const dtn_cbor *block = dtn_cbor_array_get(self->data, 0);
+    const dtn_cbor *item = dtn_cbor_array_get(block, 8);
+    if (!dtn_cbor_is_uint(item)) goto error;
+    return dtn_cbor_get_uint(item);
+
+error:
+    return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_primary_set_fragment_offset(dtn_bundle *self, uint64_t type){
+
+    if (!self || !self->data) goto error;
+
+    dtn_cbor *block = (dtn_cbor*)dtn_cbor_array_get(self->data, 0);
+    if (!block) goto error;
+
+    dtn_cbor *item = (dtn_cbor*)dtn_cbor_array_get(block, 8);
+    if (!item){
+
+        item = dtn_cbor_uint(type);
+        if (!dtn_cbor_array_push((dtn_cbor*)block, item)){
+            item = dtn_cbor_free(item);
+            goto error;
+        }
+    
+    } else {
+
+        if (!dtn_cbor_is_uint(item)) goto error;
+    }
+   
+    return dtn_cbor_set_uint(item, type);
+
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t dtn_bundle_primary_get_totel_data_length(const dtn_bundle *self){
+
+    if (!self || !self->data) goto error;
+
+    const dtn_cbor *block = dtn_cbor_array_get(self->data, 0);
+    const dtn_cbor *item = dtn_cbor_array_get(block, 9);
+    if (!dtn_cbor_is_uint(item)) goto error;
+    return dtn_cbor_get_uint(item);
+
+error:
+    return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_primary_set_total_data_length(dtn_bundle *self, uint64_t type){
+
+    if (!self || !self->data) goto error;
+
+    dtn_cbor *block = (dtn_cbor*)dtn_cbor_array_get(self->data, 0);
+    if (!block) goto error;
+
+    dtn_cbor *item = (dtn_cbor*)dtn_cbor_array_get(block, 9);
+    if (!item){
+
+        item = dtn_cbor_uint(type);
+        if (!dtn_cbor_array_push((dtn_cbor*)block, item)){
+            item = dtn_cbor_free(item);
+            goto error;
+        }
+    
+    } else {
+
+        if (!dtn_cbor_is_uint(item)) goto error;
+    }
+   
+    return dtn_cbor_set_uint(item, type);
+
+error:
+    return false;
+}
+
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      GETTER / SETTER CANNONICAL
+ *
+ *      ------------------------------------------------------------------------
+ */
+
+dtn_cbor *dtn_bundle_add_block(
+    dtn_bundle *self, 
+    uint64_t code,
+    uint64_t nbr,
+    uint64_t flags,
+    uint64_t crc_type,
+    dtn_cbor *payload){
+
+    dtn_cbor *array = NULL;
+    dtn_cbor *item = NULL;
+
+    if (!self) goto error;
+    if (!self->data) goto error;
+
+    array = dtn_cbor_array();
+    if (!array) goto error;
+
+    item = dtn_cbor_uint(code);
+    if (!dtn_cbor_array_push(array, item)) goto error;
+
+    item = dtn_cbor_uint(nbr);
+    if (!dtn_cbor_array_push(array, item)) goto error;
+
+    item = dtn_cbor_uint(flags);
+    if (!dtn_cbor_array_push(array, item)) goto error;
+
+    item = dtn_cbor_uint(crc_type);
+    if (!dtn_cbor_array_push(array, item)) goto error;
+
+    item = NULL;
+
+    if (payload)
+        if (!dtn_cbor_array_push(array, payload)) goto error;
+
+    if (!dtn_cbor_array_push(self->data, array)) goto error;
+
+    return array;
+error:
+    dtn_cbor_free(array);
+    dtn_cbor_free(item);
+    return NULL;
+    return NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+dtn_cbor *dtn_bundle_get_block(dtn_bundle *self, 
+        uint64_t nbr){
+
+    if (!self || !self->data) return NULL;
+
+    uint64_t count = dtn_cbor_array_count(self->data);
+
+    for (uint64_t i = 0; i < count; i++){
+
+        dtn_cbor *item = dtn_cbor_array_get(self->data, i);
+
+        if (dtn_bundle_get_number(item) == nbr)
+            return item;
+    }
+
+    return NULL;
+
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t dtn_bundle_get_number(const dtn_cbor *self){
+
+    if (!self) return 0;
+    if (!dtn_cbor_is_array(self)) goto error;
+
+    dtn_cbor *item = dtn_cbor_array_get(self, 1);
+    return dtn_cbor_get_uint(item);
+error:
+    return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_set_number(dtn_cbor *self, uint64_t number){
+
+    if (!self) goto error;
+
+    dtn_cbor *item = dtn_cbor_array_get(self, 1);
+    if (!item) goto error;
+
+    return dtn_cbor_set_uint(item, number);
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t dtn_bundle_get_code(const dtn_cbor *self){
+
+    if (!self) return 0;
+    if (!dtn_cbor_is_array(self)) goto error;
+
+    dtn_cbor *item = dtn_cbor_array_get(self, 0);
+    return dtn_cbor_get_uint(item);
+error:
+    return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_set_code(dtn_cbor *self, uint64_t number){
+
+    if (!self) goto error;
+
+    dtn_cbor *item = dtn_cbor_array_get(self, 0);
+    if (!item) goto error;
+
+    return dtn_cbor_set_uint(item, number);
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t dtn_bundle_get_flags(const dtn_cbor *self){
+
+    if (!self) return 0;
+    if (!dtn_cbor_is_array(self)) goto error;
+
+    dtn_cbor *item = dtn_cbor_array_get(self, 2);
+    return dtn_cbor_get_uint(item);
+error:
+    return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_set_flags(dtn_cbor *self, uint64_t number){
+
+    if (!self) goto error;
+
+    dtn_cbor *item = dtn_cbor_array_get(self, 2);
+    if (!item) goto error;
+
+    return dtn_cbor_set_uint(item, number);
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t dtn_bundle_get_crc_type(const dtn_cbor *self){
+
+    if (!self) return 0;
+    if (!dtn_cbor_is_array(self)) goto error;
+
+    dtn_cbor *item = dtn_cbor_array_get(self, 3);
+    return dtn_cbor_get_uint(item);
+error:
+    return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_set_crc_type(dtn_cbor *self, uint64_t number){
+
+    if (!self) goto error;
+
+    dtn_cbor *item = dtn_cbor_array_get(self, 3);
+    if (!item) goto error;
+
+    return dtn_cbor_set_uint(item, number);
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+dtn_cbor *dtn_bundle_get_data(const dtn_cbor *self){
+
+    if (!self) return 0;
+    if (!dtn_cbor_is_array(self)) goto error;
+
+    dtn_cbor *item = dtn_cbor_array_get(self, 4);
+    return item;
+error:
+    return NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_set_data(dtn_cbor *self, dtn_cbor *data){
+
+    if (!self) return 0;
+    if (!dtn_cbor_is_array(self)) goto error;
+
+    return dtn_cbor_array_set(self, 4, data);
+error:
+    return false;
+}
