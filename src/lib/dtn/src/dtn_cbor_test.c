@@ -3451,6 +3451,38 @@ int test_decode_map(){
     //fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 6);
     out = cbor_free(out);
+
+    buffer[0] = 0xBF;
+    buffer[1] = 0x01;  // key 
+    buffer[2] = 0x18;  // val 
+    buffer[3] = 0xff;   
+    buffer[4] = 0x10;  // key 
+    buffer[5] = 0x18;  // val 
+    buffer[6] = 0xFF;   
+    buffer[7] = 0xFF;   
+    buffer[8] = 0x00;   
+    buffer[9] = 0x10;   
+    buffer[10] = 0x11;  
+    buffer[11] = 0x12;  
+    buffer[12] = 0x13;  
+    buffer[13] = 0x14;  
+    buffer[14] = 0x15;  
+    buffer[15] = 0x16;  
+    buffer[16] = 0x17;  
+    buffer[17] = 0x10;  
+    buffer[18] = 0x11;  
+    buffer[19] = 0x12;  
+    buffer[20] = 0x13;  
+
+    match = decode_map(buffer, 20, &out, &next);
+    testrun(match == DTN_CBOR_MATCH_FULL);
+    testrun(out);
+    testrun(out->type == DTN_CBOR_MAP);
+    testrun(2 == dtn_dict_count(out->data));
+    testrun(next);
+    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    testrun(next == buffer + 8);
+    out = cbor_free(out);
     
     return testrun_log_success();
 }

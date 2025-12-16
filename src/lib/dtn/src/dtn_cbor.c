@@ -15,7 +15,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        This file is part of the opendtn project. https://opendtn.com
+        This file is part of the opendtn project. hdttps://opendtn.com
 
         ------------------------------------------------------------------------
 *//**
@@ -1833,32 +1833,26 @@ static dtn_cbor_match decode_map(
             self = dtn_cbor_create(DTN_CBOR_MAP);
             if (!self) goto error;
 
-            ptr = (uint8_t*) buffer;
-
             self->data = dtn_dict_create(dtn_cbor_dict_config(255));
             if (!self->data) goto error;
 
-            while(ptr[0] != 0xFF){
-
-                size--;
-                if (size == 0) goto partial;
-
-                ptr++;
-            }
-
-            uint8_t* last = ptr;
             ptr = (uint8_t*) buffer + 1;
+            if (ptr[0]== 0xff) goto out;
 
-            if ((uint64_t)(last-ptr) > g_config.limits.undef_length_map)
-                goto error;
+            uint64_t counter = 0;
 
-            while(ptr < last){
+            while((size - (ptr - buffer)) > 0){
+
+                counter++;
+
+                if (counter == g_config.limits.undef_length_map)
+                    goto error;
 
                 dtn_cbor *key = NULL;
                 dtn_cbor *val = NULL;
 
                 dtn_cbor_match match = dtn_cbor_decode(
-                    ptr, last - ptr, &key, &ptr);
+                    ptr, (size - (ptr - buffer)), &key, &ptr);
     
                 switch (match){
 
@@ -1872,13 +1866,8 @@ static dtn_cbor_match decode_map(
                         goto error;
                 }
 
-                if (ptr >= last) {
-                    key = dtn_cbor_free(key);
-                    goto error;
-                }
-
                 match = dtn_cbor_decode(
-                    ptr, last - ptr, &val, &ptr);
+                    ptr, (size - (ptr - buffer)), &val, &ptr);
     
                 switch (match){
 
@@ -1903,8 +1892,12 @@ static dtn_cbor_match decode_map(
                     self = dtn_cbor_free(self);
                     goto error;
                 }
+                if (ptr[0] == 0xFF) goto out;
             }
-            len = ptr - buffer + 1;
+out:
+            if (ptr[0] != 0xff) goto error;
+            ptr++;
+            len = ptr - (uint8_t*) buffer;
             goto done;
             break;    
         default:
