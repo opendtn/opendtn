@@ -103,12 +103,32 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
+static bool check_string(const char *string, size_t size){
+
+    char *ptr = (char*) string;
+
+    while((intptr_t)size > (ptr - string)){
+
+        if (ptr[0] < 0x23) goto error;
+        if (ptr[0] > 0x7E) goto error;
+
+        ptr++;
+    }
+    return true;
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
 dtn_uri *dtn_uri_decode(const char *string){
 
     dtn_uri *self = NULL;
     if (!string) goto error;
 
     size_t size = strlen(string);
+
+    if (!check_string(string, size)) goto error;
 
     self = dtn_uri_create();
 
