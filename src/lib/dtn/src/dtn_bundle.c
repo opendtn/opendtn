@@ -654,6 +654,17 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
+uint64_t dtn_bundle_encoding_size(const dtn_bundle *self){
+
+    if (!self) return 0;
+    // NOTE this may return a larger buffer due to the 
+    // bundle array infinitie length encoding. 
+
+    return dtn_cbor_encoding_size(self->data);
+}
+
+/*----------------------------------------------------------------------------*/
+
 bool dtn_bundle_verify(dtn_bundle *self){
 
     if (!self) goto error;
@@ -1386,4 +1397,83 @@ bool dtn_bundle_set_data(dtn_cbor *self, dtn_cbor *data){
     return dtn_cbor_array_set(self, 4, data);
 error:
     return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_clear(void *self){
+
+    if (!self) goto error;
+    dtn_bundle *bundle = (dtn_bundle*) self;
+
+    bundle->data = dtn_cbor_free(bundle->data);
+    return true;
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_dump(FILE *stream, void *bundle){
+
+    dtn_buffer *buffer = NULL;
+    uint8_t *next = NULL;
+
+    if (!stream || !bundle) goto error;
+
+    dtn_bundle *self = (dtn_bundle*) bundle;
+
+    size_t size = dtn_bundle_encoding_size(self);
+
+    buffer = dtn_buffer_create(size);
+    if (!buffer) goto error;
+
+    if (!dtn_bundle_encode(
+        self, 
+        buffer->start, buffer->capacity,
+        &next)) goto error;
+
+    buffer->length = next - buffer->start;
+    
+    dtn_dump_binary_as_hex(stream, buffer->start, buffer->length);
+
+    buffer = dtn_buffer_free(buffer);
+    return true;
+error:
+    dtn_buffer_free(buffer);
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+void *dtn_bundle_copy(void **destination, const void *source){
+
+    dtn_bundle *copy = NULL;
+
+    if (!destination || !source) goto error;
+    if (*destination) goto error;
+
+    dtn_bundle *self = (dtn_bundle*) source;
+
+    copy = dtn_bundle_create();
+    if (!copy) goto error;
+
+    if (self->data)
+        if (!dtn_cbor_copy((void**)&copy->data, self->data))
+            goto error;
+
+    *destination = copy;
+    return copy;
+error:
+    dtn_bundle_free(copy);
+    return NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+void *dtn_bundle_free_void(void *self){
+
+    if (!self) return self;
+    dtn_bundle *bundle = (dtn_bundle*) self;
+    return dtn_bundle_free(bundle);
 }

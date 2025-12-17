@@ -2372,6 +2372,235 @@ int test_dtn_bundle_encode(){
     return testrun_log_success();
 }
 
+/*----------------------------------------------------------------------------*/
+
+int test_dtn_bundle_clear(){
+
+    dtn_cbor *block = NULL;
+    dtn_bundle *bundle = dtn_bundle_create();
+
+    testrun(dtn_bundle_clear(bundle));
+    testrun(bundle->data == NULL);
+
+    // check min valid
+    dtn_cbor *primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        0,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        0,
+        0);
+
+    dtn_cbor *payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        0,
+        dtn_cbor_string("test"));
+
+    testrun(primary);
+    testrun(payload);
+
+    testrun(dtn_bundle_clear(bundle));
+    testrun(bundle->data == NULL);
+
+    // check max valid with some additional blocks
+    primary = dtn_bundle_add_primary_block(
+        bundle,
+        1,
+        1,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        100,
+        200);
+
+    testrun(primary);
+
+    block = dtn_bundle_add_block(
+        bundle,
+        20,
+        20,
+        0,
+        1,
+        dtn_cbor_string("one"));
+
+    testrun(block);
+
+    block = dtn_bundle_add_block(
+        bundle,
+        12,
+        12,
+        0,
+        2,
+        dtn_cbor_string("two"));
+
+    testrun(block);
+
+    payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        2,
+        dtn_cbor_string("payload"));
+   
+    testrun(payload);
+
+    testrun(dtn_bundle_clear(bundle));
+    testrun(bundle->data == NULL);
+
+    bundle = dtn_bundle_free(bundle);
+    return testrun_log_success();
+}
+
+/*----------------------------------------------------------------------------*/
+
+int test_dtn_bundle_free_void(){
+
+    dtn_bundle *bundle = dtn_bundle_create();
+
+    bundle = dtn_bundle_free_void(bundle);
+    testrun(!bundle);
+
+    bundle = dtn_bundle_create();
+
+    // check min valid
+    dtn_cbor *primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        0,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        0,
+        0);
+
+    dtn_cbor *payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        0,
+        dtn_cbor_string("test"));
+
+    testrun(primary);
+    testrun(payload);
+
+    bundle = dtn_bundle_free_void(bundle);
+    testrun(!bundle);
+
+    return testrun_log_success();
+}
+
+/*----------------------------------------------------------------------------*/
+
+int test_dtn_bundle_dump(){
+
+    dtn_bundle *bundle = dtn_bundle_create();
+
+    bundle = dtn_bundle_free_void(bundle);
+    testrun(!bundle);
+
+    bundle = dtn_bundle_create();
+
+    // check min valid
+    dtn_cbor *primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        0,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        0,
+        0);
+
+    testrun(!dtn_bundle_verify(bundle));
+    testrun(!dtn_bundle_dump(stdout, bundle));
+
+    dtn_cbor *payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        0,
+        dtn_cbor_string("test"));
+
+    testrun(primary);
+    testrun(payload);
+
+    testrun(dtn_bundle_verify(bundle));
+    testrun(dtn_bundle_dump(stdout, bundle));
+
+    bundle = dtn_bundle_free_void(bundle);
+    testrun(!bundle);
+
+    return testrun_log_success();
+}
+
+/*----------------------------------------------------------------------------*/
+
+int test_dtn_bundle_copy(){
+
+    dtn_bundle *bundle = dtn_bundle_create();
+    dtn_bundle *copy = NULL;
+
+    testrun(dtn_bundle_copy((void**)&copy, bundle));
+    copy = dtn_bundle_free(copy);
+
+    // check min valid
+    dtn_cbor *primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        0,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        0,
+        0);
+
+    testrun(dtn_bundle_copy((void**)&copy, bundle));
+    copy = dtn_bundle_free(copy);
+
+    dtn_cbor *payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        0,
+        dtn_cbor_string("test"));
+
+    testrun(primary);
+    testrun(payload);
+
+    testrun(dtn_bundle_copy((void**)&copy, bundle));
+    copy = dtn_bundle_free(copy);
+
+    bundle = dtn_bundle_free_void(bundle);
+    testrun(!bundle);
+
+    return testrun_log_success();
+}
+
+
 /*
  *      ------------------------------------------------------------------------
  *
@@ -2425,6 +2654,10 @@ int all_tests() {
     testrun_test(check_set_crc_primary);
     testrun_test(check_set_crc_block);
     testrun_test(test_dtn_bundle_encode);
+    testrun_test(test_dtn_bundle_clear);
+    testrun_test(test_dtn_bundle_free_void);
+    testrun_test(test_dtn_bundle_dump);
+    testrun_test(test_dtn_bundle_copy);
 
     return testrun_counter;
 }

@@ -115,6 +115,8 @@ dtn_cbor *dtn_cbor_double(double nbr);
 dtn_cbor *dtn_cbor_free(dtn_cbor *self);
 dtn_cbor_type dtn_cbor_get_type(const dtn_cbor *self);
 
+void *dtn_cbor_copy(void** copy, void *self);
+
 /*----------------------------------------------------------------------------*/
 
 /**

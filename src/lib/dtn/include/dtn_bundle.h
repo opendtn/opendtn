@@ -24,7 +24,10 @@
 
         @date           2025-12-15
 
-        Implementation of RFC 9171 Bundle Protocol Version 7
+        Implementation of RFC 9171 Bundle Protocol Version 7 - bundle 
+
+        NOTE This file does not contain any bundle handling, only decoding,
+        enconding and item access.
 
         ------------------------------------------------------------------------
 */
@@ -34,6 +37,7 @@
 #define DTN_BUNDLE_CRC16 "crc16"
 #define DTN_BUNDLE_CRC32 "crc32"
 
+#include <stdio.h>
 #include "dtn_cbor.h"
 
 typedef struct dtn_bundle dtn_bundle;
@@ -48,6 +52,12 @@ typedef struct dtn_bundle dtn_bundle;
 
 dtn_bundle *dtn_bundle_create();
 dtn_bundle *dtn_bundle_free(dtn_bundle *self);
+
+// data functions
+bool dtn_bundle_clear(void *bundle);
+bool dtn_bundle_dump(FILE *stream, void *bundle);
+void *dtn_bundle_copy(void **destination, const void *source);
+void *dtn_bundle_free_void(void *self);
 
 /*
  *      ------------------------------------------------------------------------
@@ -70,6 +80,10 @@ bool dtn_bundle_encode(
     uint8_t *buffer, 
     size_t size,
     uint8_t **next);
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t dtn_bundle_encoding_size(const dtn_bundle *self);
 
 /*
  *      ------------------------------------------------------------------------

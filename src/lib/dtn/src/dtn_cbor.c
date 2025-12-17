@@ -5409,7 +5409,6 @@ double dtn_cbor_get_double(const dtn_cbor *self){
     return self->nbr_double;
 }
 
-
 /*----------------------------------------------------------------------------*/
 
 bool dtn_cbor_set_double(dtn_cbor *self, double nbr){
@@ -5417,4 +5416,11 @@ bool dtn_cbor_set_double(dtn_cbor *self, double nbr){
     if (!self || self->type != DTN_CBOR_DOUBLE) return false;
     self->nbr_double = nbr;
     return true;
+}
+
+/*----------------------------------------------------------------------------*/
+
+void *dtn_cbor_copy(void** destination, void *self){
+
+    return cbor_copy(destination, self);
 }
