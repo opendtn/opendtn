@@ -578,7 +578,7 @@ int test_dtn_bundle_decode(){
     buffer[25] = 0x02;          // sequence number
     buffer[26] = 0x03; // lifetime
     buffer[27] = 0x42; // crc16 string of 2 bytes
-    buffer[28] = 0x1F; // fake CRC
+    buffer[28] = 0x0F; // fake CRC
     buffer[29] = 0x1F; // fake CRC
     buffer[30] = 0x85; // payload
     buffer[31] = 0x01; // code
@@ -600,13 +600,13 @@ int test_dtn_bundle_decode(){
 
     testrun(DTN_CBOR_NO_MATCH ==
         dtn_bundle_decode(buffer, 41, &out, &next));
-    
+  
     // set correct CRC16 
 
     buffer[28] = 0x00;
     buffer[29] = 0x00;
 
-    uint16_t crc = crc16x25(buffer, 30);
+    uint16_t crc = crc16x25(buffer + 1, 29);
     buffer[28] = crc >> 8;
     buffer[29] = crc;
 
@@ -719,7 +719,7 @@ int test_dtn_bundle_decode(){
     buffer[43] = 't';
     buffer[44] = 0xFF;
 
-    uint32_t crc32 = dtn_crc32c(buffer, 34);
+    uint32_t crc32 = dtn_crc32c(buffer + 1, 33);
     buffer[30] = crc32 >> 24;
     buffer[31] = crc32 >> 16;
     buffer[32] = crc32 >> 8;
@@ -1957,7 +1957,417 @@ int test_dtn_bundle_set_data(){
     testrun(dtn_bundle_set_data(block, dtn_cbor_string("something")));
     testrun(0 == strcmp("something", dtn_cbor_get_string(
         dtn_bundle_get_data(block))));
-    
+
+    bundle = dtn_bundle_free(bundle);
+    return testrun_log_success();
+}
+
+/*----------------------------------------------------------------------------*/
+
+int check_set_crc_primary(){
+
+    // NOTE this will add a block at the end of some bundle. 
+    // we preset a primary bundle here for potential further tests. 
+
+    dtn_bundle *bundle = dtn_bundle_create();
+
+    // crc_type 0 8 block bundle
+    dtn_cbor *block = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        0,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        0,
+        0);
+
+    testrun(set_crc_primary(block));
+    testrun(8 == dtn_cbor_array_count(block));
+
+    // crc_type 1 8 block bundle
+    testrun(dtn_bundle_primary_set_crc_type(bundle, 1));
+    testrun(set_crc_primary(block));
+    testrun(9 == dtn_cbor_array_count(block));
+    testrun(check_primary_block(bundle));
+    bundle = dtn_bundle_free(bundle);
+
+    // crc_type 2 8 block
+    bundle = dtn_bundle_create();
+    block = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        1,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        0,
+        0);
+    testrun(set_crc_primary(block));
+    testrun(9 == dtn_cbor_array_count(block));
+    testrun(check_primary_block(bundle));
+    bundle = dtn_bundle_free(bundle);
+
+    // crc_type 2 10 block
+    bundle = dtn_bundle_create();
+    block = dtn_bundle_add_primary_block(
+        bundle,
+        1,
+        2,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        123,
+        456);
+    testrun(set_crc_primary(block));
+    testrun(11 == dtn_cbor_array_count(block));
+    testrun(check_primary_block(bundle));
+    bundle = dtn_bundle_free(bundle);
+
+    // crc_type 1 10 block
+    bundle = dtn_bundle_create();
+    block = dtn_bundle_add_primary_block(
+        bundle,
+        1,
+        1,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        123,
+        456);
+    testrun(set_crc_primary(block));
+    testrun(11 == dtn_cbor_array_count(block));
+    testrun(check_primary_block(bundle));
+    bundle = dtn_bundle_free(bundle);
+
+    bundle = dtn_bundle_free(bundle);
+    return testrun_log_success();
+}
+
+/*----------------------------------------------------------------------------*/
+
+int check_set_crc_block(){
+
+    // NOTE we use the primary block based tests here to be able to
+    // use the canonical checks. 
+
+    dtn_bundle *bundle = dtn_bundle_create();
+
+    dtn_cbor *primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        0,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        0,
+        0);
+
+    testrun(primary);
+
+    dtn_cbor *block = dtn_bundle_add_block(
+        bundle,
+        0,
+        0,
+        0,
+        0,
+        dtn_cbor_string("test"));
+    testrun(block);
+
+    testrun(set_crc_block(block));
+    testrun(5 == dtn_cbor_array_count(block));
+    testrun(check_canonical_blocks(bundle));
+
+    dtn_bundle_set_crc_type(block, 1);
+    testrun(set_crc_block(block));
+    testrun(6 == dtn_cbor_array_count(block));
+    testrun(check_canonical_blocks(bundle));
+
+    bundle = dtn_bundle_free(bundle);
+    bundle = dtn_bundle_create();
+
+    primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        0,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        0,
+        0);
+
+    testrun(primary);
+
+    block = dtn_bundle_add_block(
+        bundle,
+        0,
+        0,
+        2,
+        0,
+        dtn_cbor_string("test"));
+    testrun(block);
+
+    dtn_bundle_set_crc_type(block, 2);
+    testrun(set_crc_block(block));
+    testrun(6 == dtn_cbor_array_count(block));
+    testrun(check_canonical_blocks(bundle));
+
+    bundle = dtn_bundle_free(bundle);
+    return testrun_log_success();
+}
+
+/*----------------------------------------------------------------------------*/
+
+int test_dtn_bundle_encode(){
+
+    uint8_t buffer[0xffff] = {0};
+    uint8_t *next = NULL;
+    size_t size = 0xffff;
+
+    dtn_cbor *block = 0;
+    dtn_bundle *bundle = dtn_bundle_create();
+
+    // check min valid
+    dtn_cbor *primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        0,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        0,
+        0);
+
+    dtn_cbor *payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        0,
+        dtn_cbor_string("test"));
+
+    testrun(primary);
+    testrun(payload);
+
+    testrun(dtn_bundle_encode(bundle, buffer, size, &next));
+
+    testrun(buffer[0]  == 0x9F);
+    testrun(buffer[1]  == 0x88);
+    testrun(buffer[2]  == 0x07);
+    testrun(buffer[3]  == 0x00);
+    testrun(buffer[4]  == 0x00);
+    testrun(buffer[5]  == 0x4b);
+    testrun(buffer[6]  == 'd');
+    testrun(buffer[7]  == 'e');
+    testrun(buffer[8]  == 's');
+    testrun(buffer[9]  == 't');
+    testrun(buffer[10] == 'i');
+    testrun(buffer[11] == 'n');
+    testrun(buffer[12] == 'a');
+    testrun(buffer[13] == 't');
+    testrun(buffer[14] == 'i');
+    testrun(buffer[15] == 'o');
+    testrun(buffer[16] == 'n');
+    testrun(buffer[17] == 0x46);
+    testrun(buffer[18] == 's');
+    testrun(buffer[19] == 'o');
+    testrun(buffer[20] == 'u');
+    testrun(buffer[21] == 'r');
+    testrun(buffer[22] == 'c');
+    testrun(buffer[23] == 'e');
+    testrun(buffer[24] == 0x46);
+    testrun(buffer[25] == 'r');
+    testrun(buffer[26] == 'e');
+    testrun(buffer[27] == 'p');
+    testrun(buffer[28] == 'o');
+    testrun(buffer[29] == 'r');
+    testrun(buffer[30] == 't');
+    testrun(buffer[31] == 0x82);
+    testrun(buffer[32] == 0x03);
+    testrun(buffer[33] == 0x04);
+    testrun(buffer[34] == 0x05);
+    testrun(buffer[35] == 0x85);
+    testrun(buffer[36] == 0x01);
+    testrun(buffer[37] == 0x01);
+    testrun(buffer[38] == 0x00);
+    testrun(buffer[39] == 0x00);
+    testrun(buffer[40] == 0x44);
+    testrun(buffer[41] == 't');
+    testrun(buffer[42] == 'e');
+    testrun(buffer[43] == 's');
+    testrun(buffer[44] == 't');
+    testrun(buffer[45] == 0xFF);
+    testrun(buffer[46] == 0x00);
+    testrun(buffer[47] == 0x00);
+    testrun(buffer[48] == 0x00);
+    testrun(buffer[49] == 0x00);
+    testrun(buffer[50] == 0x00);
+
+    bundle = dtn_bundle_free(bundle);
+    bundle = dtn_bundle_create();
+
+    // check max valid with some additional blocks
+    primary = dtn_bundle_add_primary_block(
+        bundle,
+        1,
+        1,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        100,
+        200);
+
+    testrun(primary);
+
+    block = dtn_bundle_add_block(
+        bundle,
+        20,
+        20,
+        0,
+        1,
+        dtn_cbor_string("one"));
+
+    testrun(block);
+
+    block = dtn_bundle_add_block(
+        bundle,
+        12,
+        12,
+        0,
+        2,
+        dtn_cbor_string("two"));
+
+    testrun(block);
+
+    payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        2,
+        dtn_cbor_string("payload"));
+   
+    testrun(payload);
+
+    testrun(dtn_bundle_encode(bundle, buffer, size, &next));
+
+    testrun(buffer[0]  == 0x9F);
+    testrun(buffer[1]  == 0x8B);
+    testrun(buffer[2]  == 0x07);
+    testrun(buffer[3]  == 0x01);
+    testrun(buffer[4]  == 0x01);
+    testrun(buffer[5]  == 0x4b);
+    testrun(buffer[6]  == 'd');
+    testrun(buffer[7]  == 'e');
+    testrun(buffer[8]  == 's');
+    testrun(buffer[9]  == 't');
+    testrun(buffer[10] == 'i');
+    testrun(buffer[11] == 'n');
+    testrun(buffer[12] == 'a');
+    testrun(buffer[13] == 't');
+    testrun(buffer[14] == 'i');
+    testrun(buffer[15] == 'o');
+    testrun(buffer[16] == 'n');
+    testrun(buffer[17] == 0x46);
+    testrun(buffer[18] == 's');
+    testrun(buffer[19] == 'o');
+    testrun(buffer[20] == 'u');
+    testrun(buffer[21] == 'r');
+    testrun(buffer[22] == 'c');
+    testrun(buffer[23] == 'e');
+    testrun(buffer[24] == 0x46);
+    testrun(buffer[25] == 'r');
+    testrun(buffer[26] == 'e');
+    testrun(buffer[27] == 'p');
+    testrun(buffer[28] == 'o');
+    testrun(buffer[29] == 'r');
+    testrun(buffer[30] == 't');
+    testrun(buffer[31] == 0x82);
+    testrun(buffer[32] == 0x03);
+    testrun(buffer[33] == 0x04);
+    testrun(buffer[34] == 0x05);
+    testrun(buffer[35] == 0x18);
+    testrun(buffer[36] == 100);
+    testrun(buffer[37] == 0x18);
+    testrun(buffer[38] == 200);
+    testrun(buffer[39] == 0x42); // CRC16
+    testrun(buffer[40] == 0x14);
+    testrun(buffer[41] == 0x21);
+    testrun(buffer[42] == 0x86); // block 2
+    testrun(buffer[43] == 0x14);
+    testrun(buffer[44] == 0x14);
+    testrun(buffer[45] == 0x00);
+    testrun(buffer[46] == 0x01);
+    testrun(buffer[47] == 0x43);
+    testrun(buffer[48] == 'o');
+    testrun(buffer[49] == 'n');
+    testrun(buffer[50] == 'e');
+    testrun(buffer[51] == 0x42); // CRC16
+    testrun(buffer[52] == 0x54);
+    testrun(buffer[53] == 0x94);
+    testrun(buffer[54] == 0x86); // block 3
+    testrun(buffer[55] == 0x0c);
+    testrun(buffer[56] == 0x0C);
+    testrun(buffer[57] == 0x00);
+    testrun(buffer[58] == 0x02);
+    testrun(buffer[59] == 0x43);
+    testrun(buffer[60] == 't');
+    testrun(buffer[61] == 'w');
+    testrun(buffer[62] == 'o');
+    testrun(buffer[63] == 0x44); // crc32
+    testrun(buffer[64] == 0x8F);
+    testrun(buffer[65] == 0x24);
+    testrun(buffer[66] == 0x68);
+    testrun(buffer[67] == 0x6d);
+    testrun(buffer[68] == 0x86); // block 4 payload
+    testrun(buffer[69] == 0x01);
+    testrun(buffer[70] == 0x01);
+    testrun(buffer[71] == 0x00);
+    testrun(buffer[72] == 0x02);
+    testrun(buffer[73] == 0x47);
+    testrun(buffer[74] == 'p');
+    testrun(buffer[75] == 'a');
+    testrun(buffer[76] == 'y');
+    testrun(buffer[77] == 'l');
+    testrun(buffer[78] == 'o');
+    testrun(buffer[79] == 'a');
+    testrun(buffer[80] == 'd');
+    testrun(buffer[81] == 0x44); // crc32
+    testrun(buffer[82] == 0xdc);
+    testrun(buffer[83] == 0xb4);
+    testrun(buffer[84] == 0x9b);
+    testrun(buffer[85] == 0xa2);
+    testrun(buffer[86] == 0xff);
+    testrun(buffer[87] == 0x00);
+    testrun(buffer[88] == 0x00);
+    testrun(buffer[89] == 0x00);
+    testrun(buffer[90] == 0x00);
+    testrun(next == buffer + 87);
+
     bundle = dtn_bundle_free(bundle);
     return testrun_log_success();
 }
@@ -2012,6 +2422,9 @@ int all_tests() {
     testrun_test(test_dtn_bundle_set_crc_type);
     testrun_test(test_dtn_bundle_get_data);
     testrun_test(test_dtn_bundle_set_data);
+    testrun_test(check_set_crc_primary);
+    testrun_test(check_set_crc_block);
+    testrun_test(test_dtn_bundle_encode);
 
     return testrun_counter;
 }

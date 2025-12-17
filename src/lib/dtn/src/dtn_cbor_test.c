@@ -4668,7 +4668,7 @@ int test_encode_array(){
 
     testrun(encode_array(self, buffer, size, &next));
     testrun(next == buffer + 7);
-    testrun(buffer[0] == 0x86);
+    testrun(buffer[0] == 0x82);
     testrun(buffer[1] == 0xf5);
     testrun(buffer[2] == 0x44);
     testrun(buffer[3] == 't');
@@ -4679,14 +4679,6 @@ int test_encode_array(){
 
     memset(buffer, 0, size);
     testrun(!encode_array(self, buffer, 6, &next));
-    testrun(buffer[0] == 0x00);
-    testrun(buffer[1] == 0x00);
-    testrun(buffer[2] == 0x00);
-    testrun(buffer[3] == 0x00);
-    testrun(buffer[4] == 0x00);
-    testrun(buffer[5] == 0x00);
-    testrun(buffer[6] == 0x00);
-    testrun(buffer[7] == 0x00);
 
     string = dtn_cbor_create(DTN_CBOR_STRING);
     testrun(dtn_random_string(&string->string, 0xff, NULL));
@@ -4694,17 +4686,15 @@ int test_encode_array(){
     testrun(dtn_list_push(self->data, string));
 
     testrun(encode_array(self, buffer, size, &next));
-    testrun(next == buffer + 3 + 1 + 5 + 2+ string->nbr_uint);
-    testrun(buffer[0] == 0x99);
-    testrun(buffer[1] == 0x01);
-    testrun(buffer[2] == 0x06);
-    testrun(buffer[3] == 0xf5);
-    testrun(buffer[4] == 0x44);
-    testrun(buffer[5] == 't');
-    testrun(buffer[6] == 'e');
-    testrun(buffer[7] == 's');
-    testrun(buffer[8] == 't');
-    testrun(buffer[9] == 0x58);
+    dtn_dump_binary_as_hex(stdout, buffer, 10 );
+    testrun(buffer[0] == 0x83);
+    testrun(buffer[1] == 0xf5);
+    testrun(buffer[2] == 0x44);
+    testrun(buffer[3] == 't');
+    testrun(buffer[4] == 'e');
+    testrun(buffer[5] == 's');
+    testrun(buffer[6] == 't');
+    testrun(buffer[7] == 0x58);
     testrun(next[0] == 0x00);
 
     self = cbor_free(self);

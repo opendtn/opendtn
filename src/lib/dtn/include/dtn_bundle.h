@@ -66,7 +66,7 @@ dtn_cbor_match dtn_bundle_decode(
 /*----------------------------------------------------------------------------*/
 
 bool dtn_bundle_encode(
-    const dtn_bundle *self,
+    dtn_bundle *self,
     uint8_t *buffer, 
     size_t size,
     uint8_t **next);

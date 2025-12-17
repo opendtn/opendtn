@@ -35,6 +35,7 @@
 #include <dtn_base/dtn_buffer.h>
 #include <dtn_base/dtn_crc16.h>
 #include <dtn_base/dtn_crc32.h>
+#include <dtn_base/dtn_dump.h>
 
 /*----------------------------------------------------------------------------*/
 
@@ -95,34 +96,46 @@ static bool check_crc(const dtn_cbor *block,
 
     buffer->length = next - buffer->start;
 
-    const uint8_t *crc_num = (const uint8_t*) dtn_cbor_get_string(crc);
+    uint8_t *crc_num = NULL;
+    size_t size = 0;
+
+    if (!dtn_cbor_get_byte_string(crc, &crc_num, &size))
+        goto error;
+
+    if (!crc_num) goto error;
+    if (size < 2) goto error;
 
     if (0 == strcmp(alg, DTN_BUNDLE_CRC16)){
 
-        buffer->start[buffer->length] = 0x00;
         buffer->start[buffer->length - 1] = 0x00;
+        buffer->start[buffer->length - 2] = 0x00;;
 
         uint16_t crc_sum = crc16x25(buffer->start, buffer->length);
+        uint16_t expect = crc_num[0] << 8;
+        expect += crc_num[1];
 
-        if (    (crc_num[0] & crc_sum >> 8) && 
-                (crc_num[1] & crc_sum)){
+        if (crc_sum == expect){
 
             crc_check = true;
         } 
 
     } else if (0 == strcmp(alg, DTN_BUNDLE_CRC32)){
 
-        buffer->start[buffer->length] = 0x00;
+        if (size < 4) goto error;
+
         buffer->start[buffer->length - 1] = 0x00;
         buffer->start[buffer->length - 2] = 0x00;
         buffer->start[buffer->length - 3] = 0x00;
+        buffer->start[buffer->length - 4] = 0x00;
+
+        uint32_t expect = crc_num[0] << 24;
+        expect += crc_num[1] << 16;
+        expect += crc_num[2] << 8;
+        expect += crc_num[3];
 
         uint32_t crc_sum = dtn_crc32c(buffer->start, buffer->length);
 
-        if (    (crc_num[0] & crc_sum >> 24) && 
-                (crc_num[1] & crc_sum >> 16) &&
-                (crc_num[2] & crc_sum >> 8) && 
-                (crc_num[3] & crc_sum)){
+        if (crc_sum == expect){
 
             crc_check = true;
         } 
@@ -355,15 +368,6 @@ dtn_cbor_match dtn_bundle_decode(
 
     if (!buffer || !out || !next) goto error;
 
-    if (!dtn_cbor_configure((dtn_cbor_config){
-        .limits.string_size = UINT16_MAX,
-        .limits.utf8_string_size = UINT16_MAX,
-        .limits.array_size = UINT16_MAX,
-        .limits.undef_length_array = UINT16_MAX,
-        .limits.map_size = UINT16_MAX,
-        .limits.undef_length_map = UINT16_MAX
-    })) goto error;
-
     dtn_cbor *data = NULL;
 
     dtn_cbor_match match = dtn_cbor_decode(buffer, size, &data, next);
@@ -393,15 +397,257 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
+static bool set_crc_primary(dtn_cbor *block){
+
+    dtn_buffer *buffer = NULL;
+
+    if (!block) goto error;
+    
+    uint64_t count = dtn_cbor_array_count(block);
+
+    const dtn_cbor *crc_type = dtn_cbor_array_get(block, 2);
+    if (!dtn_cbor_is_uint(crc_type)) goto error;
+
+    uint64_t crc_flags = dtn_cbor_get_uint(crc_type);
+
+    dtn_cbor *crc = NULL;
+
+    switch (crc_flags){
+
+        case 0x00:
+            crc = NULL;
+            goto done;
+            break;
+        case 0x01:
+            
+            if (count == 8){
+
+                crc = dtn_cbor_string("12");
+                if (!dtn_cbor_array_push(block, crc))
+                    goto error;
+
+            } else if (count == 10){
+
+                crc = dtn_cbor_string("12");
+                if (!dtn_cbor_array_push(block, crc))
+                    goto error;
+            }
+
+            break;
+        case 0x02:
+
+            if (count == 8){
+
+                crc = dtn_cbor_string("1234");
+                if (!dtn_cbor_array_push(block, crc))
+                    goto error;
+
+            } else if (count == 10){
+
+                crc = dtn_cbor_string("1234");
+                if (!dtn_cbor_array_push(block, crc))
+                    goto error;
+            }
+            break;
+        default:
+            goto error;
+
+    }
+
+    uint8_t *next = NULL;
+    uint64_t length = dtn_cbor_encoding_size(block);
+    buffer = dtn_buffer_create(length);
+
+    if (!dtn_cbor_encode(block, buffer->start, buffer->capacity, &next))
+        goto error;
+
+    buffer->length = next - buffer->start;
+
+    uint32_t crc_sum32 = 0;
+    uint16_t crc_sum16 = 0;
+    char *bytes = NULL;
+
+    switch (crc_flags){
+
+        case 0x01:
+
+            buffer->start[buffer->length - 1] = 0x00;
+            buffer->start[buffer->length - 2] = 0x00;
+            
+            crc_sum16 = crc16x25(buffer->start, buffer->length);
+
+            bytes = (char*) dtn_cbor_get_string(crc);
+            bytes[0] = crc_sum16 >> 8;
+            bytes[1] = crc_sum16;
+
+            break;
+        case 0x02:
+
+            buffer->start[buffer->length - 1] = 0x00;
+            buffer->start[buffer->length - 2] = 0x00;
+            buffer->start[buffer->length - 3] = 0x00;
+            buffer->start[buffer->length - 4] = 0x00;
+            
+            crc_sum32 = dtn_crc32c(buffer->start, buffer->length);
+            bytes = (char*) dtn_cbor_get_string(crc);
+            bytes[0] = crc_sum32 >> 24;
+            bytes[1] = crc_sum32 >> 16;
+            bytes[2] = crc_sum32 >> 8;
+            bytes[3] = crc_sum32;
+            break;
+        default:
+            goto error;
+
+    }
+
+done:
+    dtn_buffer_free(buffer);
+    return true;
+error:
+    dtn_buffer_free(buffer);
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static bool set_crc_block(dtn_cbor *block){
+
+    dtn_buffer *buffer = NULL;
+
+    if (!block) goto error;
+    
+    uint64_t count = dtn_cbor_array_count(block);
+
+    const dtn_cbor *crc_type = dtn_cbor_array_get(block, 3);
+    if (!dtn_cbor_is_uint(crc_type)) goto error;
+
+    uint64_t crc_flags = dtn_cbor_get_uint(crc_type);
+
+    dtn_cbor *crc = NULL;
+
+    switch (crc_flags){
+
+        case 0x00:
+            goto done;
+            break;
+        case 0x01:
+            
+            if (count == 5){
+
+                crc = dtn_cbor_string("12");
+                if (!dtn_cbor_array_push(block, crc))
+                    goto error;
+            }
+            break;
+        case 0x02:
+
+            if (count == 5){
+
+                crc = dtn_cbor_string("1234");
+                if (!dtn_cbor_array_push(block, crc))
+                    goto error;
+            }
+            break;
+        default:
+            goto error;
+
+    }
+
+    uint8_t *next = NULL;
+    uint64_t length = dtn_cbor_encoding_size(block);
+    buffer = dtn_buffer_create(length);
+
+    if (!dtn_cbor_encode(block, buffer->start, buffer->capacity, &next))
+        goto error;
+
+    buffer->length = next - buffer->start;
+
+    uint32_t crc_sum32 = 0;
+    uint16_t crc_sum16 = 0;
+    char *bytes = NULL;
+
+    switch (crc_flags){
+
+        case 0x01:
+
+            buffer->start[buffer->length - 1] = 0x00;
+            buffer->start[buffer->length - 2] = 0x00;
+            
+            crc_sum16 = crc16x25(buffer->start, buffer->length);
+
+            bytes = (char*) dtn_cbor_get_string(crc);
+            bytes[0] = crc_sum16 >> 8;
+            bytes[1] = crc_sum16;
+
+            break;
+        case 0x02:
+
+            buffer->start[buffer->length - 1] = 0x00;
+            buffer->start[buffer->length - 2] = 0x00;
+            buffer->start[buffer->length - 3] = 0x00;
+            buffer->start[buffer->length - 4] = 0x00;
+            
+            crc_sum32 = dtn_crc32c(buffer->start, buffer->length);
+            bytes = (char*) dtn_cbor_get_string(crc);
+            bytes[0] = crc_sum32 >> 24;
+            bytes[1] = crc_sum32 >> 16;
+            bytes[2] = crc_sum32 >> 8;
+            bytes[3] = crc_sum32;
+            break;
+        default:
+            goto error;
+
+    }
+
+done:
+    dtn_buffer_free(buffer);
+    return true;
+error:
+    dtn_buffer_free(buffer);
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static bool set_crcs(dtn_bundle *self){
+
+    if (!self) goto error;
+
+    uint64_t count = dtn_cbor_array_count(self->data);
+
+    for (uint64_t i = 0; i < count; i++){
+
+        dtn_cbor *block = dtn_cbor_array_get(self->data, i);
+
+        if (i == 0){
+            if (!set_crc_primary(block))
+                goto error;
+        } else {
+            if (!set_crc_block(block))
+                goto error;
+        }
+    }
+
+    return true;
+error:
+    return false;
+
+}
+
+/*----------------------------------------------------------------------------*/
+
 bool dtn_bundle_encode(
-    const dtn_bundle *self,
+    dtn_bundle *self,
     uint8_t *buffer, 
     size_t size,
     uint8_t **next){
 
     if (!self || !buffer || size < 1 || !next) goto error;
 
-    return dtn_cbor_encode(self->data, buffer, size, next);
+    if (!set_crcs(self)) goto error;
+    if (!dtn_bundle_verify(self)) goto error;
+
+    return dtn_cbor_encode_array_of_indefinite_length(self->data, buffer, size, next);
 error:
     return false;
 }

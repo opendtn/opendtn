@@ -3088,13 +3088,7 @@ static bool encode_array(const dtn_cbor *self,
     
     }
 
-    uint64_t items = 0;
-    for (uint64_t i = 1; i <= dtn_list_count(self->data); i++){
-
-        items += dtn_cbor_encoding_size(
-            dtn_list_get(self->data, i));
-
-    }
+    uint64_t items = dtn_list_count(self->data);
 
     if (size < items) goto error;
 
@@ -3108,7 +3102,7 @@ static bool encode_array(const dtn_cbor *self,
 
         ptr = buffer + 1;
 
-    } else if (items <= 0x17){
+    } else if (items <= 17){
 
         len = 1 + items;
         if (size < len) goto error;
@@ -4648,6 +4642,35 @@ error:
     return false;
 }
 
+/*----------------------------------------------------------------------------*/
+
+bool dtn_cbor_set_byte_string(dtn_cbor *self, 
+    const uint8_t *byte, size_t size){
+
+    if (!self || self->type != DTN_CBOR_STRING) goto error;
+
+    self->string = dtn_data_pointer_free(self->string);
+    self->bytes = calloc(size + 1, (sizeof(uint8_t)));
+    self->nbr_uint = size;
+    memcpy(self->bytes, byte, size);
+
+    return true;
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_cbor_get_byte_string(const dtn_cbor *self, uint8_t **byte, size_t *size){
+
+    if (!self || !byte || !size) goto error;
+
+    *byte = self->bytes;
+    *size = self->nbr_uint;
+    return true;
+error:
+    return false;
+}
 /*
  *      ------------------------------------------------------------------------
  *

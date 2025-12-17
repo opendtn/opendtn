@@ -361,6 +361,9 @@ uint64_t dtn_cbor_array_count(const dtn_cbor *array);
 const char *dtn_cbor_get_string(const dtn_cbor *self);
 bool dtn_cbor_set_string(dtn_cbor *self, const char *string);
 
+bool dtn_cbor_set_byte_string(dtn_cbor *self, const uint8_t *byte, size_t size);
+bool dtn_cbor_get_byte_string(const dtn_cbor *self, uint8_t **byte, size_t *size);
+
 /*----------------------------------------------------------------------------*/
 
 bool dtn_cbor_get_utf8(dtn_cbor *self, uint8_t **buffer, size_t *size);
