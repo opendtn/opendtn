@@ -1837,7 +1837,7 @@ static dtn_cbor_match decode_map(
 
             uint64_t counter = 0;
 
-            while((size - (ptr - buffer)) > 0){
+            while((int64_t)(size - (ptr - buffer) - 1) > 0){
 
                 counter++;
 
@@ -1848,7 +1848,7 @@ static dtn_cbor_match decode_map(
                 dtn_cbor *val = NULL;
 
                 dtn_cbor_match match = dtn_cbor_decode(
-                    ptr, (size - (ptr - buffer)), &key, &ptr);
+                    ptr, (size - (ptr - buffer) - 1), &key, &ptr);
     
                 switch (match){
 
@@ -1863,7 +1863,7 @@ static dtn_cbor_match decode_map(
                 }
 
                 match = dtn_cbor_decode(
-                    ptr, (size - (ptr - buffer)), &val, &ptr);
+                    ptr, (size - (ptr - buffer) - 1), &val, &ptr);
     
                 switch (match){
 
@@ -1891,6 +1891,7 @@ static dtn_cbor_match decode_map(
                 if (ptr[0] == 0xFF) goto out;
             }
 out:
+            if ((int64_t)(size - ((ptr - buffer)) <= 0)) goto partial;
             if (ptr[0] != 0xff) goto error;
             ptr++;
             len = ptr - (uint8_t*) buffer;
