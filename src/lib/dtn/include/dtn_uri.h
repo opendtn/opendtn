@@ -67,4 +67,6 @@ void *dtn_uri_copy(void** destination, void *source);
 dtn_uri *dtn_uri_decode(const char *string);
 char *dtn_uri_encode(const dtn_uri *self);
 
+bool dtn_uri_is_singleton(const dtn_uri *self);
+
 #endif /* dtn_uri_h */

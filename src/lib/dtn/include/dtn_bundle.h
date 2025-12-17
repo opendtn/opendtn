@@ -225,5 +225,52 @@ bool dtn_bundle_set_crc_type(dtn_cbor *self, uint64_t number);
 dtn_cbor *dtn_bundle_get_data(const dtn_cbor *self);
 bool dtn_bundle_set_data(dtn_cbor *self, dtn_cbor *data);
 
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      SPECIAL Functionality
+ *
+ *      ------------------------------------------------------------------------
+ */
+
+/**
+ *      Get the "RAW" CBOR instantiation of the bundle. 
+ */ 
+dtn_cbor *dtn_bundle_get_raw(const dtn_bundle *self);
+
+/*----------------------------------------------------------------------------*/
+
+/**
+ *      Set a "RAW" CBOR instantiation to the bundle. 
+ */
+bool dtn_bundle_set_raw(dtn_bundle *self, dtn_cbor *array);
+
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      SPECIAL BLOCKS
+ *
+ *      ------------------------------------------------------------------------
+ */
+
+dtn_cbor *dtn_bundle_add_previous_node(
+        dtn_bundle *self, 
+        const char *node_id);
+
+/*----------------------------------------------------------------------------*/
+
+dtn_cbor *dtn_bundle_add_bundle_age(
+        dtn_bundle *self, 
+        uint64_t age);
+
+/*----------------------------------------------------------------------------*/
+
+dtn_cbor *dtn_bundle_add_hop_count(
+        dtn_bundle *self, 
+        uint64_t count,
+        uint64_t limit);
+
+/*----------------------------------------------------------------------------*/
+
 
 #endif /* dtn_bundle_h */

@@ -1477,3 +1477,100 @@ void *dtn_bundle_free_void(void *self){
     dtn_bundle *bundle = (dtn_bundle*) self;
     return dtn_bundle_free(bundle);
 }
+
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      SPECIAL Functionality
+ *
+ *      ------------------------------------------------------------------------
+ */
+
+dtn_cbor *dtn_bundle_get_raw(const dtn_bundle *self){
+
+    if (!self) return NULL;
+    return self->data;
+
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_set_raw(dtn_bundle *self, dtn_cbor *array){
+
+    if (!self || !dtn_cbor_is_array(array)) goto error;
+
+    self->data = dtn_cbor_free(self->data);
+    self->data = array;
+    return true;
+error:
+    return false;
+}
+
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      SPECIAL BLOCKS
+ *
+ *      ------------------------------------------------------------------------
+ */
+
+dtn_cbor *dtn_bundle_add_previous_node(
+        dtn_bundle *self, 
+        const char *node_id){
+
+    if (!self || !node_id) return NULL;
+
+    return dtn_bundle_add_block(
+        self, 
+        6, 
+        6,
+        0,
+        0,
+        dtn_cbor_string(node_id));
+}
+
+/*----------------------------------------------------------------------------*/
+
+dtn_cbor *dtn_bundle_add_bundle_age(
+        dtn_bundle *self, 
+        uint64_t age){
+
+    if (!self) return NULL;
+
+    return dtn_bundle_add_block(
+        self, 
+        7, 
+        7,
+        0,
+        0,
+        dtn_cbor_uint(age));
+}
+
+/*----------------------------------------------------------------------------*/
+
+dtn_cbor *dtn_bundle_add_hop_count(
+        dtn_bundle *self, 
+        uint64_t count,
+        uint64_t limit){
+
+    dtn_cbor *arr = NULL;
+
+    if (!self) goto error;
+
+    arr = dtn_cbor_array();
+    if (!arr) goto error;
+
+    if (!dtn_cbor_array_push(arr, dtn_cbor_uint(limit))) goto error;
+    if (!dtn_cbor_array_push(arr, dtn_cbor_uint(count))) goto error;
+
+    return dtn_bundle_add_block(
+        self, 
+        10, 
+        10,
+        0,
+        0,
+        arr);
+error:
+    dtn_cbor_free(arr);
+    return NULL;
+}

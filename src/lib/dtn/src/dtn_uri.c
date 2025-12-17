@@ -220,3 +220,15 @@ char *dtn_uri_encode(const dtn_uri *self){
 error:
     return NULL;
 }
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_uri_is_singleton(const dtn_uri *self){
+
+    if (!self || !self->demux) return false;
+
+    if (self->demux[0] == '~')
+        return false;
+
+    return true;
+}
