@@ -95,4 +95,6 @@ bool dtn_webserver_send(dtn_webserver *self, int socket, const dtn_item *msg);
 
 /*----------------------------------------------------------------------------*/
 
+dtn_event_loop *dtn_webserver_get_eventloop(const dtn_webserver *self);
+
 #endif /* dtn_webserver_h */

@@ -2100,6 +2100,9 @@ dtn_io_config dtn_io_config_from_item(const dtn_item *input) {
   config.limits.timeout_usec = dtn_item_get_number(
       dtn_item_get(conf, "/limits/timeout_usecs"));
 
+  config.limits.threadlock_timeout_usec = dtn_item_get_number(
+      dtn_item_get(conf, "/limits/threadlock_timeout_usec"));
+
   return config;
 }
 

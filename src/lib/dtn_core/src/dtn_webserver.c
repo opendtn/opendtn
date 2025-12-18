@@ -1402,3 +1402,11 @@ error:
     dtn_websocket_frame_free(frame);
     return false;
 }
+
+/*----------------------------------------------------------------------------*/
+
+dtn_event_loop *dtn_webserver_get_eventloop(const dtn_webserver *self){
+
+    if (!self) return NULL;
+    return self->config.loop;
+}
