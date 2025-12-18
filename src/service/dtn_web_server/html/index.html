@@ -1,1 +1,31 @@
-TESTPAGE
+<!doctype html>
+
+<html class="no-js" lang="en">
+
+<title>dtn_echo_page</title>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<script src="dtn_websocket.js"></script>
+<script src="dtn_echo_test.js"></script>
+
+<body>
+
+	<p>Please open console to see output.</p>
+
+	<div>
+		<p> This will send the message of the window to the websocket server and the echo received is seen within the developer console. 
+		</p>
+		<input type="text" id="echo" value="echo">
+		<button id="echo" onclick="dtn_echo_test.echo(document.getElementById('echo').value)">echo</button>
+	</div>
+
+	<div >
+		<p> This will actually shutdown the server. </p>
+		<button id="echo" onclick="dtn_echo_test.shutdown()">shutdown</button>
+	</div>
+
+</body>
