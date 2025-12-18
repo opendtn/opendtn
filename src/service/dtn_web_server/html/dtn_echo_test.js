@@ -39,7 +39,7 @@ var dtn_echo_test = {
             dtn_websocket.incoming = dtn_echo_test.incoming;
             dtn_websocket.debug(this.debug);
 
-            dtn_websocket.connect("localhost");
+            dtn_websocket.connect(window.location.hostname);
 
         }
 

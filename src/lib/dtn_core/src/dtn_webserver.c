@@ -718,12 +718,12 @@ static bool process_https_get(Connection *conn, dtn_http_message *msg){
 
     if (mimetype){
 
-        if (!dtn_http_message_add_content_type(msg, mimetype, NULL))
+        if (!dtn_http_message_add_content_type(response, mimetype, NULL))
             goto error;
 
     } else {
 
-        if (!dtn_http_message_add_content_type(msg, "text/plain", NULL))
+        if (!dtn_http_message_add_content_type(response, "text/plain", NULL))
             goto error;
     }
 
@@ -748,6 +748,11 @@ static bool process_https_get(Connection *conn, dtn_http_message *msg){
             .length = response->buffer->length
         })) goto error;
 
+    if (conn->server->debug)
+        dtn_log_debug("SEND %.*s",
+            (int)response->buffer->length,
+            (char*)response->buffer->start);
+
     response = dtn_http_message_free(response);
     buffer = dtn_data_pointer_free(buffer);
     return true;
@@ -769,6 +774,11 @@ static bool process_http_message(Connection *conn, dtn_http_message *msg){
 
     if (!header_host)
         goto error;
+
+    if (conn->server->debug)
+        dtn_log_debug("RECV %.*s",
+            (int)msg->buffer->length,
+            (char*)msg->buffer->start);
     
     uint8_t *hostname = (uint8_t *)header_host->value.start;
     size_t hostname_length = header_host->value.length;
@@ -780,12 +790,10 @@ static bool process_http_message(Connection *conn, dtn_http_message *msg){
     if (0 != strncmp(conn->domain, (char*)hostname, hostname_length)){
 
         dtn_log_error("HTTPs TLS consistency error,"
-            " using domain %s and hostname %.*s at %s:%i - dropping connection",
+            " using domain %s and hostname %.*s at %s:%i - ignoring",
             conn->domain,
             (int)hostname_length, (char*) hostname,
             conn->remote.host, conn->remote.port);
-
-        goto error;
     }
 
     if (0 == strncasecmp(DTN_HTTP_METHOD_GET, 

@@ -169,6 +169,7 @@ int main(int argc, char **argv) {
 
     dtn_log_info("Enabled JSON IO callback for domain %s", domain);
 
+    dtn_webserver_set_debug(server, true);
     dtn_event_loop_run(loop, DTN_RUN_MAX);
 
 done:
