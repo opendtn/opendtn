@@ -57,12 +57,12 @@ int test_dtn_event_message_create(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_event_message_create_reponse(){
+int test_dtn_event_message_create_response(){
     
     dtn_item *msg = dtn_event_message_create("1", "1");
     testrun(msg);
 
-    dtn_item *res = dtn_event_message_create_reponse(msg);
+    dtn_item *res = dtn_event_message_create_response(msg);
     testrun(res);
     testrun(dtn_item_get(res, "/request"));
     testrun(dtn_item_get(res, "/response"));
@@ -207,7 +207,7 @@ int all_tests() {
 
     testrun_init();
     testrun_test(test_dtn_event_message_create);
-    testrun_test(test_dtn_event_message_create_reponse);
+    testrun_test(test_dtn_event_message_create_response);
     testrun_test(test_dtn_event_set_error);
     testrun_test(test_dtn_event_get_error_code);
     testrun_test(test_dtn_event_get_error_desc);

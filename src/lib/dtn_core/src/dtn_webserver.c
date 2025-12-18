@@ -52,6 +52,13 @@ struct dtn_webserver{
     dtn_dict *callbacks;
 
     dtn_json_io_buffer *json_io_buffer;
+
+    struct {
+
+        void *userdata;
+        void (*callback) (void *userdata, int socket);
+
+    } close;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -103,6 +110,13 @@ static void *connection_free(void *connection){
 
     Connection *conn = (Connection*) connection;
     if (!conn) return NULL;
+
+    if (conn->server){
+        if (conn->server->close.userdata)
+            if (conn->server->close.callback)
+                conn->server->close.callback(
+                    conn->server->close.userdata, conn->socket);
+    }
 
     conn->websocket.queue = dtn_list_free(conn->websocket.queue);
     conn->buffer = dtn_buffer_free(conn->buffer);
@@ -1417,4 +1431,28 @@ dtn_event_loop *dtn_webserver_get_eventloop(const dtn_webserver *self){
 
     if (!self) return NULL;
     return self->config.loop;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_webserver_register_close(dtn_webserver *self, void *userdata, 
+        void (callback)(void *userdata, int socket)){
+
+    if (!self) goto error;
+
+    if (self->close.userdata){
+
+        if (!userdata){
+            self->close.userdata = NULL;
+            self->close.callback = NULL;
+        } else {
+            return false;
+        }
+    }
+
+    self->close.userdata = userdata;
+    self->close.callback = callback;
+    return true;
+error:
+    return false;
 }

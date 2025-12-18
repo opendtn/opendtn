@@ -47,6 +47,18 @@ typedef struct dtn_password_hash_parameter {
 
 } dtn_password_hash_parameter;
 
+/*---------------------------------------------------------------------------*/
+
+typedef struct dtn_password {
+
+    char hash[255];
+    char salt[255];
+    uint64_t workfactor;
+    uint8_t blocksize;
+    uint8_t parallel;
+
+} dtn_password;
+
 /*
  *      ------------------------------------------------------------------------
  *
@@ -54,6 +66,15 @@ typedef struct dtn_password_hash_parameter {
  *
  *      ------------------------------------------------------------------------
  */
+
+
+dtn_password dtn_password_generate(const char *secret,
+    dtn_password_hash_parameter params,
+    size_t length);
+
+bool dtn_password_check(const char *secret, dtn_password password);
+
+dtn_password dtn_password_from_item(const dtn_item *item);
 
 /**
     Create some salted password hash and return a JSON representation

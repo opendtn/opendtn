@@ -30,6 +30,7 @@
 #include "../include/dtn_event_api.h"
 
 #include <dtn_base/dtn_id.h>
+#include <dtn_base/dtn_string.h>
 
 dtn_item *dtn_event_message_create(const char *uuid, const char *event){
 
@@ -68,7 +69,7 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-dtn_item *dtn_event_message_create_reponse(const dtn_item *message){
+dtn_item *dtn_event_message_create_response(const dtn_item *message){
 
     dtn_item *out = NULL;
     dtn_item *val = NULL;
@@ -229,4 +230,17 @@ dtn_item *dtn_event_get_response(dtn_item *message){
     return par;
 error:
     return NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_event_is(const dtn_item *msg, const char *name){
+
+    if (!msg || !name) goto error;
+
+    const char *event = dtn_event_get_event(msg);
+    if (0 == dtn_string_compare(event, name))
+        return true;
+error:
+    return false;
 }

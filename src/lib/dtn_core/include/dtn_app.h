@@ -115,4 +115,7 @@ bool dtn_app_register(dtn_app *self,
 bool dtn_app_deregister(dtn_app *self,
         const char *event);
 
+bool dtn_app_register_close(dtn_app *self, void *userdata, 
+        void (callback)(void *userdata, int socket));
+
 #endif /* dtn_app_h */

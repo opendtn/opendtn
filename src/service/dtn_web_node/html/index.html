@@ -1,0 +1,24 @@
+<!doctype html>
+
+<html class="no-js" lang="en">
+
+<title>dtn_echo_page</title>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<script src="dtn_websocket.js"></script>
+<script src="dtn_web_node.js"></script>
+
+<body>
+
+	<p>Please open console to see output.</p>
+
+	<div>
+		<input type="text" id="login" value="admin">
+		<button id="login" onclick="dtn_web_node.login(document.getElementById('login').value)">login</button>
+	</div>
+
+</body>

@@ -40,6 +40,13 @@
 #define DTN_EVENT_KEY_ERROR_CODE "code"
 #define DTN_EVENT_KEY_ERROR_DESC "desc"
 
+#define DTN_EVENT_ERROR_CODE_INPUT 1000
+#define DTN_EVENT_ERROR_DESC_INPUT "input missing"
+#define DTN_EVENT_ERROR_CODE_AUTH 666
+#define DTN_EVENT_ERROR_DESC_AUTH "auth error"
+
+
+
 #define ETN_EVENT_ERROR_NO_ERROR 0
 
 /*----------------------------------------------------------------------------*/
@@ -49,7 +56,9 @@
 #include <dtn_base/dtn_item.h>
 
 dtn_item *dtn_event_message_create(const char *uuid, const char *event);
-dtn_item *dtn_event_message_create_reponse(const dtn_item *message);
+dtn_item *dtn_event_message_create_response(const dtn_item *message);
+
+bool dtn_event_is(const dtn_item *msg, const char *name);
 
 /*----------------------------------------------------------------------------*/
 

@@ -388,3 +388,147 @@ error:
   dtn_item_free(val);
   return NULL;
 }
+
+/*---------------------------------------------------------------------------*/
+
+dtn_password dtn_password_generate(const char *secret,
+    dtn_password_hash_parameter params,
+    size_t length){
+
+    dtn_password out = {0};
+
+    dtn_item *item = NULL;
+
+    if (!secret) goto error;
+
+    item = dtn_password_hash(secret, params, length);
+    if (!item) goto error;
+
+    const char *salt = dtn_item_get_string(
+        dtn_item_object_get(item, DTN_AUTH_KEY_SALT));
+
+    if (!salt) goto error;
+    memcpy(out.salt, salt, strlen(salt));
+
+    const char *hash = dtn_item_get_string(
+        dtn_item_object_get(item, DTN_AUTH_KEY_HASH));
+
+    if (!hash) goto error;
+    memcpy(out.hash, hash, strlen(hash));
+
+    out.workfactor = dtn_item_get_number(
+        dtn_item_object_get(item, DTN_AUTH_KEY_WORKFACTOR));
+
+    out.blocksize = dtn_item_get_number(
+        dtn_item_object_get(item, DTN_AUTH_KEY_BLOCKSIZE));
+
+    out.parallel = dtn_item_get_number(
+        dtn_item_object_get(item, DTN_AUTH_KEY_PARALLEL));
+
+    return out;
+
+error:
+    dtn_item_free(item);
+    return (dtn_password){0};
+}
+
+/*---------------------------------------------------------------------------*/
+
+bool dtn_password_check(const char *secret, dtn_password password){
+
+    uint8_t *hash_byte_string = NULL;
+    size_t hash_byte_length = 0;
+
+    uint8_t *salt_byte_string = NULL;
+    size_t salt_byte_length = 0;
+
+    if (!secret )
+      return false;
+
+  /* parse the expected hash and salt to be used */
+  const char *hash = password.hash;
+  const char *salt = password.salt;
+  if (!hash || !salt)
+      return false;
+
+  /* parse the params to be used */
+  dtn_password_hash_parameter params = (dtn_password_hash_parameter){
+    .workfactor = password.workfactor,
+    .blocksize = password.blocksize,
+    .parallel = password.parallel
+  };
+
+  size_t hash_length = strlen(hash);
+  size_t salt_length = strlen(salt);
+
+  uint8_t hash_buffer[hash_length];
+  memset(hash_buffer, 0, hash_length);
+
+
+  if (!dtn_base64_decode((uint8_t *)hash, hash_length, &hash_byte_string,
+                        &hash_byte_length))
+    goto error;
+
+  if (!dtn_base64_decode((uint8_t *)salt, salt_length, &salt_byte_string,
+                        &salt_byte_length))
+    goto error;
+
+  size_t length = hash_length;
+
+  if ((0 != params.blocksize) || (0 != params.parallel)) {
+
+    if (!dtn_password_hash_scrypt(hash_buffer, &length, secret,
+                                 (char *)salt_byte_string, params))
+      goto error;
+
+  } else if (!dtn_password_hash_pdkdf2(hash_buffer, &length, secret,
+                                      (char *)salt_byte_string, params)) {
+
+    goto error;
+  }
+
+  if (0 != memcmp(hash_byte_string, hash_buffer, hash_byte_length))
+    goto error;
+
+  hash_byte_string = dtn_data_pointer_free(hash_byte_string);
+  salt_byte_string = dtn_data_pointer_free(salt_byte_string);
+  return true;
+error:
+  hash_byte_string = dtn_data_pointer_free(hash_byte_string);
+  salt_byte_string = dtn_data_pointer_free(salt_byte_string);
+  return false;
+}
+
+/*---------------------------------------------------------------------------*/
+
+dtn_password dtn_password_from_item(const dtn_item *item){
+
+    dtn_password out = {0};
+    if (!item) goto error;
+
+    const char *salt = dtn_item_get_string(
+        dtn_item_object_get(item, DTN_AUTH_KEY_SALT));
+
+    if (!salt) goto error;
+    memcpy(out.salt, salt, strlen(salt));
+
+    const char *hash = dtn_item_get_string(
+        dtn_item_object_get(item, DTN_AUTH_KEY_HASH));
+
+    if (!hash) goto error;
+    memcpy(out.hash, hash, strlen(hash));
+
+    out.workfactor = dtn_item_get_number(
+        dtn_item_object_get(item, DTN_AUTH_KEY_WORKFACTOR));
+
+    out.blocksize = dtn_item_get_number(
+        dtn_item_object_get(item, DTN_AUTH_KEY_BLOCKSIZE));
+
+    out.parallel = dtn_item_get_number(
+        dtn_item_object_get(item, DTN_AUTH_KEY_PARALLEL));
+
+    return out;
+
+  error:
+    return (dtn_password){0};
+}

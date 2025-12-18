@@ -67,6 +67,13 @@ struct dtn_app {
 
     dtn_thread_loop *thread_loop;
 
+    struct {
+
+        void *userdata;
+        void (*callback) (void *userdata, int socket);
+
+    } close;
+
 };
 
 /*----------------------------------------------------------------------------*/
@@ -475,6 +482,10 @@ static void cb_close(void *userdata, int connection){
     dtn_log_debug("%s closing socket %i", self->config.name, connection);
     dtn_json_io_buffer_drop(self->io_buffer, connection);
 
+    if(self->close.userdata)
+        if (self->close.callback)
+            self->close.callback(self->close.userdata, connection);
+
     return;
 }
 
@@ -694,6 +705,30 @@ bool dtn_app_deregister(dtn_app *self,
 
     if (result) return result;
 
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_app_register_close(dtn_app *self, void *userdata, 
+        void (callback)(void *userdata, int socket)){
+
+    if (!self) goto error;
+
+    if (self->close.userdata){
+
+        if (!userdata){
+            self->close.userdata = NULL;
+            self->close.callback = NULL;
+        } else {
+            return false;
+        }
+    }
+
+    self->close.userdata = userdata;
+    self->close.callback = callback;
+    return true;
 error:
     return false;
 }

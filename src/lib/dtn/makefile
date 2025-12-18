@@ -41,6 +41,7 @@ DTN_FLAGS       =
 DTN_LIBS        = -L$(DTN_LIBDIR)
 
 DTN_LIBS       	+= -l dtn_base$(DTN_EDITION)
+DTN_LIBS       	+= -l dtn_core$(DTN_EDITION)
 
 DTN_LIBS       += -l m
 DTN_LIBS       += -pthread

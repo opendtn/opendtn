@@ -15,11 +15,11 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        This file is part of the openvocs project. https://openvocs.org
+        This file is part of the opendtn project. https://opendtn.com
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_web_server.c
+        @file           dtn_web_node.c
         @author         Töpfer, Markus
 
         @date           2025-12-18
@@ -27,6 +27,7 @@
 
         ------------------------------------------------------------------------
 */
+
 
 #include <dtn_base/dtn_config.h>
 #include <dtn_base/dtn_config_log.h>
@@ -39,60 +40,15 @@
 #include <dtn_core/dtn_io.h>
 #include <dtn_core/dtn_webserver.h>
 
+#include <dtn/dtn_base_node.h>
+
 #include <dtn_os/dtn_os_event_loop.h>
 
 /*---------------------------------------------------------------------------*/
 
 #define CONFIG_PATH                                                            \
   DTN_ROOT                                                                \
-  "/src/service/dtn_web_server/config/default_config.json"
-
-/*---------------------------------------------------------------------------*/
-
-void io_json_callback(void *userdata, int socket, dtn_item *msg){
-
-    char *string = NULL;
-
-    dtn_webserver *self = (dtn_webserver*) userdata;
-    if (!self || !msg) goto error;
-
-    const char *event = dtn_event_get_event(msg);
-    
-    if (!event){
-
-        string = dtn_item_to_json(msg);
-        dtn_log_error("GOT MSG - ignoring - %s", string);
-        goto error;
-    }
-
-    if (0 == dtn_string_compare(event, "shutdown")){
-
-        dtn_log_info("Received SHUTDOWN event - stopping.");
-        
-        // free msg before stop 
-
-        msg = dtn_item_free(msg);
-        dtn_event_loop_stop(dtn_webserver_get_eventloop(self));
-
-    } else if (0 == dtn_string_compare(event, "echo")){
-
-        // just echo the event back to the sender
-
-        dtn_item *out = dtn_event_message_create_response(msg);
-        dtn_webserver_send(self, socket, out);
-        out = dtn_item_free(out);
-
-    } else {
-
-        string = dtn_item_to_json(msg);
-        dtn_log_error("GOT MSG - event not implemented - %s", string);
-    }
-
-error:
-    dtn_data_pointer_free(string);
-    dtn_item_free(msg);
-    return;
-}
+  "/src/service/dtn_web_node/config/default_config.json"
 
 /*---------------------------------------------------------------------------*/
 
@@ -103,6 +59,7 @@ int main(int argc, char **argv) {
     dtn_event_loop *loop = NULL;
     dtn_io *io = NULL;
     dtn_webserver *server = NULL;
+    dtn_base_node *node = NULL;
     dtn_item *config = NULL;
 
     dtn_event_loop_config loop_config = (dtn_event_loop_config){
@@ -153,23 +110,30 @@ int main(int argc, char **argv) {
 
     if (!dtn_webserver_enable_domains(server, config)) goto error;
 
-    // add our own JSON IO handler
+    // add the node
 
     const char *domain = dtn_item_get_string(dtn_item_get(config, 
                             "/webserver/domains/0/name"));
 
-    if (!domain)
-        domain = "localhost";
+    dtn_log_debug("using domain %s", domain);
+
+
+    dtn_base_node_config node_config = dtn_base_node_config_from_item(config);
+    node_config.loop = loop;
+    node_config.io = io;
+    node_config.server = server;
+
+    node = dtn_base_node_create(node_config);
+    if (!node) goto error;
 
     if (!dtn_webserver_enable_callback(
         server, 
         domain,
-        server,
-        io_json_callback)) goto error;
+        node,
+        dtn_base_node_websocket_callback)) goto error;
 
-    dtn_log_info("Enabled JSON IO callback for domain %s", domain);
+    dtn_log_info("Enabled JSON IO callback for node %s", domain);
 
-    dtn_webserver_set_debug(server, true);
     dtn_event_loop_run(loop, DTN_RUN_MAX);
 
 done:
@@ -180,10 +144,7 @@ error:
     config = dtn_item_free(config);
     io = dtn_io_free(io);
     server = dtn_webserver_free(server);
+    node = dtn_base_node_free(node);
     loop = dtn_event_loop_free(loop);
     return retval;
 }
-
-
-
-
