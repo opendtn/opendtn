@@ -136,6 +136,9 @@ bool dtn_item_object_for_each(dtn_item *self,
 dtn_item *dtn_item_array();
 bool dtn_item_is_array(const dtn_item *self);
 
+bool dtn_item_array_for_each(dtn_item *self, void *userdata, 
+        bool (*function)(void *item, void *userdata));
+
 /*---------------------------------------------------------------------------*/
 
 dtn_item *dtn_item_array_get(const dtn_item *self, uint64_t pos);

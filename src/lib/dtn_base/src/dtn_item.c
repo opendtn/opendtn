@@ -583,6 +583,15 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
+bool dtn_item_array_for_each(dtn_item *self, void *userdata, 
+        bool (*function)(void *item, void *userdata)){
+
+  if (!self || !function) return false;
+  return dtn_list_for_each(self->config.data, userdata, function);
+}
+
+/*---------------------------------------------------------------------------*/
+
 dtn_item *dtn_item_array_get(const dtn_item *self, uint64_t pos) {
 
   dtn_item *out = NULL;
