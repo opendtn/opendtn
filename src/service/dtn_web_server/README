@@ -1,0 +1,42 @@
+# dtn_web_server
+
+This is a very simple service of some lightweight webserver able to deliver based on GET requests as well as able to handle websocket connections. 
+The server implementation is a little showcase implementation of how to use the websocket callbacks for JSON IO handling. 
+
+Within the IO handling two callbacks are implemented: 
+1. ECHO 
+2. SHUTDOWN
+
+NOTE this implementation is actually providing an inband shutdown message within the Javascript implementation without any authorisation or authentication. It is clear this is not ment to be for some productional use case. 
+
+## Usage 
+
+Build the whole stuff using make and you may use the server using 
+
+```
+./bin/build/dtn_web_server 
+```
+
+To show the current version, which is included within the config parsing libraries you may add a -v to the command. If you like to use a dedicated version you may specify the path using -p. NOTE there is no help implemented here. 
+
+## Source code description 
+
+### main
+
+Within the main functionality 3 service components are used. 
+
+1. eventloop
+2. io
+3. webserver 
+
+The eventloop is actually just some eventloop handling IO events on sockets. It is avalable as OS specific eventloop for Linux or as a poll based eventloop on other operating systems. 
+
+The io layer is used to handle all socket IO application data with connection management and SSL interfaces. It abstracts the actuall IO functionality from a user. 
+
+The webserver is a very basic webserver implementation able to server GET requests and to connect some websockets. 
+
+Some functionality to handle configuration data is also used. e.g. dtn_config_path_from_command_line which will read a configuration path from commandline and evaluate version requests. 
+
+Interesting part of the main function is the part which configures the webserver. Here we have the command to enable domains within the webserver and to enable callbacks for JSON IO processing like done with the io_json_callback.
+
+Within the io_json_callback you see some functionality based on the event handling mechanism. It parses the JSON input for some "event" message and acts accordingly. 
