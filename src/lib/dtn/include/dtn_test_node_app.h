@@ -19,7 +19,7 @@
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_base_node.h
+        @file           dtn_test_node_app.h
         @author         Töpfer, Markus
 
         @date           2025-12-18
@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#ifndef dtn_base_node_h
-#define dtn_base_node_h
+#ifndef dtn_test_node_app_h
+#define dtn_test_node_app_h
 
 #include <dtn_base/dtn_event_loop.h>
 #include <dtn_core/dtn_io.h>
@@ -37,11 +37,11 @@
 
 /*---------------------------------------------------------------------------*/
 
-typedef struct dtn_base_node dtn_base_node;
+typedef struct dtn_test_node_app dtn_test_node_app;
 
 /*---------------------------------------------------------------------------*/
 
-typedef struct dtn_base_node_config {
+typedef struct dtn_test_node_app_config {
 
     dtn_event_loop *loop;
     dtn_io *io;
@@ -61,7 +61,7 @@ typedef struct dtn_base_node_config {
 
     } limits;
 
-} dtn_base_node_config;
+} dtn_test_node_app_config;
 
 /*
  *      ------------------------------------------------------------------------
@@ -71,17 +71,18 @@ typedef struct dtn_base_node_config {
  *      ------------------------------------------------------------------------
  */
 
-dtn_base_node *dtn_base_node_create(dtn_base_node_config config);
-dtn_base_node *dtn_base_node_free(dtn_base_node *self);
-dtn_base_node *dtn_base_node_cast(const void *data);
+dtn_test_node_app *dtn_test_node_app_create(dtn_test_node_app_config config);
+dtn_test_node_app *dtn_test_node_app_free(dtn_test_node_app *self);
+dtn_test_node_app *dtn_test_node_app_cast(const void *data);
 
 /*---------------------------------------------------------------------------*/
 
-dtn_base_node_config dtn_base_node_config_from_item(const dtn_item *config);
+dtn_test_node_app_config dtn_test_node_app_config_from_item(
+    const dtn_item *config);
 
 /*---------------------------------------------------------------------------*/
 
-void dtn_base_node_websocket_callback(
+void dtn_test_node_app_websocket_callback(
     void *userdata, int socket, dtn_item *item);
 
-#endif /* dtn_base_node_h */
+#endif /* dtn_test_node_app_h */

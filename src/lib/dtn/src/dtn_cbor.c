@@ -686,8 +686,9 @@ static dtn_cbor_match decode_uint(
 
         case 0x18:
 
-            if (size < 2)
+            if (size < 2){
                 goto partial;
+            }
 
             self = dtn_cbor_create(DTN_CBOR_UINT64);
             if (!self) goto error;
@@ -770,6 +771,7 @@ done:
     *next = (uint8_t*) buffer + len;
     return DTN_CBOR_MATCH_FULL;
 partial:
+    *next = (uint8_t*) buffer + size;
     self = dtn_cbor_free(self);
     return DTN_CBOR_MATCH_PARTIAL;
 error:
@@ -917,6 +919,7 @@ done:
     *next = (uint8_t*)buffer + len;
     return DTN_CBOR_MATCH_FULL;
 partial:
+    *next = (uint8_t*) buffer + size;
     self = dtn_cbor_free(self);
     return DTN_CBOR_MATCH_PARTIAL;
 error:
@@ -1181,6 +1184,7 @@ done:
     return DTN_CBOR_MATCH_FULL;
 partial:
     self = dtn_cbor_free(self);
+    *next = (uint8_t*) buffer + size;
     return DTN_CBOR_MATCH_PARTIAL;
 error:
     self = dtn_cbor_free(self);
@@ -1442,6 +1446,7 @@ done:
     return DTN_CBOR_MATCH_FULL;
 partial:
     self = dtn_cbor_free(self);
+    *next = (uint8_t*) buffer + size;
     return DTN_CBOR_MATCH_PARTIAL;
 error:
     self = dtn_cbor_free(self);
@@ -1629,6 +1634,12 @@ static dtn_cbor_match decode_array(
                 
                         break;
 
+                    case DTN_CBOR_MATCH_PARTIAL:
+                        self = dtn_cbor_free(self);
+                        *next = ptr;
+                        return match;
+                        break;
+
                 default:
                     self = dtn_cbor_free(self);
                     return match;
@@ -1672,6 +1683,12 @@ out:
                 
                 break;
 
+            case DTN_CBOR_MATCH_PARTIAL:
+                        self = dtn_cbor_free(self);
+                        *next = ptr;
+                        return match;
+                        break;
+
             default:
                 self = dtn_cbor_free(self);
                 return match;
@@ -1687,6 +1704,7 @@ done:
     return DTN_CBOR_MATCH_FULL;
 partial:
     self = dtn_cbor_free(self);
+    *next = (uint8_t*) buffer + size;
     return DTN_CBOR_MATCH_PARTIAL;
 error:
     self = dtn_cbor_free(self);
@@ -1964,6 +1982,7 @@ done:
     return DTN_CBOR_MATCH_FULL;
 partial:
     self = dtn_cbor_free(self);
+    *next = (uint8_t*) buffer + size;
     return DTN_CBOR_MATCH_PARTIAL;
 error:
     self = dtn_cbor_free(self);
@@ -2193,6 +2212,7 @@ done:
     return DTN_CBOR_MATCH_FULL;
 partial:
     self = dtn_cbor_free(self);
+    *next = (uint8_t*) buffer + size;
     return DTN_CBOR_MATCH_PARTIAL;
 error:
     self = dtn_cbor_free(self);
@@ -2311,6 +2331,7 @@ static dtn_cbor_match decode_simple(
     *out = self;
     return DTN_CBOR_MATCH_FULL;
 partial:
+    *next = (uint8_t*) buffer + size;
     return DTN_CBOR_MATCH_PARTIAL;
 error:
     return DTN_CBOR_NO_MATCH;
@@ -2325,6 +2346,7 @@ dtn_cbor_match dtn_cbor_decode(
     uint8_t **next){
 
     if (!buffer || !out || !next) goto error;
+    *next = (uint8_t*) buffer;
 
     if (size < 1) return DTN_CBOR_MATCH_PARTIAL;
 

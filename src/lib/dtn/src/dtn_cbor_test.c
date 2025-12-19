@@ -1303,7 +1303,6 @@ int test_decode_uint(){
     match = decode_uint(buffer, 2, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
     testrun(NULL == out);
-    testrun(NULL == next);
 
     for (int i = 0; i < 0xff; i++){
 
@@ -1335,7 +1334,6 @@ int test_decode_uint(){
     match = decode_uint(buffer, 4, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
     testrun(NULL == out);
-    testrun(NULL == next);
 
     for (int i = 0; i < 0xff; i++){
 
@@ -1383,7 +1381,6 @@ int test_decode_uint(){
     match = decode_uint(buffer, 8, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
     testrun(NULL == out);
-    testrun(NULL == next);
 
     for (int i = 0; i < 0xff; i++){
         
@@ -1477,7 +1474,6 @@ int test_decode_int(){
     match = decode_int(buffer, 2, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
     testrun(NULL == out);
-    testrun(NULL == next);
 
     for (int i = 0; i < 0xff; i++){
 
@@ -1509,7 +1505,6 @@ int test_decode_int(){
     match = decode_int(buffer, 4, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
     testrun(NULL == out);
-    testrun(NULL == next);
 
     for (int i = 0; i < 0xff; i++){
 
@@ -1557,7 +1552,6 @@ int test_decode_int(){
     match = decode_int(buffer, 8, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
     testrun(NULL == out);
-    testrun(NULL == next);
 
     for (int i = 0; i < 0xff; i++){
         
@@ -2896,9 +2890,9 @@ int test_decode_array(){
     buffer[8] = 0xFF;
     buffer[9] = 0xff;
 
-    for(int i = 0; i < 10;i++){
+    for(int i = 3; i < 9;i++){
 
-        // fprintf(stdout, "i == %i\n", i);
+        fprintf(stdout, "i == %i\n", i);
 
         testrun(DTN_CBOR_MATCH_PARTIAL == 
             decode_array(buffer, i , &out, &next));

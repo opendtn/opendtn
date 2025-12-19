@@ -38,6 +38,8 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#include "dtn_socket.h"
+
 /*---------------------------------------------------------------------------*/
 
 /**
@@ -77,5 +79,12 @@ bool dtn_match_intptr(const void *ptr1, const void *ptr2);
         Uint64_t match
 */
 bool dtn_match_uint64(const void *ptr1, const void *ptr2);
+
+/*---------------------------------------------------------------------------*/
+
+/**
+        dtn_socket_data
+*/
+bool dtn_match_dtn_socket_data(const void *ptr1, const void *ptr2);
 
 #endif /* dtn_match_functions_h */

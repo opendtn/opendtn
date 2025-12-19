@@ -34,6 +34,7 @@
 */
 #include "dtn_match_functions.c"
 #include "../include/testrun.h"
+#include "../include/dtn_socket.h"
 
 /*
  *      ------------------------------------------------------------------------
@@ -208,6 +209,24 @@ int test_dtn_match_uint64() {
 
 /*----------------------------------------------------------------------------*/
 
+int test_dtn_match_dtn_socket_data() {
+
+  dtn_socket_data one = {0};
+  dtn_socket_data two = {0};
+
+  testrun(dtn_match_dtn_socket_data(&one, &two));
+  one.port = 1;
+  testrun(!dtn_match_dtn_socket_data(&one, &two));
+  two.port = 1;
+  testrun(dtn_match_dtn_socket_data(&one, &two));
+  strcat(one.host, "0.0.0.0");
+  testrun(!dtn_match_dtn_socket_data(&one, &two));
+  strcat(two.host, "0.0.0.0");
+  testrun(dtn_match_dtn_socket_data(&one, &two));
+
+  return testrun_log_success();
+}
+
 /*
  *      ------------------------------------------------------------------------
  *
@@ -224,6 +243,7 @@ int all_tests() {
   testrun_test(test_dtn_match_c_string_case_ignore_strict);
   testrun_test(test_dtn_match_intptr);
   testrun_test(test_dtn_match_uint64);
+  testrun_test(test_dtn_match_dtn_socket_data);
 
   return testrun_counter;
 }

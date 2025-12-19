@@ -33,6 +33,9 @@
         ------------------------------------------------------------------------
 */
 #include "../include/dtn_hash_functions.h"
+#include "../include/dtn_socket.h"
+#include <stddef.h>
+#include <stdio.h>
 
 uint64_t dtn_hash_simple_c_string(const void *c_string) {
 
@@ -149,4 +152,18 @@ uint64_t dtn_hash_int64(const void *int64) {
     return 0;
 
   return (uint64_t)*ptr;
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t dtn_hash_dtn_socket_data(const void *self){
+
+  char buffer[1024] = {0};
+  if (!self) return 0;
+  dtn_socket_data *data = (dtn_socket_data*)self;
+  size_t bytes = snprintf(buffer, 1024, "%s:%i",
+    data->host, data->port);
+  buffer[bytes +1]= 0;
+  return dtn_hash_pearson_c_string(buffer);
+
 }

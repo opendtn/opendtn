@@ -15,59 +15,58 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        This file is part of the opendtn project. https://opendtn.com
+        This file is part of the openvocs project. https://openvocs.org
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_base_node_test.c
+        @file           dtn_io_buffer.h
         @author         Töpfer, Markus
 
-        @date           2025-12-18
+        @date           2025-12-19
 
+        IO buffer based on remote data usefull for UDP based data buffering. 
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
-#include "dtn_base_node.c"
+#ifndef dtn_io_buffer_h
+#define dtn_io_buffer_h
+
+#include "dtn_buffer.h"
+#include "dtn_socket.h"
+
+typedef struct dtn_io_buffer dtn_io_buffer;
+
+typedef struct dtn_io_buffer_config {
+
+    struct {
+
+        uint64_t default_size;
+
+    } limits;
+
+} dtn_io_buffer_config;
 
 /*
  *      ------------------------------------------------------------------------
  *
- *      TEST CASES                                                      #CASES
+ *      GENERIC FUNCTIONS
  *
  *      ------------------------------------------------------------------------
  */
 
-int test_case(){
-        testrun(1 == 1);
-
-        return testrun_log_success();
-}
+dtn_io_buffer *dtn_io_buffer_create(dtn_io_buffer_config config);
+dtn_io_buffer *dtn_io_buffer_free(dtn_io_buffer *self);
 
 /*----------------------------------------------------------------------------*/
 
-/*
- *      ------------------------------------------------------------------------
- *
- *      TEST CLUSTER                                                    #CLUSTER
- *
- *      ------------------------------------------------------------------------
- */
+bool dtn_io_buffer_push(dtn_io_buffer *self, 
+    dtn_socket_data *remote, 
+    const uint8_t *buffer, 
+    size_t size);
 
-int all_tests() {
+/*----------------------------------------------------------------------------*/
 
-        testrun_init();
-        testrun_test(test_case);
+dtn_buffer *dtn_io_buffer_pop(dtn_io_buffer *self, 
+    dtn_socket_data *remote);
 
-        return testrun_counter;
-}
-
-/*
- *      ------------------------------------------------------------------------
- *
- *      TEST EXECUTION                                                  #EXEC
- *
- *      ------------------------------------------------------------------------
- */
-
-testrun_run(all_tests);
+#endif /* dtn_io_buffer_h */

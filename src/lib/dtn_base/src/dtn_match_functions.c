@@ -33,7 +33,7 @@
         ------------------------------------------------------------------------
 */
 #include "../include/dtn_match_functions.h"
-
+#include "../include/dtn_string.h"
 #include <string.h>
 #include <strings.h>
 
@@ -100,4 +100,23 @@ bool dtn_match_uint64(const void *ptr1, const void *ptr2) {
     return false;
 
   return ((*(uint64_t *)ptr1) == (*(uint64_t *)ptr2));
+}
+
+/*---------------------------------------------------------------------------*/
+
+bool dtn_match_dtn_socket_data(const void *ptr1, const void *ptr2){
+
+  if (!ptr1 || !ptr2)
+    return false;
+
+  dtn_socket_data *one = (dtn_socket_data*) ptr1;
+  dtn_socket_data *two = (dtn_socket_data*) ptr2;
+
+  if (one->port != two->port)
+    return false;
+
+  if (0 == dtn_string_compare(one->host, two->host))
+    return true;
+
+  return false;
 }

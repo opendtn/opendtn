@@ -40,7 +40,7 @@
 #include <dtn_core/dtn_io.h>
 #include <dtn_core/dtn_webserver.h>
 
-#include <dtn/dtn_base_node.h>
+#include <dtn/dtn_test_node_app.h>
 
 #include <dtn_os/dtn_os_event_loop.h>
 
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
     dtn_event_loop *loop = NULL;
     dtn_io *io = NULL;
     dtn_webserver *server = NULL;
-    dtn_base_node *node = NULL;
+    dtn_test_node_app *node = NULL;
     dtn_item *config = NULL;
 
     dtn_event_loop_config loop_config = (dtn_event_loop_config){
@@ -118,19 +118,19 @@ int main(int argc, char **argv) {
     dtn_log_debug("using domain %s", domain);
 
 
-    dtn_base_node_config node_config = dtn_base_node_config_from_item(config);
+    dtn_test_node_app_config node_config = dtn_test_node_app_config_from_item(config);
     node_config.loop = loop;
     node_config.io = io;
     node_config.server = server;
 
-    node = dtn_base_node_create(node_config);
+    node = dtn_test_node_app_create(node_config);
     if (!node) goto error;
 
     if (!dtn_webserver_enable_callback(
         server, 
         domain,
         node,
-        dtn_base_node_websocket_callback)) goto error;
+        dtn_test_node_app_websocket_callback)) goto error;
 
     dtn_log_info("Enabled JSON IO callback for node %s", domain);
 
@@ -144,7 +144,7 @@ error:
     config = dtn_item_free(config);
     io = dtn_io_free(io);
     server = dtn_webserver_free(server);
-    node = dtn_base_node_free(node);
+    node = dtn_test_node_app_free(node);
     loop = dtn_event_loop_free(loop);
     return retval;
 }

@@ -79,4 +79,8 @@ uint64_t dtn_hash_uint64(const void *uint64);
 */
 uint64_t dtn_hash_int64(const void *int64);
 
+/*---------------------------------------------------------------------------*/
+
+uint64_t dtn_hash_dtn_socket_data(const void *self);
+
 #endif /* dtn_hash_functions_h */

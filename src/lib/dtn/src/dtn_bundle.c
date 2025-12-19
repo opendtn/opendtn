@@ -369,8 +369,11 @@ dtn_cbor_match dtn_bundle_decode(
     if (!buffer || !out || !next) goto error;
 
     dtn_cbor *data = NULL;
+    if (size < 1) goto error;
+    if (buffer[0]!=0x9f) goto error;
 
     dtn_cbor_match match = dtn_cbor_decode(buffer, size, &data, next);
+
 
     switch(match){
 
@@ -391,6 +394,7 @@ dtn_cbor_match dtn_bundle_decode(
     *out = bundle;
     return DTN_CBOR_MATCH_FULL;
 error:
+    if (next) *next = (uint8_t*) buffer;
     dtn_bundle_free(bundle);
     return DTN_CBOR_NO_MATCH;
 }

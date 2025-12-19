@@ -19,7 +19,7 @@
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_base_node.c
+        @file           dtn_test_node_app.c
         @author         Töpfer, Markus
 
         @date           2025-12-18
@@ -27,32 +27,34 @@
 
         ------------------------------------------------------------------------
 */
-#include "../include/dtn_base_node.h"
+#include "../include/dtn_test_node_app.h"
+#include "../include/dtn_test_node_core.h"
 
 #include <dtn_core/dtn_app.h>
 #include <dtn_core/dtn_event_api.h>
 #include <dtn_core/dtn_socket_item.h>
 
-#define DTN_BASE_NODE_MAGIC_BYTE 0x934A
+#define DTN_TEST_NODE_APP_MAGIC_BYTE 0x934A
 
 /*---------------------------------------------------------------------------*/
 
-struct dtn_base_node {
+struct dtn_test_node_app {
 
     uint16_t magic_byte;
-    dtn_base_node_config config;
+    dtn_test_node_app_config config;
 
     int socket;
 
     dtn_app *app;
     dtn_socket_item *connections;
+    dtn_test_node_core *core;
 };
 
 /*---------------------------------------------------------------------------*/
 
 void cb_close(void *userdata, int socket){
 
-    dtn_base_node *self = dtn_base_node_cast(userdata);
+    dtn_test_node_app *self = dtn_test_node_app_cast(userdata);
     if (!self) goto error;
 
     dtn_socket_item_drop(self->connections, socket);
@@ -62,7 +64,7 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-bool cb_login(dtn_base_node *self, int socket, const dtn_item *msg, 
+bool cb_login(dtn_test_node_app *self, int socket, const dtn_item *msg, 
     dtn_item **out){
 
     dtn_item *answer = NULL;
@@ -114,11 +116,11 @@ bool cb_app_generic(
     void *userdata, 
     int socket, 
     dtn_item *msg, 
-    bool (*function)(dtn_base_node *self, int socket, 
+    bool (*function)(dtn_test_node_app *self, int socket, 
         const dtn_item *msg, dtn_item **out)){
 
     dtn_item *out = NULL;
-    dtn_base_node *self = dtn_base_node_cast(userdata);
+    dtn_test_node_app *self = dtn_test_node_app_cast(userdata);
     if (!self || socket < 1 || !msg) goto error;
 
     bool result = function(self, socket, msg, &out);
@@ -144,7 +146,7 @@ bool cb_app_login(void *userdata, int socket, dtn_item *msg){
 
 /*---------------------------------------------------------------------------*/
 
-static bool register_app_callback(dtn_base_node *self){
+static bool register_app_callback(dtn_test_node_app *self){
 
     if (!dtn_app_register(self->app,
         "login",
@@ -158,7 +160,7 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool init_config(dtn_base_node_config *config){
+static bool init_config(dtn_test_node_app_config *config){
 
     if (!config || !config->loop || !config->io) goto error;
 
@@ -194,15 +196,15 @@ error:
  *      ------------------------------------------------------------------------
  */
 
-dtn_base_node *dtn_base_node_create(dtn_base_node_config config){
+dtn_test_node_app *dtn_test_node_app_create(dtn_test_node_app_config config){
 
-    dtn_base_node *self = NULL;
+    dtn_test_node_app *self = NULL;
     if (!init_config(&config)) goto error;
 
-    self = calloc(1, sizeof(dtn_base_node));
+    self = calloc(1, sizeof(dtn_test_node_app));
     if (!self) goto error;
 
-    self->magic_byte = DTN_BASE_NODE_MAGIC_BYTE;
+    self->magic_byte = DTN_TEST_NODE_APP_MAGIC_BYTE;
     self->config = config;
 
     dtn_socket_item_config conn = (dtn_socket_item_config){
@@ -235,6 +237,12 @@ dtn_base_node *dtn_base_node_create(dtn_base_node_config config){
             self->config.socket.port);
 
         goto error;
+    
+    } else {
+
+        dtn_log_info("created C&C listener at %s:%i",
+            self->config.socket.host,
+            self->config.socket.port);
     }
 
     if (!register_app_callback(self)) goto error;
@@ -245,39 +253,52 @@ dtn_base_node *dtn_base_node_create(dtn_base_node_config config){
     if (!dtn_app_register_close(self->app,
         self, cb_close)) goto error;
 
+    dtn_test_node_core_config core = (dtn_test_node_core_config){
+        .loop = config.loop,
+        .limits.threadlock_timeout_usec = config.limits.threadlock_timeout_usec,
+        .limits.message_queue_capacity = config.limits.message_queue_capacity,
+        .limits.threads = config.limits.threads
+    };
+
+    self->core = dtn_test_node_core_create(core);
+    if (!self->core) goto error;
+
     return self;
 error:
-    dtn_base_node_free(self);
+    dtn_test_node_app_free(self);
     return NULL;
 }
 
 /*---------------------------------------------------------------------------*/
 
-dtn_base_node *dtn_base_node_free(dtn_base_node *self){
+dtn_test_node_app *dtn_test_node_app_free(dtn_test_node_app *self){
 
-    if (!dtn_base_node_cast(self)) return self;
+    if (!dtn_test_node_app_cast(self)) return self;
 
+    self->core = dtn_test_node_core_free(self->core);
+    self->app = dtn_app_free(self->app);
+    self->connections = dtn_socket_item_free(self->connections);
     self = dtn_data_pointer_free(self);
     return NULL;
 }
 
 /*---------------------------------------------------------------------------*/
 
-dtn_base_node *dtn_base_node_cast(const void *data){
+dtn_test_node_app *dtn_test_node_app_cast(const void *data){
 
     if (!data) return NULL;
 
-    if (*(uint16_t *)data != DTN_BASE_NODE_MAGIC_BYTE)
+    if (*(uint16_t *)data != DTN_TEST_NODE_APP_MAGIC_BYTE)
         return NULL;
 
-    return (dtn_base_node *)data;
+    return (dtn_test_node_app *)data;
 }
 
 /*---------------------------------------------------------------------------*/
 
-dtn_base_node_config dtn_base_node_config_from_item(const dtn_item *input){
+dtn_test_node_app_config dtn_test_node_app_config_from_item(const dtn_item *input){
 
-    dtn_base_node_config config = {0};
+    dtn_test_node_app_config config = {0};
 
     const dtn_item *conf = dtn_item_get(input, "/dtn/node");
     if (!conf) conf = input;
@@ -302,13 +323,13 @@ dtn_base_node_config dtn_base_node_config_from_item(const dtn_item *input){
 
 /*---------------------------------------------------------------------------*/
 
-void dtn_base_node_websocket_callback(
+void dtn_test_node_app_websocket_callback(
     void *userdata, int socket, dtn_item *message){
 
     // Websocket enabled events NOTE send must be done via webserver
     dtn_item *out = NULL;
 
-    dtn_base_node *self = dtn_base_node_cast(userdata);
+    dtn_test_node_app *self = dtn_test_node_app_cast(userdata);
     if (!self || socket < 1 || !message) goto error;
 
     if (!self->config.server){
