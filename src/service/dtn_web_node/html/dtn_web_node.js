@@ -82,7 +82,17 @@ var dtn_web_node = {
         request.parameter.password = msg;
         dtn_websocket.send(JSON.stringify(request));
 
-    }
+    },
+
+    send: function(){
+
+        console.log("sending CBOR blocks");
+
+        let request = dtn_cbor_test.generateJSON();
+        dtn_websocket.send(JSON.stringify(request));
+        
+    },
+
 
  
 

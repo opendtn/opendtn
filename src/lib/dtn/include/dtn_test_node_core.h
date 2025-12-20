@@ -31,6 +31,7 @@
 #define dtn_test_node_core_h
 
 #include <dtn_base/dtn_event_loop.h>
+#include "dtn_cbor.h"
 
 /*---------------------------------------------------------------------------*/
 
@@ -47,6 +48,7 @@ typedef struct dtn_test_node_core_config{
         uint64_t threadlock_timeout_usec;
         uint64_t message_queue_capacity;
         uint64_t threads;
+        uint64_t link_check;
 
     } limits;
 
@@ -64,8 +66,13 @@ dtn_test_node_core *dtn_test_node_core_create(dtn_test_node_core_config config);
 dtn_test_node_core *dtn_test_node_core_free(dtn_test_node_core *self);
 dtn_test_node_core *dtn_test_node_core_cast(const void *data);
 
-bool dtn_test_node_core_open_interface_ip(
+bool dtn_test_node_core_enable_ip_interfaces(
         dtn_test_node_core *self,
-        dtn_socket_configuration socket);
+        const dtn_item *config);
+
+bool dtn_test_node_core_send_raw(
+        dtn_test_node_core *self,
+        dtn_socket_configuration remote,
+        const dtn_cbor *data);
 
 #endif /* dtn_test_node_core_h */

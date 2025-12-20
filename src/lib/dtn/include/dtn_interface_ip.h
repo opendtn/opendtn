@@ -59,13 +59,13 @@ typedef struct dtn_interface_ip_config {
 
         // bundle reception
         void (*io)(void *userdata, 
-            const dtn_socket_data *remote, dtn_bundle *bundle);
+            const dtn_socket_data *remote, dtn_bundle *bundle, const char *name);
 
         // state change propagation
-        void (*state)(void *userdata, dtn_ip_link_state state);
+        void (*state)(void *userdata, dtn_ip_link_state state, const char *name);
 
         // close state propagation
-        void (*close)(void *userdata, const char *interface_name);
+        void (*close)(void *userdata, const char *name);
 
     } callbacks;
 
@@ -80,10 +80,15 @@ typedef struct dtn_interface_ip_config {
  */
 
 dtn_interface_ip *dtn_interface_ip_create(dtn_interface_ip_config config);
-dtn_interface_ip *dtn_interface_ip_free(dtn_interface_ip *self);
+void *dtn_interface_ip_free(void *self);
 dtn_interface_ip *dtn_interface_ip_cast(const void *self);
 
 const char *dtn_interface_ip_name(const dtn_interface_ip *self);
+
+bool dtn_interface_ip_send(dtn_interface_ip *self,
+    dtn_socket_configuration remote,
+    const uint8_t *buffer,
+    size_t size);
 
 
 #endif /* dtn_interface_ip_h */

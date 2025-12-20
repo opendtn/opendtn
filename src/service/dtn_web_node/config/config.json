@@ -23,7 +23,7 @@
 			"socket" : {
 
 				"host" : "0.0.0.0",
-				"port" : 14444,
+				"port" : 14445,
 				"type" : "TCP"
 			},
 
@@ -49,7 +49,7 @@
 				{
 					"host" : "localhost",
 					"type" : "UDP",
-					"port" : 4556
+					"port" : 4557
 				}
 			]
 		}
@@ -61,7 +61,7 @@
 		
 		"socket" : {
 			"host" : "0.0.0.0",
-			"port" : 12345,
+			"port" : 12346,
 			"type" : "TLS"
 		},
 

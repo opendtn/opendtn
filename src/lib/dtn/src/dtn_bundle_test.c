@@ -248,7 +248,7 @@ int test_dtn_bundle_decode(){
     buffer[36] = 't';
     buffer[37] = 0xFF;
 
-    for (int i = 0; i < 37; i++){
+    for (int i = 1; i < 37; i++){
 
         testrun(DTN_CBOR_MATCH_PARTIAL == 
                 dtn_bundle_decode(buffer, i, &out, &next));
@@ -410,7 +410,7 @@ int test_dtn_bundle_decode(){
     buffer[46] = 't';
     buffer[47] = 0xFF;
 
-    for (int i = 0; i < 48; i++){
+    for (int i = 1; i < 48; i++){
 
         testrun(DTN_CBOR_MATCH_PARTIAL == 
                 dtn_bundle_decode(buffer, i, &out, &next));
@@ -473,11 +473,15 @@ int test_dtn_bundle_decode(){
     buffer[45] = 't';
     buffer[46] = 0xFF;
 
-    for (int i = 0; i < 47; i++){
-
-        // NOTE CBOR parsing will succeed but validation will fail
+    for (int i = 1; i < 27; i++){
 
         testrun(DTN_CBOR_MATCH_PARTIAL == 
+                dtn_bundle_decode(buffer, i, &out, &next));
+    }
+
+    for (int i = 28; i < 46; i++){
+
+        testrun(DTN_CBOR_NO_MATCH == 
                 dtn_bundle_decode(buffer, i, &out, &next));
     }
 
@@ -539,9 +543,15 @@ int test_dtn_bundle_decode(){
     buffer[36] = 't';
     buffer[37] = 0xFF;
 
-    for (int i = 0; i < 37; i++){
+    for (int i = 1; i < 27; i++){
 
         testrun(DTN_CBOR_MATCH_PARTIAL == 
+                dtn_bundle_decode(buffer, i, &out, &next));
+    }
+
+    for (int i = 27; i < 37; i++){
+
+        testrun(DTN_CBOR_NO_MATCH == 
                 dtn_bundle_decode(buffer, i, &out, &next));
     }
 
@@ -592,9 +602,15 @@ int test_dtn_bundle_decode(){
     buffer[39] = 't';
     buffer[40] = 0xFF;
 
-    for (int i = 0; i < 41; i++){
+    for (int i = 1; i < 30; i++){
 
         testrun(DTN_CBOR_MATCH_PARTIAL == 
+                dtn_bundle_decode(buffer, i, &out, &next));
+    }
+
+    for (int i = 30; i < 40; i++){
+
+        testrun(DTN_CBOR_NO_MATCH == 
                 dtn_bundle_decode(buffer, i, &out, &next));
     }
 
@@ -659,7 +675,7 @@ int test_dtn_bundle_decode(){
     buffer[38] = 't';
     buffer[39] = 0xFF;
 
-    for (int i = 0; i < 40; i++){
+    for (int i = 1; i < 40; i++){
 
         testrun(DTN_CBOR_MATCH_PARTIAL == 
                 dtn_bundle_decode(buffer, i, &out, &next));
@@ -725,7 +741,7 @@ int test_dtn_bundle_decode(){
     buffer[32] = crc32 >> 8;
     buffer[33] = crc32;
 
-    for (int i = 0; i < 44; i++){
+    for (int i = 1; i < 44; i++){
 
         testrun(DTN_CBOR_MATCH_PARTIAL == 
                 dtn_bundle_decode(buffer, i, &out, &next));
@@ -2600,7 +2616,287 @@ int test_dtn_bundle_copy(){
     return testrun_log_success();
 }
 
+/*----------------------------------------------------------------------------*/
 
+int test_check_primary_bytes(){
+
+    uint8_t buffer[100] = {0};
+    // min valid 
+    buffer[0]  = 0x9f;
+    buffer[1]  = 0x88;
+    buffer[2]  = 0x07; // version
+    buffer[3]  = 0x00; // flags
+    buffer[4]  = 0x00; // crc_type
+    buffer[5]  = 0x45; // destination
+    buffer[6]  = 'd';
+    buffer[7]  = 't';
+    buffer[8]  = 'n';
+    buffer[9]  = ':';
+    buffer[10] = '1';
+    buffer[11] = 0x45; // source
+    buffer[12] = 'd';
+    buffer[13] = 't';
+    buffer[14] = 'n';
+    buffer[15] = ':';
+    buffer[16] = '2';
+    buffer[17] = 0x45; // report
+    buffer[18] = 'd';
+    buffer[19] = 't';
+    buffer[20] = 'n';
+    buffer[21] = ':';
+    buffer[22] = '3';
+    buffer[23] = 0x82; // timestamp
+    buffer[24] = 0x01;          // time
+    buffer[25] = 0x02;          // sequence number
+    buffer[26] = 0x03; // lifetime
+
+    testrun(check_primary_bytes(buffer + 1 , 26));
+
+    // full valid without crc 
+    buffer[0]  = 0x9f;
+    buffer[1]  = 0x8B;
+    buffer[2]  = 0x07; // version
+    buffer[3]  = 0x00; // flags
+    buffer[4]  = 0x00; // crc_type
+    buffer[5]  = 0x45; // destination
+    buffer[6]  = 'd';
+    buffer[7]  = 't';
+    buffer[8]  = 'n';
+    buffer[9]  = ':';
+    buffer[10] = '1';
+    buffer[11] = 0x45; // source
+    buffer[12] = 'd';
+    buffer[13] = 't';
+    buffer[14] = 'n';
+    buffer[15] = ':';
+    buffer[16] = '2';
+    buffer[17] = 0x45; // report
+    buffer[18] = 'd';
+    buffer[19] = 't';
+    buffer[20] = 'n';
+    buffer[21] = ':';
+    buffer[22] = '3';
+    buffer[23] = 0x82; // timestamp
+    buffer[24] = 0x01;          // time
+    buffer[25] = 0x02;          // sequence number
+    buffer[26] = 0x03; // lifetime
+    buffer[27] = 0x18;
+    buffer[28] = 100;
+    buffer[29] = 0x18;
+    buffer[30] = 200;
+
+    testrun(check_primary_bytes(buffer + 1 , 30));
+
+    // app data not int
+    buffer[0]  = 0x9f;
+    buffer[1]  = 0x8B;
+    buffer[2]  = 0x07; // version
+    buffer[3]  = 0x01; // flags
+    buffer[4]  = 0x00; // crc_type
+    buffer[5]  = 0x45; // destination
+    buffer[6]  = 'd';
+    buffer[7]  = 't';
+    buffer[8]  = 'n';
+    buffer[9]  = ':';
+    buffer[10] = '1';
+    buffer[11] = 0x45; // source
+    buffer[12] = 'd';
+    buffer[13] = 't';
+    buffer[14] = 'n';
+    buffer[15] = ':';
+    buffer[16] = '2';
+    buffer[17] = 0x45; // report
+    buffer[18] = 'd';
+    buffer[19] = 't';
+    buffer[20] = 'n';
+    buffer[21] = ':';
+    buffer[22] = '3';
+    buffer[23] = 0x82; // timestamp
+    buffer[24] = 0x01;          // time
+    buffer[25] = 0x02;          // sequence number
+    buffer[26] = 0x03; // lifetime
+    buffer[27] = 0x18;
+    buffer[28] = 100;
+    buffer[29] = 0x8B;
+    buffer[30] = 200;
+
+    testrun(!check_primary_bytes(buffer + 1 , 30));
+
+    // fragment not int
+    buffer[0]  = 0x9f;
+    buffer[1]  = 0x8B;
+    buffer[2]  = 0x07; // version
+    buffer[3]  = 0x01; // flags
+    buffer[4]  = 0x00; // crc_type
+    buffer[5]  = 0x45; // destination
+    buffer[6]  = 'd';
+    buffer[7]  = 't';
+    buffer[8]  = 'n';
+    buffer[9]  = ':';
+    buffer[10] = '1';
+    buffer[11] = 0x45; // source
+    buffer[12] = 'd';
+    buffer[13] = 't';
+    buffer[14] = 'n';
+    buffer[15] = ':';
+    buffer[16] = '2';
+    buffer[17] = 0x45; // report
+    buffer[18] = 'd';
+    buffer[19] = 't';
+    buffer[20] = 'n';
+    buffer[21] = ':';
+    buffer[22] = '3';
+    buffer[23] = 0x82; // timestamp
+    buffer[24] = 0x01;          // time
+    buffer[25] = 0x02;          // sequence number
+    buffer[26] = 0x03; // lifetime
+    buffer[27] = 0x8B;
+    buffer[28] = 100;
+    buffer[29] = 0x18;
+    buffer[30] = 200;
+
+    // destination not string
+    buffer[0]  = 0x9f;
+    buffer[1]  = 0x8B;
+    buffer[2]  = 0x07; // version
+    buffer[3]  = 0x01; // flags
+    buffer[4]  = 0x00; // crc_type
+    buffer[5]  = 0x18; // destination
+    buffer[6]  = 'd';
+    buffer[7]  = 't';
+    buffer[8]  = 'n';
+    buffer[9]  = ':';
+    buffer[10] = '1';
+    buffer[11] = 0x45; // source
+    buffer[12] = 'd';
+    buffer[13] = 't';
+    buffer[14] = 'n';
+    buffer[15] = ':';
+    buffer[16] = '2';
+    buffer[17] = 0x45; // report
+    buffer[18] = 'd';
+    buffer[19] = 't';
+    buffer[20] = 'n';
+    buffer[21] = ':';
+    buffer[22] = '3';
+    buffer[23] = 0x82; // timestamp
+    buffer[24] = 0x01;          // time
+    buffer[25] = 0x02;          // sequence number
+    buffer[26] = 0x03; // lifetime
+    buffer[27] = 0x18;
+    buffer[28] = 100;
+    buffer[29] = 0x18;
+    buffer[30] = 200;
+
+    testrun(!check_primary_bytes(buffer + 1 , 30));
+
+    // source not string
+    buffer[0]  = 0x9f;
+    buffer[1]  = 0x8B;
+    buffer[2]  = 0x07; // version
+    buffer[3]  = 0x01; // flags
+    buffer[4]  = 0x00; // crc_type
+    buffer[5]  = 0x45; // destination
+    buffer[6]  = 'd';
+    buffer[7]  = 't';
+    buffer[8]  = 'n';
+    buffer[9]  = ':';
+    buffer[10] = '1';
+    buffer[11] = 0x18; // source
+    buffer[12] = 'd';
+    buffer[13] = 't';
+    buffer[14] = 'n';
+    buffer[15] = ':';
+    buffer[16] = '2';
+    buffer[17] = 0x45; // report
+    buffer[18] = 'd';
+    buffer[19] = 't';
+    buffer[20] = 'n';
+    buffer[21] = ':';
+    buffer[22] = '3';
+    buffer[23] = 0x82; // timestamp
+    buffer[24] = 0x01;          // time
+    buffer[25] = 0x02;          // sequence number
+    buffer[26] = 0x03; // lifetime
+    buffer[27] = 0x18;
+    buffer[28] = 100;
+    buffer[29] = 0x18;
+    buffer[30] = 200;
+
+    testrun(!check_primary_bytes(buffer + 1 , 30));
+
+    // report not string
+    buffer[0]  = 0x9f;
+    buffer[1]  = 0x8B;
+    buffer[2]  = 0x07; // version
+    buffer[3]  = 0x01; // flags
+    buffer[4]  = 0x00; // crc_type
+    buffer[5]  = 0x45; // destination
+    buffer[6]  = 'd';
+    buffer[7]  = 't';
+    buffer[8]  = 'n';
+    buffer[9]  = ':';
+    buffer[10] = '1';
+    buffer[11] = 0x45; // source
+    buffer[12] = 'd';
+    buffer[13] = 't';
+    buffer[14] = 'n';
+    buffer[15] = ':';
+    buffer[16] = '2';
+    buffer[17] = 0x18; // report
+    buffer[18] = 'd';
+    buffer[19] = 't';
+    buffer[20] = 'n';
+    buffer[21] = ':';
+    buffer[22] = '3';
+    buffer[23] = 0x82; // timestamp
+    buffer[24] = 0x01;          // time
+    buffer[25] = 0x02;          // sequence number
+    buffer[26] = 0x03; // lifetime
+    buffer[27] = 0x18;
+    buffer[28] = 100;
+    buffer[29] = 0x18;
+    buffer[30] = 200;
+
+    testrun(!check_primary_bytes(buffer + 1 , 30));
+
+    // timestamp not array
+    buffer[0]  = 0x9f;
+    buffer[1]  = 0x8B;
+    buffer[2]  = 0x07; // version
+    buffer[3]  = 0x01; // flags
+    buffer[4]  = 0x00; // crc_type
+    buffer[5]  = 0x45; // destination
+    buffer[6]  = 'd';
+    buffer[7]  = 't';
+    buffer[8]  = 'n';
+    buffer[9]  = ':';
+    buffer[10] = '1';
+    buffer[11] = 0x45; // source
+    buffer[12] = 'd';
+    buffer[13] = 't';
+    buffer[14] = 'n';
+    buffer[15] = ':';
+    buffer[16] = '2';
+    buffer[17] = 0x45; // report
+    buffer[18] = 'd';
+    buffer[19] = 't';
+    buffer[20] = 'n';
+    buffer[21] = ':';
+    buffer[22] = '3';
+    buffer[23] = 0x18; // timestamp
+    buffer[24] = 0x01;          // time
+    buffer[25] = 0x02;          // sequence number
+    buffer[26] = 0x03; // lifetime
+    buffer[27] = 0x18;
+    buffer[28] = 100;
+    buffer[29] = 0x18;
+    buffer[30] = 200;
+
+    testrun(!check_primary_bytes(buffer + 1 , 30));
+
+    return testrun_log_success();
+}
 /*
  *      ------------------------------------------------------------------------
  *
@@ -2612,6 +2908,7 @@ int test_dtn_bundle_copy(){
 int all_tests() {
 
     testrun_init();
+    testrun_test(test_check_primary_bytes);
     testrun_test(test_dtn_bundle_create);
     testrun_test(test_dtn_bundle_free);
     testrun_test(test_check_primary_block);
@@ -2658,6 +2955,7 @@ int all_tests() {
     testrun_test(test_dtn_bundle_free_void);
     testrun_test(test_dtn_bundle_dump);
     testrun_test(test_dtn_bundle_copy);
+    
 
     return testrun_counter;
 }

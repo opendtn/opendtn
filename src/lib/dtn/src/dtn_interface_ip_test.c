@@ -119,7 +119,9 @@ struct dummy {
 /*----------------------------------------------------------------------------*/
 
 static void dummy_io(void *userdata, 
-    const dtn_socket_data *remote, dtn_bundle *bundle){
+    const dtn_socket_data *remote, dtn_bundle *bundle, const char *name){
+
+    UNUSED(name);
 
     struct dummy *dummy = (struct dummy*) userdata;
 
@@ -247,11 +249,12 @@ int check_io(){
 
     while(-1 == bytes){
 
-        bytes = sendto(client, buffer, 21 , 0, (struct sockaddr *)&sa, sa_len);
+        bytes = sendto(client, buffer, 10 , 0, (struct sockaddr *)&sa, sa_len);
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
     }
 
     testrun(!dummy.bundle);
+
 
     // add some none matching buffer
     bytes = -1;
@@ -274,22 +277,11 @@ int check_io(){
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
     }
 
-    // NOTE somehow we need to send two packages to reset the CBOR algorythm. 
-
-    // send after after garbadge
-    bytes = -1;
-
-    while(-1 == bytes){
-
-        bytes = sendto(client, buffer, one_bundle , 0, (struct sockaddr *)&sa, sa_len);
-        dtn_event_loop_run(loop, DTN_RUN_ONCE);
-    }
-
     testrun(dummy.bundle);
     dummy.bundle = dtn_bundle_free(dummy.bundle);
 
     memset(buffer, 0, 1024);
-    testrun(dtn_bundle_encode(bundle, buffer, 1024, &next))
+    testrun(dtn_bundle_encode(bundle, buffer, 1024, &next));
 
     bytes = -1;
 

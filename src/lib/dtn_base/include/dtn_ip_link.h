@@ -30,6 +30,8 @@
 #ifndef dtn_ip_link_h
 #define dtn_ip_link_h
 
+#include "dtn_item.h"
+
 typedef enum dtn_ip_link_state {
 
     DTN_IP_LINK_ERROR = 0,
@@ -38,8 +40,19 @@ typedef enum dtn_ip_link_state {
 
 } dtn_ip_link_state;
 
+/*------------------------------------------------------------------*/
+
 char *dtn_ip_link_get_interface_name(int socket);
 
+/*------------------------------------------------------------------*/
+
 dtn_ip_link_state dtn_ip_link_get_state(const char *interface_name);
+
+/*------------------------------------------------------------------*/
+
+/**
+ *      Returns a dict of name and ip address
+ */
+dtn_item *dtn_io_link_get_all_interfaces();
 
 #endif /* dtn_ip_link_h */

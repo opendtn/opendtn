@@ -34,6 +34,9 @@
 #include "../include/dtn_string.h"
 #include <sys/types.h>
 #include <ifaddrs.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 
 char *dtn_ip_link_get_interface_name(int socket){
@@ -144,4 +147,75 @@ dtn_ip_link_state dtn_ip_link_get_state(const char *name){
     return result;
 error:
     return DTN_IP_LINK_ERROR;
+}
+
+/*------------------------------------------------------------------*/
+
+dtn_item *dtn_io_link_get_all_interfaces(){
+
+    dtn_item *out = dtn_item_object();
+    dtn_item *arr = NULL;
+
+    dtn_socket_configuration config = {0};
+
+    struct ifaddrs* ifaddr = NULL;
+    struct ifaddrs* ifa = NULL;
+
+    int r = getifaddrs(&ifaddr);
+    if (r != 0) goto error;
+
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
+    {
+        if (ifa->ifa_addr){
+
+            arr = dtn_item_object_get(out, ifa->ifa_name);
+            if (!arr){
+                arr = dtn_item_array();
+                dtn_item_object_set(out, ifa->ifa_name, arr);
+            }
+
+            switch(ifa->ifa_addr->sa_family){
+                case AF_INET:
+
+                    struct sockaddr_in* inaddr = (struct sockaddr_in*)ifa->ifa_addr;
+                    if (inet_ntop(AF_INET,
+                        &inaddr->sin_addr,
+                        config.host, DTN_HOST_NAME_MAX)){
+
+                        dtn_item *val = dtn_item_string(config.host);
+                        if (!val) goto error;
+                        if (!dtn_item_array_push(arr,val)){
+                            val = dtn_item_free(val);
+                                goto error;
+                        } 
+                    }
+                    break;
+
+                case AF_INET6:
+
+                    struct sockaddr_in6* inaddr6 = (struct sockaddr_in6*)ifa->ifa_addr;
+                    if (inet_ntop(AF_INET6,
+                        &inaddr6->sin6_addr,
+                        config.host, DTN_HOST_NAME_MAX)){
+
+                        dtn_item *val = dtn_item_string(config.host);
+                        if (!val) goto error;
+                        if (!dtn_item_array_push(arr,val)){
+                            val = dtn_item_free(val);
+                                goto error;
+                        } 
+                    }
+                    break;
+
+                default:
+                    break;
+            } 
+        }
+    }
+
+    freeifaddrs(ifaddr);
+    return out;
+error:
+    dtn_item_free(out);
+    return NULL;
 }

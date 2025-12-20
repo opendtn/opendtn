@@ -78,7 +78,9 @@ static bool check_link_status(uint32_t timer_id, void *userdata){
     if (self->config.callbacks.state){
 
         self->config.callbacks.state(
-            self->config.callbacks.userdata, current);
+            self->config.callbacks.userdata, 
+            current,
+            self->config.socket.host);
     
     }
 
@@ -125,7 +127,8 @@ static bool process_bundle(dtn_interface_ip *self,
         self->config.callbacks.io(
             self->config.callbacks.userdata,
             remote,
-            bundle);
+            bundle,
+            self->config.socket.host);
     
     } else {
 
@@ -188,7 +191,7 @@ static bool cb_io(int socket, uint8_t event, void *userdata){
 
             DTN_ASSERT(next);
 
-            if (next - out->start + 1 != (int64_t) out->length){
+            if (next - out->start != (int64_t) out->length){
                 dtn_buffer_free(out);
                 goto error;
             }
@@ -345,9 +348,10 @@ error:
 
 /*------------------------------------------------------------------*/
 
-dtn_interface_ip *dtn_interface_ip_free(dtn_interface_ip *self){
+void *dtn_interface_ip_free(void *data){
 
-    if (!dtn_interface_ip_cast(self)) return self;
+    dtn_interface_ip *self = dtn_interface_ip_cast(data);
+    if (!self) return data;
 
     if (self->socket > 0) close(self->socket);
 
@@ -381,4 +385,44 @@ const char *dtn_interface_ip_name(const dtn_interface_ip *self){
 
     if (!self) return NULL;
     return self->config.socket.host;
+}
+
+/*------------------------------------------------------------------*/
+
+bool dtn_interface_ip_send(dtn_interface_ip *self,
+    dtn_socket_configuration remote,
+    const uint8_t *buffer,
+    size_t size){
+
+    if (!self || !buffer || size < 1) goto error;
+
+    if (0 == remote.host[0]) goto error;
+    if (UDP != remote.type) goto error;
+
+    struct sockaddr_storage sa = {0};
+    socklen_t sock_len = sizeof(sa);
+
+    int type = AF_INET;
+
+    char *ptr = memchr(remote.host, '.', strlen(remote.host));
+    
+    if (ptr){
+        sock_len = sizeof(struct sockaddr_in);
+        type = AF_INET;
+    } else {
+        sock_len = sizeof(struct sockaddr_in6);
+        type = AF_INET6;
+    }
+
+    if (!dtn_socket_fill_sockaddr_storage(&sa, type, remote.host, remote.port))
+        goto error;
+
+    ssize_t bytes = sendto(self->socket, buffer, size, 0, 
+        (struct sockaddr*)&sa, sock_len);
+
+    if (bytes < 1) goto error;
+
+    return true;
+error:
+    return false;
 }

@@ -117,7 +117,6 @@ int main(int argc, char **argv) {
 
     dtn_log_debug("using domain %s", domain);
 
-
     dtn_test_node_app_config node_config = dtn_test_node_app_config_from_item(config);
     node_config.loop = loop;
     node_config.io = io;
@@ -125,6 +124,9 @@ int main(int argc, char **argv) {
 
     node = dtn_test_node_app_create(node_config);
     if (!node) goto error;
+
+    if (!dtn_test_node_enable_ip_interfaces(node, config))
+        goto error;
 
     if (!dtn_webserver_enable_callback(
         server, 

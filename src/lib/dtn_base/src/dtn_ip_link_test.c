@@ -30,6 +30,8 @@
 #include <dtn_base/testrun.h>
 #include "dtn_ip_link.c"
 
+#include "../include/dtn_item_json.h"
+
 /*
  *      ------------------------------------------------------------------------
  *
@@ -77,6 +79,20 @@ int test_dtn_ip_link_get_state(){
 
 /*----------------------------------------------------------------------------*/
 
+int test_dtn_io_link_get_all_interfaces(){
+
+    dtn_item *item = dtn_io_link_get_all_interfaces();
+    testrun(item);
+    char *string = dtn_item_to_json(item);
+    fprintf(stdout, "%s\n", string);
+    string = dtn_data_pointer_free(string);
+    item = dtn_item_free(item);
+
+    return testrun_log_success();
+}
+
+/*----------------------------------------------------------------------------*/
+
 
 /*
  *      ------------------------------------------------------------------------
@@ -91,6 +107,7 @@ int all_tests() {
     testrun_init();
     testrun_test(test_dtn_ip_link_get_interface_name);
     testrun_test(test_dtn_ip_link_get_state);
+    testrun_test(test_dtn_io_link_get_all_interfaces);
 
     return testrun_counter;
 }

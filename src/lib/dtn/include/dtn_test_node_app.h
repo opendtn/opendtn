@@ -58,6 +58,7 @@ typedef struct dtn_test_node_app_config {
         uint64_t threadlock_timeout_usec;
         uint64_t message_queue_capacity;
         uint64_t threads;
+        uint64_t link_check;
 
     } limits;
 
@@ -84,5 +85,10 @@ dtn_test_node_app_config dtn_test_node_app_config_from_item(
 
 void dtn_test_node_app_websocket_callback(
     void *userdata, int socket, dtn_item *item);
+
+/*---------------------------------------------------------------------------*/
+
+bool dtn_test_node_enable_ip_interfaces(
+    dtn_test_node_app *self, const dtn_item *config);
 
 #endif /* dtn_test_node_app_h */

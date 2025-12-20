@@ -358,6 +358,145 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
+static bool check_primary_bytes(uint8_t *start , size_t size){
+
+    uint8_t *ptr = start;
+    dtn_cbor *item = NULL;
+
+    uint64_t flags = 0;
+    uint64_t crc = 0;
+
+    switch(ptr[0]){
+        case 0x88:
+        case 0x89:
+        case 0x8A:
+        case 0x8B:
+            break;
+        default:
+            goto error;
+    }
+
+    ptr++;
+
+    if ((int64_t) size - (ptr - start) <= 0) return true;
+    
+    dtn_cbor_match match = dtn_cbor_decode(ptr, size - (ptr - start), &item, &ptr);
+    if (match == DTN_CBOR_MATCH_PARTIAL) return true;
+    if (match != DTN_CBOR_MATCH_FULL) goto error;
+    if (!dtn_cbor_is_uint(item)) goto error;
+    if (0x07 != dtn_cbor_get_uint(item)) goto error;
+    item = dtn_cbor_free(item);
+
+    if ((int64_t) size - (ptr - start) <= 0) return true;
+
+    match = dtn_cbor_decode(ptr, size - (ptr - start), &item, &ptr);
+    if (match == DTN_CBOR_MATCH_PARTIAL) return true;
+    if (match != DTN_CBOR_MATCH_FULL) goto error;
+    if (!dtn_cbor_is_uint(item)) goto error;
+    flags = dtn_cbor_get_uint(item);
+    item = dtn_cbor_free(item);
+
+    if ((int64_t) size - (ptr - start) <= 0) return true;
+
+    match = dtn_cbor_decode(ptr, size - (ptr - start), &item, &ptr);
+    if (match == DTN_CBOR_MATCH_PARTIAL) return true;
+    if (match != DTN_CBOR_MATCH_FULL) goto error;
+    if (!dtn_cbor_is_uint(item)) goto error;
+    crc = dtn_cbor_get_uint(item);
+    item = dtn_cbor_free(item);
+
+    if ((int64_t) size - (ptr - start) <= 0) return true;
+
+    match = dtn_cbor_decode(ptr, size - (ptr - start), &item, &ptr);
+    if (match == DTN_CBOR_MATCH_PARTIAL) return true;
+    if (match != DTN_CBOR_MATCH_FULL) goto error;
+    if (!dtn_cbor_is_string(item)) goto error;
+    item = dtn_cbor_free(item);
+
+    if ((int64_t) size - (ptr - start) <= 0) return true;
+
+    match = dtn_cbor_decode(ptr, size - (ptr - start), &item, &ptr);
+    if (match == DTN_CBOR_MATCH_PARTIAL) return true;
+    if (match != DTN_CBOR_MATCH_FULL) goto error;
+    if (!dtn_cbor_is_string(item)) goto error;
+    item = dtn_cbor_free(item);
+
+    if ((int64_t) size - (ptr - start) <= 0) return true;
+
+    match = dtn_cbor_decode(ptr, size - (ptr - start), &item, &ptr);
+    if (match == DTN_CBOR_MATCH_PARTIAL) return true;
+    if (match != DTN_CBOR_MATCH_FULL) goto error;
+    if (!dtn_cbor_is_string(item)) goto error;
+    item = dtn_cbor_free(item);
+
+    if ((int64_t) size - (ptr - start) <= 0) return true;
+
+    match = dtn_cbor_decode(ptr, size - (ptr - start), &item, &ptr);
+    if (match == DTN_CBOR_MATCH_PARTIAL) return true;
+    if (match != DTN_CBOR_MATCH_FULL) goto error;
+    if (!dtn_cbor_is_array(item)) goto error;
+    if (dtn_cbor_array_count(item) != 2) goto error;
+    item = dtn_cbor_free(item);
+
+    if ((int64_t) size - (ptr - start) <= 0) return true;
+
+    match = dtn_cbor_decode(ptr, size - (ptr - start), &item, &ptr);
+    if (match == DTN_CBOR_MATCH_PARTIAL) return true;
+    if (match != DTN_CBOR_MATCH_FULL) goto error;
+    if (!dtn_cbor_is_uint(item)) goto error;
+    item = dtn_cbor_free(item);
+
+    if ((int64_t) size - (ptr - start) <= 0) return true;
+
+    if (flags &0x01){
+
+        match = dtn_cbor_decode(ptr, size - (ptr - start), &item, &ptr);
+        if (match == DTN_CBOR_MATCH_PARTIAL) return true;
+        if (match != DTN_CBOR_MATCH_FULL) goto error;
+        if (!dtn_cbor_is_uint(item)) goto error;
+        item = dtn_cbor_free(item);
+
+        if ((int64_t) size - (ptr - start) <= 0) return true;
+
+        match = dtn_cbor_decode(ptr, size - (ptr - start), &item, &ptr);
+        if (match == DTN_CBOR_MATCH_PARTIAL) return true;
+        if (match != DTN_CBOR_MATCH_FULL) goto error;
+        if (!dtn_cbor_is_uint(item)) goto error;
+        item = dtn_cbor_free(item);
+
+        if ((int64_t) size - (ptr - start) <= 0) return true;
+
+        if (crc > 0){
+
+            match = dtn_cbor_decode(ptr, size - (ptr - start), &item, &ptr);
+            if (match == DTN_CBOR_MATCH_PARTIAL) return true;
+            if (match != DTN_CBOR_MATCH_FULL) goto error;
+            if (!dtn_cbor_is_array(item)) goto error;
+            if (2 != dtn_cbor_array_count(item)) goto error;
+            item = dtn_cbor_free(item);
+
+        }
+   
+    } else if (crc > 0){
+
+        match = dtn_cbor_decode(ptr, size - (ptr - start), &item, &ptr);
+        if (match == DTN_CBOR_MATCH_PARTIAL) return true;
+        if (match != DTN_CBOR_MATCH_FULL) goto error;
+        if (!dtn_cbor_is_array(item)) goto error;
+        if (2 != dtn_cbor_array_count(item)) goto error;
+        item = dtn_cbor_free(item);
+
+    }
+
+    dtn_cbor_free(item);
+    return true;
+error:
+    dtn_cbor_free(item);
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
 dtn_cbor_match dtn_bundle_decode(
     const uint8_t *buffer, 
     size_t size,
@@ -368,27 +507,133 @@ dtn_cbor_match dtn_bundle_decode(
 
     if (!buffer || !out || !next) goto error;
 
-    dtn_cbor *data = NULL;
     if (size < 1) goto error;
     if (buffer[0]!=0x9f) goto error;
-
-    dtn_cbor_match match = dtn_cbor_decode(buffer, size, &data, next);
-
-
-    switch(match){
-
-        case DTN_CBOR_MATCH_FULL:
-            break;
-        default:
-            return match;
-    }
+    if (size == 1) return DTN_CBOR_MATCH_PARTIAL;
 
     bundle = dtn_bundle_create();
-    bundle->data = data;
+    bundle->data = dtn_cbor_array();
 
-    uint64_t count = dtn_cbor_array_count(bundle->data);
-    if (count < 2) goto error;
+    uint8_t *ptr = (uint8_t*) buffer + 1;
+    dtn_cbor_match match = DTN_CBOR_NO_MATCH;
 
+    uint64_t counter = 0;
+    uint8_t *start = ptr;
+
+    while ((int64_t) size > ptr - buffer){
+
+        dtn_cbor *item = NULL;
+        start = ptr;
+        if (counter == 0){
+
+            // expect primary block
+            switch(ptr[0]){
+
+                case 0x88:
+                case 0x89:
+                case 0x8A:
+                case 0x8B:
+                    
+                    // primary array detected
+
+                    match = dtn_cbor_decode(ptr, 
+                        size - (ptr - buffer), &item, &ptr);
+                    
+                    switch(match){
+
+                        case DTN_CBOR_NO_MATCH:
+                            goto error;
+
+                        case DTN_CBOR_MATCH_PARTIAL:
+                            *next = ptr;
+                            if (!check_primary_bytes(start, (ptr - start)))
+                                goto error;
+                            bundle = dtn_bundle_free(bundle);
+                            return match;
+
+                        case DTN_CBOR_MATCH_FULL:
+
+                            dtn_cbor_array_push(bundle->data, item);
+
+                            if (!check_primary_block(bundle)){
+                                bundle = dtn_bundle_free(bundle);
+                                goto error;
+                            }
+
+                            break;
+                    }
+                    break;
+
+                default:
+                    *next = ptr;
+                    goto error;
+            }
+        
+        } else {
+
+            // expect canonical block
+            switch (ptr[0]){
+
+                case 0x85:
+                case 0x86:
+                    
+                    // canonical block detected
+                    
+                    match = dtn_cbor_decode(
+                        ptr, size- (ptr -buffer), &item, &ptr);
+
+                    switch(match){
+
+                        case DTN_CBOR_NO_MATCH:
+                            goto error;
+
+                        case DTN_CBOR_MATCH_PARTIAL:
+                            *next = ptr;
+                            bundle = dtn_bundle_free(bundle);
+                            return match;
+
+                        case DTN_CBOR_MATCH_FULL:
+
+                            if (!check_canonical_block(item)){
+
+                                bundle = dtn_bundle_free(bundle);
+                                item = dtn_cbor_free(item);
+                                goto error;
+                            }
+
+                            dtn_cbor_array_push(bundle->data, item);
+                            break;
+                    }
+
+                    break;
+
+                default:
+                    *next = ptr;
+                    goto error;
+            }
+        }
+
+        if ((int64_t) size == ptr - buffer){
+            *next = ptr;
+            bundle = dtn_bundle_free(bundle);
+            return DTN_CBOR_MATCH_PARTIAL;
+        }
+
+        if (ptr[0] == 0xff){
+            // bundle_close
+            *next = ptr + 1;
+            goto done;
+
+        }
+
+        counter++;
+    }
+
+done:
+    counter = dtn_cbor_array_count(bundle->data);
+    if (counter < 2) goto error;
+
+    // we verify again to check for payload block
     if (!dtn_bundle_verify(bundle)) goto error;
     
     *out = bundle;
