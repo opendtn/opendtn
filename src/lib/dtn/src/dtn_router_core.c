@@ -15,19 +15,20 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        This file is part of the opendtn project. https://opendtn.com
+        This file is part of the openvocs project. https://openvocs.org
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_test_node_core.c
+        @file           dtn_router_core.c
         @author         Töpfer, Markus
 
-        @date           2025-12-19
+        @date           2025-12-21
 
 
         ------------------------------------------------------------------------
 */
-#include "../include/dtn_test_node_core.h"
+#include "../include/dtn_router_core.h"
+
 #include "../include/dtn_interface_ip.h"
 
 #include <dtn_base/dtn_utils.h>
@@ -40,7 +41,7 @@
 
 /*---------------------------------------------------------------------------*/
 
-#define DTN_TEST_NODE_CORE_MAGIC_BYTE 0xc053
+#define dtn_router_core_MAGIC_BYTE 0xc053
 
 typedef enum ThreadMessageType {
 
@@ -51,10 +52,10 @@ typedef enum ThreadMessageType {
 
 /*---------------------------------------------------------------------------*/
 
-struct dtn_test_node_core {
+struct dtn_router_core {
 
     uint16_t magic_byte;
-    dtn_test_node_core_config config;
+    dtn_router_core_config config;
 
     dtn_garbadge_colloctor *garbadge;
 
@@ -172,7 +173,7 @@ static dtn_thread_message *thread_message_create(
 
 static bool handle_in_loop(dtn_thread_loop *tloop, dtn_thread_message *msg){
 
-    dtn_test_node_core *self = dtn_thread_loop_get_data(tloop);
+    dtn_router_core *self = dtn_thread_loop_get_data(tloop);
     if (!self || !msg) goto error;
 
     TODO("... to be implemented.");
@@ -186,7 +187,7 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool message_bundle_process(dtn_test_node_core *self, Threadmessage *msg){
+static bool message_bundle_process(dtn_router_core *self, Threadmessage *msg){
 
     if (!self || !msg) goto error;
 
@@ -210,7 +211,7 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool message_state_change_process(dtn_test_node_core *self, Threadmessage *msg){
+static bool message_state_change_process(dtn_router_core *self, Threadmessage *msg){
 
     if (!self || !msg) goto error;
 
@@ -248,7 +249,7 @@ error:
 
 static bool handle_in_thread(dtn_thread_loop *tloop, dtn_thread_message *msg){
 
-    dtn_test_node_core *self = dtn_thread_loop_get_data(tloop);
+    dtn_router_core *self = dtn_thread_loop_get_data(tloop);
     if (!self || !msg) goto error;
 
     if (msg->type != 1) goto error;
@@ -276,7 +277,7 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool init_config(dtn_test_node_core_config *config){
+static bool init_config(dtn_router_core_config *config){
 
     if (!config || !config->loop) goto error;
 
@@ -309,16 +310,16 @@ error:
  *      ------------------------------------------------------------------------
  */
 
-dtn_test_node_core *dtn_test_node_core_create(dtn_test_node_core_config config){
+dtn_router_core *dtn_router_core_create(dtn_router_core_config config){
 
-    dtn_test_node_core *self = NULL;
+    dtn_router_core *self = NULL;
     
     if (!init_config(&config)) goto error;
 
-    self = calloc(1, sizeof(dtn_test_node_core));
+    self = calloc(1, sizeof(dtn_router_core));
     if (!self) goto error;
 
-    self->magic_byte = DTN_TEST_NODE_CORE_MAGIC_BYTE;
+    self->magic_byte = dtn_router_core_MAGIC_BYTE;
     self->config = config;
 
     self->tloop = dtn_thread_loop_create(self->config.loop,
@@ -359,15 +360,15 @@ dtn_test_node_core *dtn_test_node_core_create(dtn_test_node_core_config config){
 
     return self;
 error:
-    dtn_test_node_core_free(self);
+    dtn_router_core_free(self);
     return NULL;
 }
 
 /*---------------------------------------------------------------------------*/
 
-dtn_test_node_core *dtn_test_node_core_free(dtn_test_node_core *self){
+dtn_router_core *dtn_router_core_free(dtn_router_core *self){
 
-    if (!dtn_test_node_core_cast(self)) return self;
+    if (!dtn_router_core_cast(self)) return self;
 
     dtn_thread_lock_clear(&self->interfaces.lock_ip);
 
@@ -380,14 +381,14 @@ dtn_test_node_core *dtn_test_node_core_free(dtn_test_node_core *self){
 
 /*---------------------------------------------------------------------------*/
 
-dtn_test_node_core *dtn_test_node_core_cast(const void *data){
+dtn_router_core *dtn_router_core_cast(const void *data){
 
     if (!data) return NULL;
 
-    if (*(uint16_t *)data != DTN_TEST_NODE_CORE_MAGIC_BYTE)
+    if (*(uint16_t *)data != dtn_router_core_MAGIC_BYTE)
         return NULL;
 
-    return (dtn_test_node_core *)data;
+    return (dtn_router_core *)data;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -395,7 +396,7 @@ dtn_test_node_core *dtn_test_node_core_cast(const void *data){
 static void interface_io(void *userdata, const dtn_socket_data *remote, 
     dtn_bundle *bundle, const char *name){
 
-    dtn_test_node_core *self = dtn_test_node_core_cast(userdata);
+    dtn_router_core *self = dtn_router_core_cast(userdata);
     if (!self || !remote || !bundle || !name) return;
 
     dtn_log_debug("IO at %s from %s:%i", name, remote->host, remote->port);
@@ -419,7 +420,7 @@ error:
 static void interface_state(void *userdata, 
     dtn_ip_link_state state, const char *name){
 
-    dtn_test_node_core *self = dtn_test_node_core_cast(userdata);
+    dtn_router_core *self = dtn_router_core_cast(userdata);
     if (!self || !name) return;
 
     const char *string = NULL;
@@ -465,7 +466,7 @@ done:
 
 static void interface_close(void *userdata, const char *name){
 
-    dtn_test_node_core *self = dtn_test_node_core_cast(userdata);
+    dtn_router_core *self = dtn_router_core_cast(userdata);
     if (!userdata || !name) return;
 
     dtn_log_error("Interface %s lost", name);
@@ -496,7 +497,7 @@ error:
 /*---------------------------------------------------------------------------*/
 
 static bool open_interface(dtn_socket_configuration socket, 
-    dtn_test_node_core *self){
+    dtn_router_core *self){
 
     dtn_interface_ip_config config = (dtn_interface_ip_config){
         .loop = self->config.loop,
@@ -568,7 +569,7 @@ error:
 struct container {
 
     const char *key;
-    dtn_test_node_core *app;
+    dtn_router_core *app;
 };
 
 /*---------------------------------------------------------------------------*/
@@ -600,7 +601,7 @@ error:
 
 static bool open_socket_interface(void *item, void *userdata){
 
-    dtn_test_node_core *self = dtn_test_node_core_cast(userdata);
+    dtn_router_core *self = dtn_router_core_cast(userdata);
     if (!item || !self) goto error;
 
     dtn_socket_configuration socket = dtn_socket_configuration_from_item(item);
@@ -617,7 +618,7 @@ static bool open_local_interface(const char *key, dtn_item const *val, void *use
 
     if (!key) return true;
 
-    dtn_test_node_core *self = dtn_test_node_core_cast(userdata);
+    dtn_router_core *self = dtn_router_core_cast(userdata);
 
     struct container container = (struct container){
         .key = key,
@@ -633,7 +634,7 @@ static bool open_local_interface(const char *key, dtn_item const *val, void *use
 
 /*---------------------------------------------------------------------------*/
 
-static bool open_all_interfaces(dtn_test_node_core *self){
+static bool open_all_interfaces(dtn_router_core *self){
 
     dtn_item *interfaces = NULL;
 
@@ -656,8 +657,8 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_test_node_core_enable_ip_interfaces(
-        dtn_test_node_core *self,
+bool dtn_router_core_enable_ip_interfaces(
+        dtn_router_core *self,
         const dtn_item *input){
 
     bool result = false;
@@ -692,7 +693,7 @@ struct container1 {
     dtn_socket_configuration remote;
     const uint8_t *buffer;
     size_t size;
-    dtn_test_node_core *self;
+    dtn_router_core *self;
 
 };
 
@@ -732,8 +733,8 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_test_node_core_send_raw(
-        dtn_test_node_core *self,
+bool dtn_router_core_send_raw(
+        dtn_router_core *self,
         dtn_socket_configuration remote,
         const dtn_cbor *data){
 

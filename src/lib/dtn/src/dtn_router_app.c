@@ -16,19 +16,19 @@
         limitations under the License.
 
         This file is part of the opendtn project. https://opendtn.com
-
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_test_node_app.c
+        @file           dtn_router_app.c
         @author         Töpfer, Markus
 
-        @date           2025-12-18
+        @date           2025-12-21
 
 
         ------------------------------------------------------------------------
 */
-#include "../include/dtn_test_node_app.h"
-#include "../include/dtn_test_node_core.h"
+#include "../include/dtn_router_app.h"
+
+#include "../include/dtn_router_core.h"
 #include "../include/dtn_cbor.h"
 
 #include <dtn_base/dtn_string.h>
@@ -36,21 +36,21 @@
 #include <dtn_core/dtn_event_api.h>
 #include <dtn_core/dtn_socket_item.h>
 
-#define DTN_TEST_NODE_APP_MAGIC_BYTE 0x934A
+#define dtn_router_app_MAGIC_BYTE 0x934A
 
 /*---------------------------------------------------------------------------*/
 
-struct dtn_test_node_app {
+struct dtn_router_app {
 
     uint16_t magic_byte;
-    dtn_test_node_app_config config;
+    dtn_router_app_config config;
 
     int socket;
 
     dtn_app *app;
 
     dtn_socket_item *connections;
-    dtn_test_node_core *core;
+    dtn_router_core *core;
 
 };
 
@@ -58,7 +58,7 @@ struct dtn_test_node_app {
 
 static void cb_close(void *userdata, int socket){
 
-    dtn_test_node_app *self = dtn_test_node_app_cast(userdata);
+    dtn_router_app *self = dtn_router_app_cast(userdata);
     if (!self) goto error;
 
     dtn_socket_item_drop(self->connections, socket);
@@ -68,7 +68,7 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool cb_login(dtn_test_node_app *self, int socket, const dtn_item *msg, 
+static bool cb_login(dtn_router_app *self, int socket, const dtn_item *msg, 
     dtn_item **out){
 
     dtn_item *answer = NULL;
@@ -341,7 +341,7 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool cb_bundle_send_request(dtn_test_node_app *self, int socket, const dtn_item *msg, 
+static bool cb_bundle_send_request(dtn_router_app *self, int socket, const dtn_item *msg, 
     dtn_item **out){
 
     dtn_item *answer = NULL;
@@ -373,7 +373,7 @@ static bool cb_bundle_send_request(dtn_test_node_app *self, int socket, const dt
         goto done;
     }
 
-    if (!dtn_test_node_core_send_raw(self->core, socket_config, cbor)){
+    if (!dtn_router_core_send_raw(self->core, socket_config, cbor)){
 
         dtn_event_set_error(answer, 
             DTN_EVENT_ERROR_CODE_SEND, DTN_EVENT_ERROR_DESC_SEND);
@@ -403,11 +403,11 @@ static bool cb_app_generic(
     void *userdata, 
     int socket, 
     dtn_item *msg, 
-    bool (*function)(dtn_test_node_app *self, int socket, 
+    bool (*function)(dtn_router_app *self, int socket, 
         const dtn_item *msg, dtn_item **out)){
 
     dtn_item *out = NULL;
-    dtn_test_node_app *self = dtn_test_node_app_cast(userdata);
+    dtn_router_app *self = dtn_router_app_cast(userdata);
     if (!self || socket < 1 || !msg) goto error;
 
     bool result = function(self, socket, msg, &out);
@@ -440,7 +440,7 @@ static bool cb_app_bundle_send_request(void *userdata, int socket, dtn_item *msg
 
 /*---------------------------------------------------------------------------*/
 
-static bool register_app_callback(dtn_test_node_app *self){
+static bool register_app_callback(dtn_router_app *self){
 
     if (!dtn_app_register(self->app,
         "login",
@@ -459,7 +459,7 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool init_config(dtn_test_node_app_config *config){
+static bool init_config(dtn_router_app_config *config){
 
     if (!config || !config->loop || !config->io) goto error;
 
@@ -495,15 +495,15 @@ error:
  *      ------------------------------------------------------------------------
  */
 
-dtn_test_node_app *dtn_test_node_app_create(dtn_test_node_app_config config){
+dtn_router_app *dtn_router_app_create(dtn_router_app_config config){
 
-    dtn_test_node_app *self = NULL;
+    dtn_router_app *self = NULL;
     if (!init_config(&config)) goto error;
 
-    self = calloc(1, sizeof(dtn_test_node_app));
+    self = calloc(1, sizeof(dtn_router_app));
     if (!self) goto error;
 
-    self->magic_byte = DTN_TEST_NODE_APP_MAGIC_BYTE;
+    self->magic_byte = dtn_router_app_MAGIC_BYTE;
     self->config = config;
 
     dtn_socket_item_config conn = (dtn_socket_item_config){
@@ -552,29 +552,29 @@ dtn_test_node_app *dtn_test_node_app_create(dtn_test_node_app_config config){
     if (!dtn_app_register_close(self->app,
         self, cb_close)) goto error;
 
-    dtn_test_node_core_config core = (dtn_test_node_core_config){
+    dtn_router_core_config core = (dtn_router_core_config){
         .loop = config.loop,
         .limits.threadlock_timeout_usec = config.limits.threadlock_timeout_usec,
         .limits.message_queue_capacity = config.limits.message_queue_capacity,
         .limits.threads = config.limits.threads
     };
 
-    self->core = dtn_test_node_core_create(core);
+    self->core = dtn_router_core_create(core);
     if (!self->core) goto error;
     
     return self;
 error:
-    dtn_test_node_app_free(self);
+    dtn_router_app_free(self);
     return NULL;
 }
 
 /*---------------------------------------------------------------------------*/
 
-dtn_test_node_app *dtn_test_node_app_free(dtn_test_node_app *self){
+dtn_router_app *dtn_router_app_free(dtn_router_app *self){
 
-    if (!dtn_test_node_app_cast(self)) return self;
+    if (!dtn_router_app_cast(self)) return self;
 
-    self->core = dtn_test_node_core_free(self->core);
+    self->core = dtn_router_core_free(self->core);
     self->app = dtn_app_free(self->app);
     self->connections = dtn_socket_item_free(self->connections);
     self = dtn_data_pointer_free(self);
@@ -583,21 +583,21 @@ dtn_test_node_app *dtn_test_node_app_free(dtn_test_node_app *self){
 
 /*---------------------------------------------------------------------------*/
 
-dtn_test_node_app *dtn_test_node_app_cast(const void *data){
+dtn_router_app *dtn_router_app_cast(const void *data){
 
     if (!data) return NULL;
 
-    if (*(uint16_t *)data != DTN_TEST_NODE_APP_MAGIC_BYTE)
+    if (*(uint16_t *)data != dtn_router_app_MAGIC_BYTE)
         return NULL;
 
-    return (dtn_test_node_app *)data;
+    return (dtn_router_app *)data;
 }
 
 /*---------------------------------------------------------------------------*/
 
-dtn_test_node_app_config dtn_test_node_app_config_from_item(const dtn_item *input){
+dtn_router_app_config dtn_router_app_config_from_item(const dtn_item *input){
 
-    dtn_test_node_app_config config = {0};
+    dtn_router_app_config config = {0};
 
     const dtn_item *conf = dtn_item_get(input, "/dtn/node");
     if (!conf) conf = input;
@@ -625,13 +625,13 @@ dtn_test_node_app_config dtn_test_node_app_config_from_item(const dtn_item *inpu
 
 /*---------------------------------------------------------------------------*/
 
-void dtn_test_node_app_websocket_callback(
+void dtn_router_app_websocket_callback(
     void *userdata, int socket, dtn_item *message){
 
     // Websocket enabled events NOTE send must be done via webserver
     dtn_item *out = NULL;
 
-    dtn_test_node_app *self = dtn_test_node_app_cast(userdata);
+    dtn_router_app *self = dtn_router_app_cast(userdata);
     if (!self || socket < 1 || !message) goto error;
 
     if (!self->config.server){
@@ -667,10 +667,10 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_test_node_enable_ip_interfaces(
-    dtn_test_node_app *self, const dtn_item *input){
+bool dtn_router_enable_ip_interfaces(
+    dtn_router_app *self, const dtn_item *input){
 
-    return dtn_test_node_core_enable_ip_interfaces(
+    return dtn_router_core_enable_ip_interfaces(
         self->core, input);
 }
 
