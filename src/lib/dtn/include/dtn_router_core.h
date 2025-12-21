@@ -44,6 +44,8 @@ typedef struct dtn_router_core_config{
 
     dtn_event_loop *loop;
 
+    char name[PATH_MAX];
+
     struct {
 
         uint64_t threadlock_timeout_usec;

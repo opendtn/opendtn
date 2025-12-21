@@ -36,7 +36,7 @@
 #include <dtn_core/dtn_event_api.h>
 #include <dtn_core/dtn_socket_item.h>
 
-#define dtn_router_app_MAGIC_BYTE 0x934A
+#define DTN_ROUTER_APP_MAGIC_BYTE 0x9A32
 
 /*---------------------------------------------------------------------------*/
 
@@ -503,7 +503,7 @@ dtn_router_app *dtn_router_app_create(dtn_router_app_config config){
     self = calloc(1, sizeof(dtn_router_app));
     if (!self) goto error;
 
-    self->magic_byte = dtn_router_app_MAGIC_BYTE;
+    self->magic_byte = DTN_ROUTER_APP_MAGIC_BYTE;
     self->config = config;
 
     dtn_socket_item_config conn = (dtn_socket_item_config){
@@ -559,6 +559,8 @@ dtn_router_app *dtn_router_app_create(dtn_router_app_config config){
         .limits.threads = config.limits.threads
     };
 
+    strncpy(core.name, config.name, PATH_MAX);
+
     self->core = dtn_router_core_create(core);
     if (!self->core) goto error;
     
@@ -587,7 +589,7 @@ dtn_router_app *dtn_router_app_cast(const void *data){
 
     if (!data) return NULL;
 
-    if (*(uint16_t *)data != dtn_router_app_MAGIC_BYTE)
+    if (*(uint16_t *)data != DTN_ROUTER_APP_MAGIC_BYTE)
         return NULL;
 
     return (dtn_router_app *)data;

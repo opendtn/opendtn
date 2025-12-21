@@ -41,7 +41,7 @@
 
 /*---------------------------------------------------------------------------*/
 
-#define dtn_router_core_MAGIC_BYTE 0xc053
+#define DTN_ROUTER_CORE_MAGIC_BYTE 0xc423
 
 typedef enum ThreadMessageType {
 
@@ -319,7 +319,7 @@ dtn_router_core *dtn_router_core_create(dtn_router_core_config config){
     self = calloc(1, sizeof(dtn_router_core));
     if (!self) goto error;
 
-    self->magic_byte = dtn_router_core_MAGIC_BYTE;
+    self->magic_byte = DTN_ROUTER_CORE_MAGIC_BYTE;
     self->config = config;
 
     self->tloop = dtn_thread_loop_create(self->config.loop,
@@ -385,7 +385,7 @@ dtn_router_core *dtn_router_core_cast(const void *data){
 
     if (!data) return NULL;
 
-    if (*(uint16_t *)data != dtn_router_core_MAGIC_BYTE)
+    if (*(uint16_t *)data != DTN_ROUTER_CORE_MAGIC_BYTE)
         return NULL;
 
     return (dtn_router_core *)data;

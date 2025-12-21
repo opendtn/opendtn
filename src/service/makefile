@@ -27,6 +27,7 @@ include $(DTN_ROOT)/makefiles/makefile_const.mk
 
 DTN_LIB_DIRS      = dtn_web_server
 DTN_LIB_DIRS     += dtn_web_node
+DTN_LIB_DIRS     += dtn_router
 
 all    : target_build_all
 depend : target_depend
