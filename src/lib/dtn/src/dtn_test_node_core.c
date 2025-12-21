@@ -36,10 +36,18 @@
 #include <dtn_base/dtn_thread_message.h>
 #include <dtn_base/dtn_string.h>
 #include <dtn_base/dtn_dict.h>
+#include <dtn_base/dtn_garbadge_colloctor.h>
 
 /*---------------------------------------------------------------------------*/
 
 #define DTN_TEST_NODE_CORE_MAGIC_BYTE 0xc053
+
+typedef enum ThreadMessageType {
+
+    BUNDLE_IO = 0,
+    STATE_CHANGE
+
+}ThreadMessageType;
 
 /*---------------------------------------------------------------------------*/
 
@@ -47,6 +55,8 @@ struct dtn_test_node_core {
 
     uint16_t magic_byte;
     dtn_test_node_core_config config;
+
+    dtn_garbadge_colloctor *garbadge;
 
     dtn_thread_loop *tloop;
 
@@ -57,6 +67,36 @@ struct dtn_test_node_core {
 
     } interfaces;
 };
+
+/*----------------------------------------------------------------------------*/
+
+typedef struct Interface {
+
+    dtn_thread_lock lock;
+    char name[DTN_HOST_NAME_MAX];
+    dtn_ip_link_state state;
+
+    dtn_interface_ip *interface;
+
+} Interface;
+
+/*----------------------------------------------------------------------------*/
+
+static void *interface_free(void *data){
+
+    if (!data) return NULL;
+
+    Interface *self = (Interface*) data;
+    if (!dtn_thread_lock_try_lock(&self->lock)) goto error;
+    self->interface = dtn_interface_ip_free(self->interface);
+    if (!dtn_thread_lock_unlock(&self->lock)){
+        dtn_log_error("failed to unlock interface.");
+    }
+    dtn_thread_lock_clear(&self->lock);
+    self = dtn_data_pointer_free(self);
+error:
+    return self;
+}
 
 /*
  *      ------------------------------------------------------------------------
@@ -69,7 +109,9 @@ struct dtn_test_node_core {
 typedef struct Threadmessage {
 
     dtn_thread_message generic;
+    ThreadMessageType type;
 
+    dtn_ip_link_state state;
     dtn_bundle *bundle;
     dtn_socket_data remote;
     char *interface;
@@ -91,6 +133,24 @@ dtn_thread_message *thread_message_free(dtn_thread_message *self){
 
 /*----------------------------------------------------------------------------*/
 
+dtn_thread_message *thread_message_state_create(const char *name, dtn_ip_link_state state){
+
+    Threadmessage *msg = calloc(1, sizeof(Threadmessage));
+    if (!msg) return NULL;
+    
+    msg->generic.magic_bytes = DTN_THREAD_MESSAGE_MAGIC_BYTES;
+    msg->generic.type = 1;
+    msg->generic.free = thread_message_free;
+
+    msg->type = STATE_CHANGE;
+    msg->state = state;
+    msg->interface = dtn_string_dup(name);
+
+    return dtn_thread_message_cast(msg);
+}
+
+/*----------------------------------------------------------------------------*/
+
 dtn_thread_message *thread_message_create(
     dtn_bundle *bundle, const dtn_socket_data *remote, const char *name){
 
@@ -101,6 +161,7 @@ dtn_thread_message *thread_message_create(
     msg->generic.type = 1;
     msg->generic.free = thread_message_free;
 
+    msg->type = BUNDLE_IO;
     msg->bundle = bundle;
     msg->remote = *remote;
     msg->interface = dtn_string_dup(name);
@@ -125,6 +186,66 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
+static bool message_bundle_process(dtn_test_node_core *self, Threadmessage *msg){
+
+    if (!self || !msg) goto error;
+
+    dtn_log_debug("THREAD IO at %s from %s:%i", msg->interface, 
+        msg->remote.host, msg->remote.port);
+
+    fprintf(stderr, "DUMP INCOMING BUNDLE\n");
+    dtn_bundle_dump(stderr, msg->bundle);
+    fprintf(stderr, "\n");
+
+    TODO(" ... process message.");
+
+    dtn_thread_message_free(dtn_thread_message_cast(msg));
+    return true;
+
+error:
+    dtn_thread_message_free(dtn_thread_message_cast(msg));
+    return false;
+
+}
+
+/*---------------------------------------------------------------------------*/
+
+static bool message_state_change_process(dtn_test_node_core *self, Threadmessage *msg){
+
+    if (!self || !msg) goto error;
+
+    const char *string = NULL;
+
+    switch(msg->state){
+
+        case DTN_IP_LINK_ERROR:
+            string = "ERROR";
+            break;
+
+        case DTN_IP_LINK_DOWN:
+            string = "DOWN";
+            break;
+
+        case DTN_IP_LINK_UP:
+            string = "UP";
+            break;
+    }
+
+    dtn_log_debug("THREAD IO STATE CHANGE at %s to %s", msg->interface, string);
+
+    TODO("... process state change");
+
+    dtn_thread_message_free(dtn_thread_message_cast(msg));
+    return true;
+
+error:
+    dtn_thread_message_free(dtn_thread_message_cast(msg));
+    return false;
+
+}
+
+/*---------------------------------------------------------------------------*/
+
 static bool handle_in_thread(dtn_thread_loop *tloop, dtn_thread_message *msg){
 
     dtn_test_node_core *self = dtn_thread_loop_get_data(tloop);
@@ -134,15 +255,17 @@ static bool handle_in_thread(dtn_thread_loop *tloop, dtn_thread_message *msg){
 
     Threadmessage *message = (Threadmessage*) msg;
 
-    dtn_log_debug("THREAD IO at %s from %s:%i", message->interface, 
-        message->remote.host, message->remote.port);
+    switch(message->type){
 
-    fprintf(stderr, "DUMP INCOMING BUNDLE\n");
-    dtn_bundle_dump(stderr, message->bundle);
-    fprintf(stderr, "\n");
+        case BUNDLE_IO:
+            return message_bundle_process(self, message);
+            break;
 
-    TODO(" ... process message.");
+        case STATE_CHANGE:
+            return message_state_change_process(self, message);
+            break;
 
+    }
 
     dtn_thread_message_free(msg);
     return true;
@@ -217,7 +340,7 @@ dtn_test_node_core *dtn_test_node_core_create(dtn_test_node_core_config config){
     if (!dtn_thread_loop_start_threads(self->tloop)) goto error;
 
     dtn_dict_config d_config = dtn_dict_string_key_config(255);
-    d_config.value.data_function.free = dtn_interface_ip_free;
+    d_config.value.data_function.free = interface_free;
 
     self->interfaces.ip = dtn_dict_create(d_config);
     if (!self->interfaces.ip) goto error;
@@ -225,6 +348,14 @@ dtn_test_node_core *dtn_test_node_core_create(dtn_test_node_core_config config){
     if (!dtn_thread_lock_init(&self->interfaces.lock_ip, 
         self->config.limits.threadlock_timeout_usec))
         goto error;
+
+    self->garbadge = dtn_garbadge_colloctor_create((dtn_garbadge_colloctor_config){
+        .loop = config.loop,
+        .limits.threadlock_timeout_usec = config.limits.threadlock_timeout_usec,
+        .limits.run_cleanup_usec = 1000000 // 1 second
+    });
+
+    if (!self->garbadge) goto error;
 
     return self;
 error:
@@ -240,6 +371,7 @@ dtn_test_node_core *dtn_test_node_core_free(dtn_test_node_core *self){
 
     dtn_thread_lock_clear(&self->interfaces.lock_ip);
 
+    self->garbadge = dtn_garbadge_colloctor_free(self->garbadge);
     self->interfaces.ip = dtn_dict_free(self->interfaces.ip);
     self->tloop = dtn_thread_loop_free(self->tloop);
     self = dtn_data_pointer_free(self);
@@ -306,10 +438,26 @@ static void interface_state(void *userdata,
             string = "UP";
             break;
     }
-    
+
     dtn_log_debug("state change at %s to %s", name, string);
 
-    TODO(" ... process state change.");
+    Interface *in = dtn_dict_get(self->interfaces.ip, name);
+    if (!in) goto done;
+
+    if (!dtn_thread_lock_try_lock(&in->lock)) goto done;
+    in->state = state;
+    if (!dtn_thread_lock_unlock(&in->lock)){
+        dtn_log_error("failed to unlock interface.");
+    }
+
+    dtn_thread_message *msg = thread_message_state_create(name, state);
+    if (!msg) goto done;
+
+    if (!dtn_thread_loop_send_message(self->tloop, msg, DTN_RECEIVER_THREAD)){
+        msg = dtn_thread_message_free(msg);
+    }
+
+done:
     return;
 }
 
@@ -326,10 +474,20 @@ static void interface_close(void *userdata, const char *name){
         goto error;
     }
 
-    dtn_dict_del(self->interfaces.ip, name);
+    Interface *in = dtn_dict_remove(self->interfaces.ip, name);
 
     if (!dtn_thread_lock_unlock(&self->interfaces.lock_ip)){
         dtn_log_warning("Failed to unlock IP interfaces.");
+    }
+
+    if(in){
+
+        in = interface_free(in);
+
+        if (in){
+            dtn_garbadge_colloctor_push(self->garbadge, in, interface_free);
+        }
+
     }
 error:
     return;
@@ -364,6 +522,12 @@ static bool open_interface(dtn_socket_configuration socket,
 
     char *name = dtn_string_dup(socket.host);
 
+    Interface *in = calloc(1, sizeof(Interface));
+    if (!in) goto error;
+
+    strncpy(in->name, name, DTN_HOST_NAME_MAX);
+    in->interface = interface;
+
     if (!dtn_thread_lock_try_lock(&self->interfaces.lock_ip)){
 
         dtn_log_error("Failed to look IP interfaces.");
@@ -373,7 +537,7 @@ static bool open_interface(dtn_socket_configuration socket,
     }
 
     bool result = dtn_dict_set(self->interfaces.ip,
-        name, interface, NULL);
+        name, in, NULL);
 
     if (!dtn_thread_lock_unlock(&self->interfaces.lock_ip)){
         dtn_log_error("Failed to unlook IP interfaces.");
@@ -382,7 +546,7 @@ static bool open_interface(dtn_socket_configuration socket,
     if (!result){
 
         name =dtn_data_pointer_free(name);
-        interface = dtn_interface_ip_free(interface);
+        in = interface_free(in);
 
         dtn_log_error("Failed to create interface %s:%i - continue",
             socket.host,
@@ -539,12 +703,20 @@ static bool send_at_interface(const void *key, void *val, void *data){
     if (!key) return true;
 
     char *name = (char*) key;
-    dtn_interface_ip *interface = dtn_interface_ip_cast(val);
+    Interface *interface = (Interface*)(val);
+
     struct container1 *container = (struct container1*) data;
     if (!name || !interface || !container) goto error;
 
+    if (!dtn_thread_lock_try_lock(&interface->lock))
+        goto error;
+
     bool result = dtn_interface_ip_send(
-        interface, container->remote, container->buffer, container->size);
+        interface->interface, container->remote, container->buffer, container->size);
+
+    if (!dtn_thread_lock_unlock(&interface->lock)){
+        dtn_log_error("failed to unlock interface.");
+    }
 
     if (!result){
         dtn_log_error("Failed to send at interface %s", name);

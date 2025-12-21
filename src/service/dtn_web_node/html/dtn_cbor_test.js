@@ -260,7 +260,7 @@ var dtn_cbor_test = {
         data_item.value = "some payload data";
         data_item.style.float  = "left";
         var data_tag = document.createElement("p");
-        data_tag.innerHTML="data";
+        data_tag.innerHTML="payload_data";
         data.appendChild(data_item);
         data.appendChild(data_tag);
 
@@ -287,7 +287,7 @@ var dtn_cbor_test = {
         var blocks = document.getElementById("blocks");
         blocks.appendChild(delimiter);
         var block = document.createElement("div");
-        block.id = "data" + this.block_counter;
+        block.id = "block" + this.block_counter;
         blocks.appendChild(block);
 
         var block_tag = document.createElement("p");
