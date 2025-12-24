@@ -75,7 +75,7 @@ char *dtn_string_copy(char *restrict target, char const *restrict source,
     if (len > max_len) {
       len = max_len;
     }
-    target = malloc(len);
+    target = calloc(len, sizeof(char));
   }
 
   DTN_ASSERT(0 != target);

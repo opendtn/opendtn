@@ -107,6 +107,7 @@ static bool check_crc(const dtn_cbor *block,
 
     if (0 == strcmp(alg, DTN_BUNDLE_CRC16)){
 
+        buffer->start[buffer->length] = 0x00;
         buffer->start[buffer->length - 1] = 0x00;
         buffer->start[buffer->length - 2] = 0x00;;
 
@@ -123,6 +124,7 @@ static bool check_crc(const dtn_cbor *block,
 
         if (size < 4) goto error;
 
+        buffer->start[buffer->length] = 0x00;
         buffer->start[buffer->length - 1] = 0x00;
         buffer->start[buffer->length - 2] = 0x00;
         buffer->start[buffer->length - 3] = 0x00;
@@ -303,8 +305,6 @@ static bool check_canonical_block(const dtn_cbor *array){
         crc = dtn_cbor_array_get(array, 5);
         if (!check_crc(array, crc_alg, crc)) goto error;
     }
-
-
 
     return true;
 error:
@@ -556,6 +556,7 @@ dtn_cbor_match dtn_bundle_decode(
                             dtn_cbor_array_push(bundle->data, item);
 
                             if (!check_primary_block(bundle)){
+                                fprintf(stdout, "\nprimary failed\n");
                                 bundle = dtn_bundle_free(bundle);
                                 goto error;
                             }
@@ -595,7 +596,7 @@ dtn_cbor_match dtn_bundle_decode(
                         case DTN_CBOR_MATCH_FULL:
 
                             if (!check_canonical_block(item)){
-
+                                fprintf(stdout, "\ncheck_canonical_block failed\n");
                                 bundle = dtn_bundle_free(bundle);
                                 item = dtn_cbor_free(item);
                                 goto error;
@@ -652,7 +653,7 @@ static bool set_crc_primary(dtn_cbor *block){
 
     if (!block) goto error;
     
-    uint64_t count = dtn_cbor_array_count(block);
+    //uint64_t count = dtn_cbor_array_count(block);
 
     const dtn_cbor *crc_type = dtn_cbor_array_get(block, 2);
     if (!dtn_cbor_is_uint(crc_type)) goto error;
@@ -669,35 +670,21 @@ static bool set_crc_primary(dtn_cbor *block){
             break;
         case 0x01:
             
-            if (count == 8){
+            crc = dtn_cbor_string("12");
+            if (!dtn_cbor_array_push(block, crc))
+                goto error;
 
-                crc = dtn_cbor_string("12");
-                if (!dtn_cbor_array_push(block, crc))
-                    goto error;
-
-            } else if (count == 10){
-
-                crc = dtn_cbor_string("12");
-                if (!dtn_cbor_array_push(block, crc))
-                    goto error;
-            }
 
             break;
+
         case 0x02:
 
-            if (count == 8){
-
-                crc = dtn_cbor_string("1234");
-                if (!dtn_cbor_array_push(block, crc))
-                    goto error;
-
-            } else if (count == 10){
-
-                crc = dtn_cbor_string("1234");
-                if (!dtn_cbor_array_push(block, crc))
-                    goto error;
-            }
+            crc = dtn_cbor_string("1234");
+            if (!dtn_cbor_array_push(block, crc))
+                goto error;
+            
             break;
+
         default:
             goto error;
 
@@ -720,18 +707,22 @@ static bool set_crc_primary(dtn_cbor *block){
 
         case 0x01:
 
+            buffer->start[buffer->length] = 0x00;
             buffer->start[buffer->length - 1] = 0x00;
             buffer->start[buffer->length - 2] = 0x00;
             
             crc_sum16 = crc16x25(buffer->start, buffer->length);
 
             bytes = (char*) dtn_cbor_get_string(crc);
+            if (!bytes) goto error;
+
             bytes[0] = crc_sum16 >> 8;
             bytes[1] = crc_sum16;
 
             break;
         case 0x02:
 
+            buffer->start[buffer->length] = 0x00;
             buffer->start[buffer->length - 1] = 0x00;
             buffer->start[buffer->length - 2] = 0x00;
             buffer->start[buffer->length - 3] = 0x00;
@@ -739,6 +730,8 @@ static bool set_crc_primary(dtn_cbor *block){
             
             crc_sum32 = dtn_crc32c(buffer->start, buffer->length);
             bytes = (char*) dtn_cbor_get_string(crc);
+            if (!bytes) goto error;
+
             bytes[0] = crc_sum32 >> 24;
             bytes[1] = crc_sum32 >> 16;
             bytes[2] = crc_sum32 >> 8;
@@ -765,7 +758,7 @@ static bool set_crc_block(dtn_cbor *block){
 
     if (!block) goto error;
     
-    uint64_t count = dtn_cbor_array_count(block);
+    //uint64_t count = dtn_cbor_array_count(block);
 
     const dtn_cbor *crc_type = dtn_cbor_array_get(block, 3);
     if (!dtn_cbor_is_uint(crc_type)) goto error;
@@ -781,21 +774,17 @@ static bool set_crc_block(dtn_cbor *block){
             break;
         case 0x01:
             
-            if (count == 5){
-
-                crc = dtn_cbor_string("12");
-                if (!dtn_cbor_array_push(block, crc))
-                    goto error;
-            }
+            crc = dtn_cbor_string("12");
+            if (!dtn_cbor_array_push(block, crc))
+                goto error;
+            
             break;
         case 0x02:
 
-            if (count == 5){
+            crc = dtn_cbor_string("1234");
+            if (!dtn_cbor_array_push(block, crc))
+                goto error;
 
-                crc = dtn_cbor_string("1234");
-                if (!dtn_cbor_array_push(block, crc))
-                    goto error;
-            }
             break;
         default:
             goto error;
@@ -819,18 +808,22 @@ static bool set_crc_block(dtn_cbor *block){
 
         case 0x01:
 
+            buffer->start[buffer->length] = 0x00;
             buffer->start[buffer->length - 1] = 0x00;
             buffer->start[buffer->length - 2] = 0x00;
             
             crc_sum16 = crc16x25(buffer->start, buffer->length);
 
             bytes = (char*) dtn_cbor_get_string(crc);
+            if (!bytes) goto error;
+
             bytes[0] = crc_sum16 >> 8;
             bytes[1] = crc_sum16;
 
             break;
         case 0x02:
 
+            buffer->start[buffer->length] = 0x00;
             buffer->start[buffer->length - 1] = 0x00;
             buffer->start[buffer->length - 2] = 0x00;
             buffer->start[buffer->length - 3] = 0x00;
@@ -838,10 +831,13 @@ static bool set_crc_block(dtn_cbor *block){
             
             crc_sum32 = dtn_crc32c(buffer->start, buffer->length);
             bytes = (char*) dtn_cbor_get_string(crc);
+            if (!bytes) goto error;
+
             bytes[0] = crc_sum32 >> 24;
             bytes[1] = crc_sum32 >> 16;
             bytes[2] = crc_sum32 >> 8;
             bytes[3] = crc_sum32;
+            
             break;
         default:
             goto error;
@@ -965,11 +961,12 @@ dtn_cbor *dtn_bundle_add_primary_block(
     if (!dtn_bundle_primary_set_report(self, report_to)) goto error;
     if (!dtn_bundle_primary_set_timestamp(self, time, seq)) goto error;
     if (!dtn_bundle_primary_set_lifetime(self, lifetime)) goto error;
-    if (0 != offset)
-        if (!dtn_bundle_primary_set_fragment_offset(self, offset)) goto error;
-    if (0 != length)
-        if (!dtn_bundle_primary_set_total_data_length(self, length))goto error;
 
+    if (flags &0x01){
+        if (!dtn_bundle_primary_set_fragment_offset(self, offset)) goto error;
+        if (!dtn_bundle_primary_set_total_data_length(self, length))goto error;
+    }
+        
     return dtn_cbor_array_get(self->data, 0);
 error:
     return NULL;
@@ -1102,6 +1099,7 @@ const char *dtn_bundle_primary_get_destination(const dtn_bundle *self){
     const dtn_cbor *block = dtn_cbor_array_get(self->data, 0);
     const dtn_cbor *item = dtn_cbor_array_get(block, 3);
     if (!dtn_cbor_is_string(item)) goto error;
+
     return dtn_cbor_get_string(item);
 
 error:
@@ -1131,7 +1129,7 @@ bool dtn_bundle_primary_set_destination(
 
         if (!dtn_cbor_is_string(item)) goto error;
     }
-   
+
     return dtn_cbor_set_string(item, value);
 
 error:
@@ -1503,7 +1501,7 @@ dtn_cbor *dtn_bundle_get_block(dtn_bundle *self,
 
     uint64_t count = dtn_cbor_array_count(self->data);
 
-    for (uint64_t i = 0; i < count; i++){
+    for (uint64_t i = 1; i < count; i++){
 
         dtn_cbor *item = dtn_cbor_array_get(self->data, i);
 

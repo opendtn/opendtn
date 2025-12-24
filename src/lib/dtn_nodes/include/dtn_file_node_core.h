@@ -19,39 +19,30 @@
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_router_app.h
+        @file           dtn_file_node_core.h
         @author         Töpfer, Markus
 
-        @date           2025-12-21
+        @date           2025-12-23
 
+        This is the core of a DTN node able to receive and send some files.
 
         ------------------------------------------------------------------------
 */
-#ifndef dtn_router_app_h
-#define dtn_router_app_h
+#ifndef dtn_file_node_core_h
+#define dtn_file_node_core_h
 
 #include <dtn_base/dtn_event_loop.h>
-#include <dtn_core/dtn_io.h>
-#include <dtn_core/dtn_webserver.h>
-#include <dtn_core/dtn_password.h>
+#include <dtn/dtn_cbor.h>
 
 /*---------------------------------------------------------------------------*/
 
-typedef struct dtn_router_app dtn_router_app;
+typedef struct dtn_file_node_core dtn_file_node_core;
 
 /*---------------------------------------------------------------------------*/
 
-typedef struct dtn_router_app_config {
+typedef struct dtn_file_node_core_config{
 
     dtn_event_loop *loop;
-    dtn_io *io;
-    dtn_webserver *server;
-
-    char name[PATH_MAX];
-
-    dtn_socket_configuration socket; // command & control socket
-
-    dtn_password password;
 
     struct {
 
@@ -59,10 +50,12 @@ typedef struct dtn_router_app_config {
         uint64_t message_queue_capacity;
         uint64_t threads;
         uint64_t link_check;
+        uint64_t buffer_time_cleanup_usecs;
+        uint64_t max_buffer_time_usecs;
 
     } limits;
 
-} dtn_router_app_config;
+} dtn_file_node_core_config;
 
 /*
  *      ------------------------------------------------------------------------
@@ -72,24 +65,52 @@ typedef struct dtn_router_app_config {
  *      ------------------------------------------------------------------------
  */
 
-dtn_router_app *dtn_router_app_create(dtn_router_app_config config);
-dtn_router_app *dtn_router_app_free(dtn_router_app *self);
-dtn_router_app *dtn_router_app_cast(const void *data);
+dtn_file_node_core *dtn_file_node_core_create(dtn_file_node_core_config config);
+dtn_file_node_core *dtn_file_node_core_free(dtn_file_node_core *self);
+dtn_file_node_core *dtn_file_node_core_cast(const void *data);
+
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      CONFIG FUNCTIONS
+ *
+ *      ------------------------------------------------------------------------
+ */
+
+bool dtn_file_node_core_enable_ip_interfaces(
+        dtn_file_node_core *self,
+        const dtn_item *config);
 
 /*---------------------------------------------------------------------------*/
 
-dtn_router_app_config dtn_router_app_config_from_item(
-    const dtn_item *config);
+bool dtn_file_node_core_enable_routes(
+        dtn_file_node_core *self, 
+        const char *path);
 
 /*---------------------------------------------------------------------------*/
 
-void dtn_router_app_websocket_callback(
-    void *userdata, int socket, dtn_item *item);
+bool dtn_file_node_core_set_source_uri(
+        dtn_file_node_core *self, 
+        const char *uri);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_router_enable_ip_interfaces(
-    dtn_router_app *self, const dtn_item *config);
+bool dtn_file_node_core_set_reception_path(
+        dtn_file_node_core *self, 
+        const char *path);
 
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      SEND FUNCTIONS
+ *
+ *      ------------------------------------------------------------------------
+ */
 
-#endif /* dtn_router_app_h */
+bool dtn_file_node_core_send_file(
+    dtn_file_node_core *self,
+    const char *uri,
+    const char *source_path,
+    const char *destination_path);
+
+#endif /* dtn_file_node_core_h */

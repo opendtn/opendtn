@@ -986,7 +986,7 @@ static dtn_cbor_match decode_text_string(
                 self->string = calloc(str_len + 1, sizeof(char));
                 if (!self->string) goto error;
 
-                if (!dtn_string_copy(self->string, (char*)buffer + 1, str_len + 1))
+                if (!dtn_cbor_set_byte_string(self, (uint8_t*)buffer + 1, str_len))
                     goto error;
 
             }
@@ -1013,10 +1013,10 @@ static dtn_cbor_match decode_text_string(
                 if (str_len > g_config.limits.string_size)
                     goto error;
 
-                self->string = calloc(str_len + 1, sizeof(char));
+                self->string = calloc(str_len + 2, sizeof(char));
                 if (!self->string) goto error;
 
-                if (!dtn_string_copy(self->string, (char*)buffer + 1, str_len + 1))
+                if (!dtn_cbor_set_byte_string(self, (uint8_t*)buffer + 2, str_len))
                     goto error;
 
             }
@@ -1044,10 +1044,10 @@ static dtn_cbor_match decode_text_string(
                 if (str_len > g_config.limits.string_size)
                     goto error;
 
-                self->string = calloc(str_len + 1, sizeof(char));
+                self->string = calloc(str_len + 2, sizeof(char));
                 if (!self->string) goto error;
 
-                if (!dtn_string_copy(self->string, (char*)buffer + 3, str_len + 1))
+                if (!dtn_cbor_set_byte_string(self, (uint8_t*)buffer + 3, str_len))
                     goto error;
 
             }
@@ -1081,12 +1081,11 @@ static dtn_cbor_match decode_text_string(
                 if (str_len > g_config.limits.string_size)
                     goto error;
 
-                self->string = calloc(str_len + 1, sizeof(char));
+                self->string = calloc(str_len + 2, sizeof(char));
                 if (!self->string) goto error;
 
-                if (!dtn_string_copy(self->string, (char*)buffer + 5, str_len + 1))
+                if (!dtn_cbor_set_byte_string(self, (uint8_t*)buffer + 5, str_len))
                     goto error;
-
             }
 
             self->nbr_uint = str_len;
@@ -1131,7 +1130,7 @@ static dtn_cbor_match decode_text_string(
                 self->string = calloc(str_len + 1, sizeof(char));
                 if (!self->string) goto error;
 
-                if (!dtn_string_copy(self->string, (char*)buffer + 9, str_len + 1))
+                if (!dtn_cbor_set_byte_string(self, (uint8_t*)buffer + 9, str_len))
                     goto error;
 
             }
@@ -1166,7 +1165,7 @@ static dtn_cbor_match decode_text_string(
                 self->string = calloc(str_len + 1, sizeof(char));
                 if (!self->string) goto error;
 
-                if (!dtn_string_copy(self->string, (char*)buffer + 1, str_len + 1))
+                if (!dtn_cbor_set_byte_string(self, (uint8_t*)buffer + 1, str_len))
                     goto error;
 
             }
@@ -2015,7 +2014,7 @@ static dtn_cbor_match decode_tag(
                 default:
                     return match;
             }
-            self->nbr_uint = buffer[0];
+            self->tag = buffer[0];
             break;
 
         case 0xc1:
@@ -2027,7 +2026,7 @@ static dtn_cbor_match decode_tag(
                 default:
                     return match;
             }
-            self->nbr_uint = buffer[0];
+            self->tag = buffer[0];
             break;
 
         case 0xc2:
@@ -2039,7 +2038,7 @@ static dtn_cbor_match decode_tag(
                 default:
                     return match;
             }
-            self->nbr_uint = buffer[0];
+            self->tag = buffer[0];
             break;
 
         case 0xc3:
@@ -2051,7 +2050,7 @@ static dtn_cbor_match decode_tag(
                 default:
                     return match;
             }
-            self->nbr_uint = buffer[0];
+            self->tag = buffer[0];
             break;
 
         case 0xc4:
@@ -2064,7 +2063,7 @@ static dtn_cbor_match decode_tag(
                 default:
                     return match;
             }
-            self->nbr_uint = buffer[0];
+            self->tag = buffer[0];
             break;
 
         case 0xc5:
@@ -2077,7 +2076,7 @@ static dtn_cbor_match decode_tag(
                 default:
                     return match;
             }
-            self->nbr_uint = buffer[0];
+            self->tag = buffer[0];
             break;
 
         case 0xc6:

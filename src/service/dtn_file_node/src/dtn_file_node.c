@@ -15,19 +15,18 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        This file is part of the opendtn project. https://opendtn.com
+        This file is part of the openvocs project. https://openvocs.org
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_web_node.c
+        @file           dtn_file_node.c
         @author         Töpfer, Markus
 
-        @date           2025-12-18
+        @date           2025-12-23
 
 
         ------------------------------------------------------------------------
 */
-
 
 #include <dtn_base/dtn_config.h>
 #include <dtn_base/dtn_config_log.h>
@@ -40,7 +39,7 @@
 #include <dtn_core/dtn_io.h>
 #include <dtn_core/dtn_webserver.h>
 
-#include <dtn_nodes/dtn_test_node_app.h>
+#include <dtn_nodes/dtn_file_node_app.h>
 
 #include <dtn_os/dtn_os_event_loop.h>
 
@@ -48,7 +47,7 @@
 
 #define CONFIG_PATH                                                            \
   DTN_ROOT                                                                \
-  "/src/service/dtn_web_node/config/default_config.json"
+  "/src/service/dtn_file_node/config/default_config.json"
 
 /*---------------------------------------------------------------------------*/
 
@@ -58,8 +57,7 @@ int main(int argc, char **argv) {
 
     dtn_event_loop *loop = NULL;
     dtn_io *io = NULL;
-    dtn_webserver *server = NULL;
-    dtn_test_node_app *node = NULL;
+    dtn_file_node_app *node = NULL;
     dtn_item *config = NULL;
 
     dtn_event_loop_config loop_config = (dtn_event_loop_config){
@@ -87,7 +85,7 @@ int main(int argc, char **argv) {
 
     // load eventloop
 
-    loop = dtn_os_event_loop(loop_config);
+    loop = dtn_event_loop_default(loop_config);
     if (!loop) goto error;
     if (!dtn_event_loop_setup_signals(loop)) goto error;
 
@@ -99,43 +97,21 @@ int main(int argc, char **argv) {
     io = dtn_io_create(io_config);
     if (!io) goto error;
 
-    // load webserver 
+    // load node 
 
-    dtn_webserver_config server_config = dtn_webserver_config_from_item(config);
-    server_config.loop = loop;
-    server_config.io = io;
-
-    server = dtn_webserver_create(server_config);
-    if (!server) goto error;
-
-    if (!dtn_webserver_enable_domains(server, config)) goto error;
-
-    // add the node
-
-    const char *domain = dtn_item_get_string(dtn_item_get(config, 
-                            "/webserver/domains/0/name"));
-
-    dtn_log_debug("using domain %s", domain);
-
-    dtn_test_node_app_config node_config = dtn_test_node_app_config_from_item(config);
+    dtn_file_node_app_config node_config = dtn_file_node_app_config_from_item(config);
     node_config.loop = loop;
     node_config.io = io;
-    node_config.server = server;
 
-    node = dtn_test_node_app_create(node_config);
+    node = dtn_file_node_app_create(node_config);
     if (!node) goto error;
 
-    if (!dtn_test_node_enable_ip_interfaces(node, config))
+    if (!dtn_file_node_app_enable_ip_interfaces(node, config))
         goto error;
-
-    if (!dtn_webserver_enable_callback(
-        server, 
-        domain,
-        node,
-        dtn_test_node_app_websocket_callback)) goto error;
-
-    dtn_log_info("Enabled JSON IO callback for node %s", domain);
-
+        
+    const char *routes = dtn_item_get_string(dtn_item_get(config, "/dtn/routes/path"));
+    dtn_file_node_app_enable_routes(node, routes);
+    
     dtn_event_loop_run(loop, DTN_RUN_MAX);
 
 done:
@@ -145,8 +121,7 @@ error:
     
     config = dtn_item_free(config);
     io = dtn_io_free(io);
-    server = dtn_webserver_free(server);
-    node = dtn_test_node_app_free(node);
+    node = dtn_file_node_app_free(node);
     loop = dtn_event_loop_free(loop);
     return retval;
 }

@@ -8,7 +8,7 @@
 	"io" : {
 
 		"domain" : {
-			"path" : "./src/service/dtn_router/config/domain"
+			"path" : "./src/service/dtn_file_node/config/domain"
 		},
 		"limits": {
 			"reconnect_usecs" : 3000000,
@@ -20,12 +20,14 @@
 
 		"routes" : {
 
-			"path" : "./src/service/dtn_router/config/routes"
+			"path" : "./src/service/dtn_file_node/config/routes"
 		},
 
 		"node" : {
 
-			"name" : "DTN TEST ROUTER",
+			"name" : "DTN FILE NODE",
+			"path" : "/tmp/opendtn/input",
+			"uri"  : "dtn://test/two",
 
 			"socket" : {
 
@@ -54,30 +56,12 @@
 			"sockets" :
 			[
 				{
-					"host" : "localhost",
+					"host" : "127.0.0.1",
 					"type" : "UDP",
 					"port" : 4557
 				}
 			]
 		}
 
-	},
-	"webserver" :{
-
-		"name" : "DTN TEST ROUTER",
-		
-		"socket" : {
-			"host" : "0.0.0.0",
-			"port" : 12346,
-			"type" : "TLS"
-		},
-
-		"domains" : 
-		[
-			{
-				"name" : "localhost",
-				"path" : "./src/service/dtn_router/html"
-			}
-		]
 	}
 }

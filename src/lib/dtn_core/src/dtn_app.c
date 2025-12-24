@@ -74,6 +74,13 @@ struct dtn_app {
 
     } close;
 
+    struct {
+
+        void *userdata;
+        void (*callback) (void *userdata, int socket);
+
+    } connected;
+
 };
 
 /*----------------------------------------------------------------------------*/
@@ -452,6 +459,9 @@ static void cb_connected(void *userdata, int connection){
         event = dtn_item_free(event);
     }
 
+    if (self->connected.callback)
+        self->connected.callback(self->connected.userdata, connection);
+
 error:
     return;
 }
@@ -728,6 +738,30 @@ bool dtn_app_register_close(dtn_app *self, void *userdata,
 
     self->close.userdata = userdata;
     self->close.callback = callback;
+    return true;
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_app_register_connected(dtn_app *self, void *userdata, 
+        void (callback)(void *userdata, int socket)){
+
+    if (!self) goto error;
+
+    if (self->connected.userdata){
+
+        if (!userdata){
+            self->connected.userdata = NULL;
+            self->connected.callback = NULL;
+        } else {
+            return false;
+        }
+    }
+
+    self->connected.userdata = userdata;
+    self->connected.callback = callback;
     return true;
 error:
     return false;

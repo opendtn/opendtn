@@ -34,7 +34,6 @@ DTN_LIBS        = -L$(DTN_LIBDIR)
 DTN_LIBS 	   += -l dtn_base$(DTN_EDITION)
 DTN_LIBS 	   += -l dtn_core$(DTN_EDITION)
 DTN_LIBS 	   += -l dtn$(DTN_EDITION)
-DTN_LIBS 	   += -l dtn_nodes$(DTN_EDITION)
 DTN_LIBS 	   += -l dtn_os$(DTN_EDITION)
 
 DTN_LIBS       += `pkg-config --libs openssl`
@@ -42,4 +41,3 @@ DTN_LIBS       += `pkg-config --libs openssl`
 #-----------------------------------------------------------------------------
 
 include $(DTN_ROOT)/makefiles/makefile_targets.mk
-

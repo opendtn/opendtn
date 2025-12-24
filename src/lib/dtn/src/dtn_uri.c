@@ -189,6 +189,8 @@ error:
 
 char *dtn_uri_encode(const dtn_uri *self){
 
+    if (!self) return NULL;
+
     size_t size = 2*PATH_MAX;
 
     char *string = calloc(size, sizeof(char));

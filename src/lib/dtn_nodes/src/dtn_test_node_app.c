@@ -29,7 +29,7 @@
 */
 #include "../include/dtn_test_node_app.h"
 #include "../include/dtn_test_node_core.h"
-#include "../include/dtn_cbor.h"
+#include <dtn/dtn_cbor.h>
 
 #include <dtn_base/dtn_string.h>
 #include <dtn_core/dtn_app.h>

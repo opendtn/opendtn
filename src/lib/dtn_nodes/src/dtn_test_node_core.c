@@ -28,7 +28,7 @@
         ------------------------------------------------------------------------
 */
 #include "../include/dtn_test_node_core.h"
-#include "../include/dtn_interface_ip.h"
+#include <dtn/dtn_interface_ip.h>
 
 #include <dtn_base/dtn_utils.h>
 #include <dtn_base/dtn_thread_loop.h>

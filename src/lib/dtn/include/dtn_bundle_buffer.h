@@ -19,40 +19,53 @@
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_test_node_core.h
+        @file           dtn_bundle_buffer.h
         @author         Töpfer, Markus
 
-        @date           2025-12-19
+        @date           2025-12-23
 
+        This is a buffer for dtn_bundles, which may be fragmeneted.
 
         ------------------------------------------------------------------------
 */
-#ifndef dtn_test_node_core_h
-#define dtn_test_node_core_h
+#ifndef dtn_bundle_buffer_h
+#define dtn_bundle_buffer_h
 
 #include <dtn_base/dtn_event_loop.h>
-#include "dtn_cbor.h"
+#include <dtn_base/dtn_buffer.h>
+#include "dtn_bundle.h"
 
 /*---------------------------------------------------------------------------*/
 
-typedef struct dtn_test_node_core dtn_test_node_core;
+typedef struct dtn_bundle_buffer dtn_bundle_buffer;
 
 /*---------------------------------------------------------------------------*/
 
-typedef struct dtn_test_node_core_config{
+typedef struct dtn_bundle_buffer_config {
 
     dtn_event_loop *loop;
 
     struct {
 
-        uint64_t threadlock_timeout_usec;
-        uint64_t message_queue_capacity;
-        uint64_t threads;
-        uint64_t link_check;
+        uint64_t buffer_time_cleanup_usecs;
+        uint64_t max_buffer_time_usecs;
+        uint64_t threadlock_timeout_usecs;
 
     } limits;
 
-} dtn_test_node_core_config;
+    struct {
+
+        void *userdata;
+
+        void (*payload) (void *userdata,
+                         const uint8_t *payload,
+                         size_t size,
+                         const char *source_uri,
+                         const char *destination_uri);
+
+    } callbacks;
+
+} dtn_bundle_buffer_config;
 
 /*
  *      ------------------------------------------------------------------------
@@ -62,17 +75,15 @@ typedef struct dtn_test_node_core_config{
  *      ------------------------------------------------------------------------
  */
 
-dtn_test_node_core *dtn_test_node_core_create(dtn_test_node_core_config config);
-dtn_test_node_core *dtn_test_node_core_free(dtn_test_node_core *self);
-dtn_test_node_core *dtn_test_node_core_cast(const void *data);
+dtn_bundle_buffer *dtn_bundle_buffer_create(dtn_bundle_buffer_config config);
+dtn_bundle_buffer *dtn_bundle_buffer_free(dtn_bundle_buffer *self);
 
-bool dtn_test_node_core_enable_ip_interfaces(
-        dtn_test_node_core *self,
-        const dtn_item *config);
+/*----------------------------------------------------------------------------*/
 
-bool dtn_test_node_core_send_raw(
-        dtn_test_node_core *self,
-        dtn_socket_configuration remote,
-        const dtn_cbor *data);
+bool dtn_bundle_buffer_push(dtn_bundle_buffer *self, dtn_bundle *bundle);
 
-#endif /* dtn_test_node_core_h */
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_buffer_clear(dtn_bundle_buffer *self);
+
+#endif /* dtn_bundle_buffer_h */

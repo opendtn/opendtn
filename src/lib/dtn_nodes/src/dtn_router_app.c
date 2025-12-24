@@ -29,7 +29,7 @@
 #include "../include/dtn_router_app.h"
 
 #include "../include/dtn_router_core.h"
-#include "../include/dtn_cbor.h"
+#include <dtn/dtn_cbor.h>
 
 #include <dtn_base/dtn_string.h>
 #include <dtn_core/dtn_app.h>
@@ -116,289 +116,6 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static uint64_t get_uint_from_string(const dtn_item *source){
-
-    uint64_t out = 0;
-    const char *str = dtn_item_get_string(source);
-    if (!str) goto error;
-
-    dtn_convert_hex_string_to_uint64(str, strlen(str), &out);
-
-    return out;
-error:
-    return 0;
-}
-
-/*---------------------------------------------------------------------------*/
-
-static void set_primary(dtn_cbor *cbor, const dtn_item *source){
-
-    uint64_t hex = 0;
-    dtn_cbor *val = NULL;
-    const char *str = NULL;
-    dtn_item *item = NULL;
-
-    if (!cbor || !source) goto error;
-
-    dtn_cbor *arr = dtn_cbor_array();
-    dtn_cbor_array_push(cbor, arr);
-
-    item = dtn_item_object_get(source, "version");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "flags");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "crc_type");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "dest");
-    if (item){
-        str = dtn_item_get_string(item);
-        val = dtn_cbor_string(str);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "source");
-    if (item){
-        str = dtn_item_get_string(item);
-        val = dtn_cbor_string(str);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "report");
-    if (item){
-        str = dtn_item_get_string(item);
-        val = dtn_cbor_string(str);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    dtn_cbor *timestamp = dtn_cbor_array();
-    dtn_cbor_array_push(arr, timestamp);
-
-    item = dtn_item_object_get(source, "timestamp");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(timestamp, val);
-    }
-
-    item = dtn_item_object_get(source, "sequence");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(timestamp, val);
-    }
-
-    item = dtn_item_object_get(source, "lifetime");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "fragment");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "total_data");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "crc");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(arr, val);
-    }
-
-error:
-    return;
-}
-
-/*---------------------------------------------------------------------------*/
-
-static bool add_block(void *val, void *data){
-
-    uint64_t hex = 0;
-    dtn_item *item = NULL;
-    const char *str = NULL;
-
-    dtn_item *source = (dtn_item*) val;
-
-    dtn_cbor *cbor = (dtn_cbor*) data;
-    dtn_cbor *arr = dtn_cbor_array();
-    dtn_cbor_array_push(cbor, arr);
-
-    item = dtn_item_object_get(source, "code");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "num");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "flags");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "crc_type");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "data");
-    if (item){
-        str = dtn_item_get_string(item);
-        val = dtn_cbor_string(str);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    item = dtn_item_object_get(source, "crc");
-    if (item){
-        hex = get_uint_from_string(item);
-        val = dtn_cbor_uint(hex);
-        dtn_cbor_array_push(arr, val);
-    }
-
-    return true;
-}
-
-/*---------------------------------------------------------------------------*/
-
-static void set_blocks(dtn_cbor *cbor, const dtn_item *source){
-
-    if (!cbor || !source) goto error;
-
-    dtn_item_array_for_each((dtn_item*)source, cbor, add_block);
-
-error:
-    return;
-}
-
-/*---------------------------------------------------------------------------*/
-
-static void set_payload(dtn_cbor *cbor, const dtn_item *source){
-
-    if (!cbor || !source) goto error;
-
-    add_block((void*)source, cbor);
-
-error:
-    return;
-}
-
-/*---------------------------------------------------------------------------*/
-
-static dtn_cbor *get_cbor_from_json(const dtn_item *item){
-
-    dtn_cbor *cbor = NULL;
-    if (!item) goto error;
-
-    cbor = dtn_cbor_array();
-
-    const dtn_item *primary = dtn_item_object_get(item, "primary");
-    const dtn_item *payload = dtn_item_object_get(item, "payload");
-    const dtn_item *blocks = dtn_item_object_get(item, "blocks");
-
-    set_primary(cbor, primary);
-    set_blocks(cbor, blocks);
-    set_payload(cbor, payload);
-
-    return cbor;
-error:
-    return NULL;
-}
-
-/*---------------------------------------------------------------------------*/
-
-static bool cb_bundle_send_request(dtn_router_app *self, int socket, const dtn_item *msg, 
-    dtn_item **out){
-
-    dtn_item *answer = NULL;
-
-    if (!self || socket < 1 || !msg || !out) goto error;
-
-    answer = dtn_event_message_create_response(msg);
-
-    dtn_socket_configuration socket_config = dtn_socket_configuration_from_item(
-        dtn_item_get(msg, "/parameter/socket"));
-    
-    socket_config.type = UDP;
-
-    dtn_cbor *cbor = get_cbor_from_json(dtn_item_get(msg, "/parameter"));
-
-    if (0 == socket_config.host[0]){
-
-        dtn_event_set_error(answer, 
-            DTN_EVENT_ERROR_CODE_INPUT, DTN_EVENT_ERROR_DESC_INPUT);
-        
-        goto done;
-    }
-
-    if (!cbor){
-
-        dtn_event_set_error(answer, 
-            DTN_EVENT_ERROR_CODE_PROCESSING, DTN_EVENT_ERROR_DESC_PROCESSING);
-        
-        goto done;
-    }
-
-    if (!dtn_router_core_send_raw(self->core, socket_config, cbor)){
-
-        dtn_event_set_error(answer, 
-            DTN_EVENT_ERROR_CODE_SEND, DTN_EVENT_ERROR_DESC_SEND);
-
-        goto done;
-    }
-
-done:
-    
-    cbor = dtn_cbor_free(cbor);
-
-    if (0 == dtn_event_get_error_code(answer)){
-        dtn_log_info("SUCCESS bundle send request at socket %i", socket);
-    } else {
-        dtn_log_error("FAILURE bundle send request at socket %i", socket);
-    }
-
-    *out = answer;
-    return true;
-error:
-    
-    return false;
-}
-/*---------------------------------------------------------------------------*/
-
 static bool cb_app_generic(
     void *userdata, 
     int socket, 
@@ -433,13 +150,6 @@ static bool cb_app_login(void *userdata, int socket, dtn_item *msg){
 
 /*---------------------------------------------------------------------------*/
 
-static bool cb_app_bundle_send_request(void *userdata, int socket, dtn_item *msg){
-
-    return cb_app_generic(userdata, socket, msg, cb_bundle_send_request);
-}
-
-/*---------------------------------------------------------------------------*/
-
 static bool register_app_callback(dtn_router_app *self){
 
     if (!dtn_app_register(self->app,
@@ -447,10 +157,6 @@ static bool register_app_callback(dtn_router_app *self){
         cb_app_login,
         self)) goto error;
 
-    if (!dtn_app_register(self->app,
-        "bundle_send_request",
-        cb_app_bundle_send_request,
-        self)) goto error;
 
     return true;
 error:
@@ -560,6 +266,7 @@ dtn_router_app *dtn_router_app_create(dtn_router_app_config config){
     };
 
     strncpy(core.name, config.name, PATH_MAX);
+    strncpy(core.route_config_path, config.route_config_path, PATH_MAX);
 
     self->core = dtn_router_core_create(core);
     if (!self->core) goto error;
@@ -604,6 +311,9 @@ dtn_router_app_config dtn_router_app_config_from_item(const dtn_item *input){
     const dtn_item *conf = dtn_item_get(input, "/dtn/node");
     if (!conf) conf = input;
 
+    const char *str = dtn_item_get_string(dtn_item_get(conf, "name"));
+    if (str) strncpy(config.name, str, PATH_MAX);
+
     config.limits.threadlock_timeout_usec = dtn_item_get_number(
         dtn_item_get(conf, "threadlock_timeout_usec"));
 
@@ -621,6 +331,13 @@ dtn_router_app_config dtn_router_app_config_from_item(const dtn_item *input){
 
     config.password = dtn_password_from_item(
         dtn_item_object_get(conf, "password"));
+
+    conf = dtn_item_get(input, "/dtn/routes/path");
+    if (conf){
+
+        const char *str = dtn_item_get_string(conf);
+        strncpy(config.route_config_path, str, PATH_MAX);
+    }
 
     return config;
 }
@@ -651,11 +368,7 @@ void dtn_router_app_websocket_callback(
 
         result = cb_login(self, socket, message, &out);
 
-    } else if (dtn_event_is(message, "bundle_send_request")){
-
-        result = cb_bundle_send_request(self, socket, message, &out);
-
-    }
+    } 
 
     if (!result) goto error;
 

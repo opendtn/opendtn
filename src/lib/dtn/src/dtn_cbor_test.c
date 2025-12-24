@@ -1597,7 +1597,7 @@ int test_decode_int(){
 
 int test_decode_text_string(){
 
-    uint8_t buffer[100] = {0};
+    uint8_t buffer[0xFFFF] = {0};
 
     dtn_cbor_match match = DTN_CBOR_NO_MATCH;
     dtn_cbor *out = NULL;
@@ -1726,7 +1726,7 @@ int test_decode_text_string(){
             testrun(out->string);
             testrun(out->nbr_uint == strlen);
             //fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
-            testrun(0 == strncmp(out->string, (char*) buffer + 1, strlen));
+            testrun(0 == strncmp(out->string, (char*) buffer + 2, strlen));
             testrun(next);
             testrun(next == buffer + strlen + 2);
             out = cbor_free(out);
@@ -3522,6 +3522,7 @@ int test_decode_tag(){
     testrun(match == DTN_CBOR_MATCH_FULL);
     testrun(out);
     testrun(out->type == DTN_CBOR_DATE_TIME);
+    fprintf(stdout, "%s", out->string);
     testrun(0 == strcmp(out->string, "abcde"));
     testrun(next == buffer + 7);
     out = cbor_free(out);
@@ -6901,6 +6902,48 @@ int test_dtn_cbor_encode_array_of_indefinite_length(){
     return testrun_log_success();
 }
 
+/*----------------------------------------------------------------------------*/
+
+int check_string(){
+
+    uint8_t buffer[0xffff] = {0};
+    size_t size = 0xffff;
+    uint8_t *next = NULL;
+
+    dtn_cbor *self = dtn_cbor_string("test");
+    testrun(encode_string(self, buffer, size, &next));
+    testrun(buffer[0] == 0x44);
+    testrun(buffer[1] == 't');
+    testrun(buffer[2] == 'e');
+    testrun(buffer[3] == 's');
+    testrun(buffer[4] == 't');
+    testrun(next == buffer + 5);
+
+    dtn_cbor *out = NULL;
+    testrun(decode_text_string(buffer, size, &out, &next));
+    testrun(next == buffer + 5);
+    testrun(out);
+    testrun(0 == dtn_string_compare("test", dtn_cbor_get_string(out)));
+    out = cbor_free(out);
+
+    //              123456789012345678901234
+    char *string = "dtn://test/two/text.data";
+    self = dtn_cbor_string(string);
+    testrun(encode_string(self, buffer, size, &next));
+    testrun(buffer[0] == 0x58)
+    testrun(buffer[1] == strlen(string));
+
+
+    out = NULL;
+    testrun(decode_text_string(buffer, size, &out, &next));
+    testrun(out);
+    testrun(0 == dtn_string_compare(string, dtn_cbor_get_string(out)));
+    out = cbor_free(out);
+
+    self = cbor_free(self);
+    return testrun_log_success();
+}
+
 
 /*
  *      ------------------------------------------------------------------------
@@ -7020,6 +7063,7 @@ int all_tests() {
     testrun_test(test_dtn_cbor_get_double);
     testrun_test(test_dtn_cbor_set_double);
     testrun_test(test_dtn_cbor_encode_array_of_indefinite_length);
+    testrun_test(check_string);
 
     return testrun_counter;
 }

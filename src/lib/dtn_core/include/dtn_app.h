@@ -112,10 +112,20 @@ bool dtn_app_register(dtn_app *self,
         bool (*callback)(void *userdata, int socket, dtn_item *input),
         void *userdata);
 
+/*----------------------------------------------------------------------------*/
+
 bool dtn_app_deregister(dtn_app *self,
         const char *event);
 
+/*----------------------------------------------------------------------------*/
+
 bool dtn_app_register_close(dtn_app *self, void *userdata, 
         void (callback)(void *userdata, int socket));
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_app_register_connected(dtn_app *self, void *userdata, 
+        void (callback)(void *userdata, int socket));
+
 
 #endif /* dtn_app_h */

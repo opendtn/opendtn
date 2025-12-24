@@ -8,7 +8,7 @@
 	"io" : {
 
 		"domain" : {
-			"path" : "./src/service/dtn_web_node/config/domain"
+			"path" : "./src/service/dtn_router/config/domain"
 		},
 		"limits": {
 			"reconnect_usecs" : 3000000,
@@ -18,7 +18,14 @@
 	},
 	"dtn" : {
 
+		"routes" : {
+
+			"path" : "./src/service/dtn_router/config/routes"
+		},
+
 		"node" : {
+
+			"name" : "DTN TEST ROUTER",
 
 			"socket" : {
 
@@ -57,7 +64,7 @@
 	},
 	"webserver" :{
 
-		"name" : "DTN TEST SERVER",
+		"name" : "DTN TEST ROUTER",
 		
 		"socket" : {
 			"host" : "0.0.0.0",

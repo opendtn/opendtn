@@ -2134,8 +2134,7 @@ bool dtn_io_send(dtn_io *self, int socket, const dtn_memory_pointer buffer) {
   /* Ensure outgoing readiness listening */
 
   if (!loop->callback.set(loop, socket,
-                          DTN_EVENT_IO_IN | DTN_EVENT_IO_ERR | DTN_EVENT_IO_CLOSE |
-                              DTN_EVENT_IO_OUT,
+                          DTN_EVENT_IO_IN | DTN_EVENT_IO_ERR | DTN_EVENT_IO_CLOSE | DTN_EVENT_IO_OUT,
                           self, conn->io_data.callback))
     goto error;
 
@@ -2189,8 +2188,7 @@ stop:
 
   if (!result) goto error;
 
-    /* Return here to not increase io counters, and let processing be done
-     * in next eventloop run */
+  stream_send(self, conn);
   return true;
   }
 
@@ -2214,6 +2212,7 @@ stop:
   if (!dtn_thread_lock_unlock(&conn->io_data.lock))
         goto error;
 
+  stream_send(self, conn);
   return true;
 
 error:

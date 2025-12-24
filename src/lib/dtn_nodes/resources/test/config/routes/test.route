@@ -1,0 +1,26 @@
+{
+	"uris" : 
+	{
+		"test/one" : 
+		{
+			"interface" : "127.0.0.1",
+			"socket" : 
+			{
+				"host" : "127.0.0.1",
+				"port" : 4556,
+				"type" : "UDP"
+			}
+		},
+		
+		"test/two" :
+		{
+			"interface" : "127.0.0.1",
+			"socket" : 
+			{
+				"host" : "127.0.0.1",
+				"port" : 4557,
+				"type" : "UDP"
+			}
+		}
+	}
+}

@@ -850,8 +850,8 @@ int test_dtn_bundle_add_primary_block(){
     testrun(3 == timestamp);
     testrun(4 == sequence_number);
     testrun(5 == dtn_bundle_primary_get_lifetime(bundle));
-    // check CRC and FRAGMENT and TOTAL are missing
-    testrun(8 == dtn_cbor_array_count(primary));
+    // FRAGMENT and TOTAL are set
+    testrun(10 == dtn_cbor_array_count(primary));
 
     bundle = dtn_bundle_free(bundle);
     return testrun_log_success();
@@ -2717,7 +2717,7 @@ int test_check_primary_bytes(){
     buffer[26] = 0x03; // lifetime
     buffer[27] = 0x18;
     buffer[28] = 100;
-    buffer[29] = 0x8B;
+    buffer[29] = 0x41;
     buffer[30] = 200;
 
     testrun(!check_primary_bytes(buffer + 1 , 30));
@@ -2897,6 +2897,94 @@ int test_check_primary_bytes(){
 
     return testrun_log_success();
 }
+
+/*----------------------------------------------------------------------------*/
+
+int check_crc_generation(){
+
+    dtn_bundle *bundle = dtn_bundle_create();
+    testrun(bundle);
+
+    dtn_cbor *primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        1,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        100,
+        200);
+
+    dtn_cbor *payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        1,
+        dtn_cbor_string("test12345678901234567890"));
+
+    testrun(payload);
+    testrun(primary);
+
+    uint8_t *next = NULL;
+    dtn_bundle *out = NULL;
+
+    uint8_t buffer[2048] = {0};
+    size_t size = 2048;
+
+    testrun(dtn_bundle_encode(bundle, buffer, size, &next));
+
+    out = NULL;
+    testrun(DTN_CBOR_MATCH_FULL == dtn_bundle_decode(
+        buffer, next - buffer, &out, &next));
+    testrun(out);
+
+    out = dtn_bundle_free(out);
+    bundle = dtn_bundle_free(out);
+
+    bundle = dtn_bundle_create();
+    testrun(bundle);
+
+    primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        2,
+        "destination",
+        "source",
+        "report",
+        3,
+        4,
+        5,
+        100,
+        200);
+
+    payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        2,
+        dtn_cbor_string("test12345678901234567890"));
+
+    testrun(payload);
+    testrun(primary);
+
+    testrun(dtn_bundle_encode(bundle, buffer, size, &next));
+
+    out = NULL;
+    testrun(DTN_CBOR_MATCH_FULL == dtn_bundle_decode(
+        buffer, next - buffer, &out, &next));
+    testrun(out);
+
+    out = dtn_bundle_free(out);
+    bundle = dtn_bundle_free(out);
+
+    return testrun_log_success();
+}
+
 /*
  *      ------------------------------------------------------------------------
  *
@@ -2955,6 +3043,7 @@ int all_tests() {
     testrun_test(test_dtn_bundle_free_void);
     testrun_test(test_dtn_bundle_dump);
     testrun_test(test_dtn_bundle_copy);
+    testrun_test(check_crc_generation);
     
 
     return testrun_counter;

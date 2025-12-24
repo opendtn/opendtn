@@ -15,7 +15,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        This file is part of the openvocs project. https://openvocs.org
+        This file is part of the opendtn project. https://opendtn.com
 
         ------------------------------------------------------------------------
 *//**
@@ -29,7 +29,8 @@
 */
 #include "../include/dtn_router_core.h"
 
-#include "../include/dtn_interface_ip.h"
+#include <dtn/dtn_interface_ip.h>
+#include <dtn/dtn_routing.h>
 
 #include <dtn_base/dtn_utils.h>
 #include <dtn_base/dtn_thread_loop.h>
@@ -60,6 +61,8 @@ struct dtn_router_core {
     dtn_garbadge_colloctor *garbadge;
 
     dtn_thread_loop *tloop;
+
+    dtn_routing *routing;
 
     struct {
 
@@ -358,6 +361,16 @@ dtn_router_core *dtn_router_core_create(dtn_router_core_config config){
 
     if (!self->garbadge) goto error;
 
+    dtn_routing_config routing = (dtn_routing_config){
+        .loop = self->config.loop
+    };
+    strncpy(routing.name, self->config.name, PATH_MAX);
+    strncpy(routing.route_config_path, self->config.route_config_path, PATH_MAX);
+
+    self->routing = dtn_routing_create(routing);
+
+    if (!self->routing) goto error;
+
     return self;
 error:
     dtn_router_core_free(self);
@@ -490,6 +503,9 @@ static void interface_close(void *userdata, const char *name){
         }
 
     }
+
+    dtn_routing_deregister_interface(self->routing, name);
+
 error:
     return;
 }
@@ -546,7 +562,7 @@ static bool open_interface(dtn_socket_configuration socket,
 
     if (!result){
 
-        name =dtn_data_pointer_free(name);
+        name = dtn_data_pointer_free(name);
         in = interface_free(in);
 
         dtn_log_error("Failed to create interface %s:%i - continue",
@@ -556,6 +572,9 @@ static bool open_interface(dtn_socket_configuration socket,
         return true;
 
     }
+
+    if (!dtn_routing_register_interface(self->routing, name))
+        goto error;
 
     dtn_log_info("created interface %s:%i",
             socket.host,

@@ -86,6 +86,20 @@ dtn_item *dtn_event_message_create_response(const dtn_item *message){
     if (!dtn_item_object_set(out, DTN_EVENT_KEY_RESPONSE, val))
         goto error;
 
+    val = NULL;
+    dtn_item_copy((void**)& val, dtn_item_object_get(message, "event"));
+    if (!val) goto error;
+
+    if (!dtn_item_object_set(out, "event", val))
+        goto error;
+
+    val = NULL;
+    dtn_item_copy((void**)& val, dtn_item_object_get(message, "uuid"));
+    if (!val) goto error;
+
+    if (!dtn_item_object_set(out, "uuid", val))
+        goto error;
+
     return out;
 error:
     dtn_item_free(out);

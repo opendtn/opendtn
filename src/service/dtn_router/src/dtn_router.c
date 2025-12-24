@@ -40,7 +40,7 @@
 #include <dtn_core/dtn_io.h>
 #include <dtn_core/dtn_webserver.h>
 
-#include <dtn/dtn_router_app.h>
+#include <dtn_nodes/dtn_router_app.h>
 
 #include <dtn_os/dtn_os_event_loop.h>
 
@@ -48,7 +48,7 @@
 
 #define CONFIG_PATH                                                            \
   DTN_ROOT                                                                \
-  "/src/service/dtn_web_node/config/default_config.json"
+  "/src/service/dtn_router/config/default_config.json"
 
 /*---------------------------------------------------------------------------*/
 
