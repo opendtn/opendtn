@@ -19,7 +19,7 @@
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_uri.h
+        @file           dtn_dtn_uri.h
         @author         Töpfer, Markus
 
         @date           2025-12-17
@@ -27,19 +27,19 @@
 
         ------------------------------------------------------------------------
 */
-#ifndef dtn_uri_h
-#define dtn_uri_h
+#ifndef dtn_dtn_uri_h
+#define dtn_dtn_uri_h
 
 #include <stdbool.h>
 #include <stdio.h>
 
-typedef struct dtn_uri {
+typedef struct dtn_dtn_uri {
 
     char *scheme;
     char *name;
     char *demux;
 
-} dtn_uri;
+} dtn_dtn_uri;
 
 /*
  *      ------------------------------------------------------------------------
@@ -49,12 +49,12 @@ typedef struct dtn_uri {
  *      ------------------------------------------------------------------------
  */
 
-dtn_uri *dtn_uri_create();
+dtn_dtn_uri *dtn_dtn_uri_create();
 
-void *dtn_uri_free(void *self);
-bool dtn_uri_clear(void *self);
-bool dtn_uri_dump(FILE *stream, void *self);
-void *dtn_uri_copy(void** destination, void *source);
+void *dtn_dtn_uri_free(void *self);
+bool dtn_dtn_uri_clear(void *self);
+bool dtn_dtn_uri_dump(FILE *stream, void *self);
+void *dtn_dtn_uri_copy(void** destination, void *source);
 
 /*
  *      ------------------------------------------------------------------------
@@ -64,9 +64,11 @@ void *dtn_uri_copy(void** destination, void *source);
  *      ------------------------------------------------------------------------
  */
 
-dtn_uri *dtn_uri_decode(const char *string);
-char *dtn_uri_encode(const dtn_uri *self);
+dtn_dtn_uri *dtn_dtn_uri_decode(const char *string);
+char *dtn_dtn_uri_encode(const dtn_dtn_uri *self);
 
-bool dtn_uri_is_singleton(const dtn_uri *self);
+bool dtn_dtn_uri_is_singleton(const dtn_dtn_uri *self);
 
-#endif /* dtn_uri_h */
+bool dtn_dtn_uri_path_remove_dot_segments(const char *in, char *out);
+
+#endif /* dtn_dtn_uri_h */

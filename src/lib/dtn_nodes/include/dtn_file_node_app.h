@@ -67,6 +67,17 @@ typedef struct dtn_file_node_app_config {
         uint64_t buffer_time_cleanup_usecs;
         uint64_t max_buffer_time_usecs;
 
+        struct {
+
+            uint64_t string_size;
+            uint64_t utf8_string_size;
+            uint64_t array_size;
+            uint64_t undef_length_array;
+            uint64_t map_size;
+            uint64_t undef_length_map; 
+
+        } cbor;
+
     } limits;
 
 } dtn_file_node_app_config;

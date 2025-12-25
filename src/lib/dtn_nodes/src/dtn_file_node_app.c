@@ -255,6 +255,45 @@ error:
     return false;
 }
 
+/*---------------------------------------------------------------------------*/
+
+static bool cb_shutdown(dtn_file_node_app *self, int socket, const dtn_item *msg, 
+    dtn_item **out){
+
+    dtn_item *data = NULL;
+    dtn_item *answer = NULL;
+
+    if (!self || socket < 1 || !msg || !out) goto error;
+
+    data = dtn_socket_item_get(self->connections, socket);
+    if (!data){
+
+        dtn_event_set_error(answer, 
+            DTN_EVENT_ERROR_CODE_AUTH, DTN_EVENT_ERROR_DESC_AUTH);
+
+        goto response;
+    }
+
+    if (!dtn_item_is_true(dtn_item_object_get(data, "auth"))){
+
+        dtn_event_set_error(answer, 
+            DTN_EVENT_ERROR_CODE_AUTH, DTN_EVENT_ERROR_DESC_AUTH);
+
+        goto response;
+
+    }
+
+    dtn_log_warning("GOING TO SHUTDOWN ON REQUEST.");
+    dtn_event_loop_stop(self->config.loop);
+
+response:
+    *out = answer;
+    data = dtn_item_free(data);
+    return true;
+error:
+    data = dtn_item_free(data);
+    return false;
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -304,6 +343,12 @@ static bool cb_app_send_file(void *userdata, int socket, dtn_item *msg){
     return cb_app_generic(userdata, socket, msg, cb_send_file);
 }
 
+/*---------------------------------------------------------------------------*/
+
+static bool cb_app_shutdown(void *userdata, int socket, dtn_item *msg){
+
+    return cb_app_generic(userdata, socket, msg, cb_shutdown);
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -324,6 +369,11 @@ static bool register_app_callback(dtn_file_node_app *self){
         cb_app_send_file,
         self)) goto error;
 
+    if (!dtn_app_register(self->app,
+        "shutdown",
+        cb_app_shutdown,
+        self)) goto error;
+
     return true;
 error:
     return false;
@@ -340,6 +390,24 @@ static bool init_config(dtn_file_node_app_config *config){
 
     if (0 == config->limits.message_queue_capacity)
         config->limits.message_queue_capacity = 10000;
+
+    if (0 == config->limits.cbor.string_size)
+        config->limits.cbor.string_size = 1500;
+
+    if (0 == config->limits.cbor.utf8_string_size)
+        config->limits.cbor.utf8_string_size = 1500;
+
+    if (0 == config->limits.cbor.array_size)
+        config->limits.cbor.array_size = 1500;
+
+    if (0 == config->limits.cbor.undef_length_array)
+        config->limits.cbor.undef_length_array = 1500;
+
+    if (0 == config->limits.cbor.map_size)
+        config->limits.cbor.map_size = 1500;
+
+    if (0 == config->limits.cbor.undef_length_map)
+        config->limits.cbor.undef_length_map = 1500;
 
     if (0 == config->limits.threads){
 
@@ -435,6 +503,18 @@ dtn_file_node_app *dtn_file_node_app_create(dtn_file_node_app_config config){
 
     if (0 != self->config.path[0])
         dtn_file_node_core_set_reception_path(self->core, self->config.path);
+
+    dtn_cbor_config cbor_config = (dtn_cbor_config){
+
+        .limits.string_size = config.limits.cbor.string_size,
+        .limits.utf8_string_size = config.limits.cbor.utf8_string_size,
+        .limits.array_size = config.limits.cbor.array_size,
+        .limits.undef_length_array = config.limits.cbor.undef_length_array,
+        .limits.map_size = config.limits.cbor.map_size,
+        .limits.undef_length_map = config.limits.cbor.undef_length_map
+    };
+
+    dtn_cbor_configure(cbor_config);
     
     return self;
 error:
@@ -493,6 +573,26 @@ dtn_file_node_app_config dtn_file_node_app_config_from_item(const dtn_item *inpu
 
     config.limits.max_buffer_time_usecs = dtn_item_get_number(
         dtn_item_get(conf, "max_buffer_time_usecs"));
+
+    const dtn_item *cbor = dtn_item_get(conf, "/cbor");
+
+    config.limits.cbor.string_size = dtn_item_get_number(
+        dtn_item_get(cbor, "string_size"));
+
+    config.limits.cbor.utf8_string_size = dtn_item_get_number(
+        dtn_item_get(cbor, "utf8_string_size"));
+
+    config.limits.cbor.array_size = dtn_item_get_number(
+        dtn_item_get(cbor, "array_size"));
+
+    config.limits.cbor.undef_length_array = dtn_item_get_number(
+        dtn_item_get(cbor, "undef_length_array"));
+
+    config.limits.cbor.map_size = dtn_item_get_number(
+        dtn_item_get(cbor, "map_size"));
+
+    config.limits.cbor.undef_length_map = dtn_item_get_number(
+        dtn_item_get(cbor, "undef_length_map"));
 
     config.socket = dtn_socket_configuration_from_item(
         dtn_item_object_get(conf, "socket"));

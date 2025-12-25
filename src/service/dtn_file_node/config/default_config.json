@@ -60,7 +60,16 @@
 					"type" : "UDP",
 					"port" : 4556
 				}
-			]
+			],
+			"cbor" :
+			{
+				"string_size" : 1500,
+				"utf8_string_size" : 1500,
+				"array_size" : 1000,
+				"undef_length_array" : 1000,
+				"map_size" : 1000,
+				"undef_length_map" : 1000
+			}
 		}
 
 	}

@@ -174,6 +174,25 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
+static bool send_shutdown(dtn_app *app, int socket){
+
+    dtn_item *msg = dtn_event_message_create(NULL, "shutdown");
+
+    if (!dtn_app_send_json(app, socket, msg)) goto error;
+
+    dtn_log_debug("SHUTDOWN send at %i", socket);
+    
+    msg = dtn_item_free(msg);
+    return true;
+error:
+    dtn_log_debug("SHUTDOWN send failed.");
+    dtn_item_free(msg);
+    return false;
+}
+
+
+/*---------------------------------------------------------------------------*/
+
 static bool send_load_routes(dtn_app *app, int socket, const char *path){
 
     dtn_item *msg = dtn_event_message_create(NULL, "load_routes");
@@ -231,6 +250,7 @@ static bool print_help(){
     fprintf(stdout, "   login       :   send login to server (your password is stored for convinience)\n");
     fprintf(stdout, "   load_routes :   send load_routes to server\n");
     fprintf(stdout, "   send_file   :   send send_file from path and uri to server\n");
+    fprintf(stdout, "   shutdown    :   shutdown server daemon\n");
 
     return true;
 }
@@ -269,6 +289,9 @@ static bool interact_with_user(struct userdata *userdata){
 
         if (0 == strcmp(buffer, "login\n"))
             send_login(userdata->app, userdata->socket, userdata->password);
+
+        if (0 == strcmp(buffer, "shutdown\n"))
+            send_shutdown(userdata->app, userdata->socket);
 
         if (0 == strcmp(buffer, "load_routes\n")){
 

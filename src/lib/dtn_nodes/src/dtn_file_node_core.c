@@ -29,8 +29,12 @@
 */
 #include "../include/dtn_file_node_core.h"
 
+#include <limits.h>
+#include <stdlib.h>
+#include <libgen.h>
+
 #include <dtn/dtn_interface_ip.h>
-#include <dtn/dtn_uri.h>
+#include <dtn/dtn_dtn_uri.h>
 #include <dtn/dtn_bundle_buffer.h>
 
 #include <dtn_base/dtn_utils.h>
@@ -46,6 +50,7 @@
 #include <dtn_base/dtn_time.h>
 #include <dtn_base/dtn_file.h>
 #include <dtn_base/dtn_dump.h>
+#include <dtn_base/dtn_dir.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -69,7 +74,7 @@ struct dtn_file_node_core {
 
     uint64_t sequence;
 
-    dtn_uri *uri;
+    dtn_dtn_uri *uri;
     char *path;
 
     dtn_thread_loop *tloop;
@@ -215,13 +220,49 @@ static void cb_payload(void *userdata,
                        const char *source,
                        const char *destination){
 
+    dtn_dtn_uri *dest = NULL;
+    char inpath[PATH_MAX];
+    memset(inpath, 0, PATH_MAX);
+
+    char cleanpath[PATH_MAX];
+    memset(cleanpath, 0, PATH_MAX);
+
+    char path[2 * PATH_MAX];
+    memset(path, 0, 2 * PATH_MAX);
+
+    char rpath[PATH_MAX];
+    memset(rpath, 0, PATH_MAX);
+
     dtn_file_node_core *self = dtn_file_node_core_cast(userdata);
     if (!self || !payload || size < 1 || !source || !destination) goto error;
 
     dtn_log_debug("GOT PAYLOAD from %s for %s", source, destination);
 
+    dest = dtn_dtn_uri_decode(destination);
+    
+    if (0 != dtn_string_compare(dest->scheme, self->uri->scheme))
+        goto error;
+
+    if (0 != dtn_string_compare(dest->name, self->uri->name))
+        goto error;
+
+    // prepare path
+    snprintf(inpath, PATH_MAX, "%s", dest->demux);
+    if (!dtn_dtn_uri_path_remove_dot_segments(inpath, cleanpath)) goto error;
+    snprintf(path, 2 * PATH_MAX, "%s/%s", self->path, cleanpath);
+    strncpy(rpath, path, PATH_MAX);
+
+    char *dir = dirname(rpath);
+    if (!dtn_dir_tree_create(dir)) goto error;
+
+    if (DTN_FILE_SUCCESS != dtn_file_write(path, payload, size, "w+")){
+        dtn_log_error("failed to write file %s", path);
+    } else {
+        dtn_log_info("new file received %s", path);
+    }
 
 error:
+    dtn_dtn_uri_free(dest);
     return;
 }
 
@@ -429,7 +470,7 @@ dtn_file_node_core *dtn_file_node_core_free(dtn_file_node_core *self){
     dtn_thread_lock_clear(&self->routes.lock);
 
     self->buffer = dtn_bundle_buffer_free(self->buffer);
-    self->uri = dtn_uri_free(self->uri);
+    self->uri = dtn_dtn_uri_free(self->uri);
     self->path = dtn_data_pointer_free(self->path);
     self->routes.data = dtn_item_free(self->routes.data);
     self->garbadge = dtn_garbadge_colloctor_free(self->garbadge);
@@ -459,7 +500,7 @@ static void interface_io(void *userdata, const dtn_socket_data *remote,
     dtn_file_node_core *self = dtn_file_node_core_cast(userdata);
     if (!self || !remote || !bundle || !name) return;
 
-    dtn_log_debug("IO at %s from %s:%i", name, remote->host, remote->port);
+    // dtn_log_debug("IO at %s from %s:%i", name, remote->host, remote->port);
 
     dtn_thread_message *msg = thread_message_create(bundle, remote, name);
     if (!msg) goto error;
@@ -791,8 +832,8 @@ bool dtn_file_node_core_set_source_uri(
 
     if (!self) goto error;
 
-    self->uri = dtn_uri_free(self->uri);
-    self->uri = dtn_uri_decode(uri);
+    self->uri = dtn_dtn_uri_free(self->uri);
+    self->uri = dtn_dtn_uri_decode(uri);
 
     dtn_log_info("SET SOURCE URI TO %s", uri);
 
@@ -812,7 +853,7 @@ bool dtn_file_node_core_set_reception_path(
     self->path = dtn_data_pointer_free(self->path);
     self->path = dtn_string_dup(path);
 
-    dtn_log_info("SET SOURCE PATH TO %s", path);
+    dtn_log_info("SET RECEPTION PATH TO %s", path);
     return true;
 error:
     return false;
@@ -1057,7 +1098,7 @@ static dtn_list *create_bundles_for_file(dtn_file_node_core *self,
     }
     
 
-    source = dtn_uri_encode(self->uri);
+    source = dtn_dtn_uri_encode(self->uri);
 
     while(open - chunk > 0){
 
@@ -1078,7 +1119,7 @@ static dtn_list *create_bundles_for_file(dtn_file_node_core *self,
             ptr - buffer,
             size)) goto error;
 
-        payload = dtn_cbor_string(NULL);
+        payload = dtn_cbor_string("test");
         if (!dtn_cbor_set_byte_string(payload, ptr, chunk)) goto error;
 
         if (!dtn_bundle_add_block(
@@ -1119,7 +1160,7 @@ static dtn_list *create_bundles_for_file(dtn_file_node_core *self,
             ptr - buffer,
             size)) goto error;
 
-    payload = dtn_cbor_string(NULL);
+    payload = dtn_cbor_string("test");
     if (!dtn_cbor_set_byte_string(payload, ptr, open)) goto error;
 
     if (!dtn_bundle_add_block(
@@ -1194,6 +1235,7 @@ bool dtn_file_node_core_send_file(
         dtn_bundle_decode(out, next - out, &test, &next);
         test = dtn_bundle_free(test);
 
+        bundle = dtn_bundle_free(bundle);
         bundle = dtn_list_queue_pop(queue);
     }
 
