@@ -19,59 +19,47 @@
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_routing.h
+        @file           dtn_tunnel_core.h
         @author         Töpfer, Markus
 
-        @date           2025-12-21
+        @date           2025-12-25
 
 
         ------------------------------------------------------------------------
 */
-#ifndef dtn_routing_h
-#define dtn_routing_h
+#ifndef dtn_tunnel_core_h
+#define dtn_tunnel_core_h
+
 
 #include <dtn_base/dtn_event_loop.h>
-#include "dtn_dtn_uri.h"
-
-typedef enum dtn_routing_class {
-
-    DTN_ROUTING_ERROR = 0,
-    DTN_ROUTING_DIRECT = 1,
-    DTN_ROUTING_REGNAME = 2,
-    DTN_ROUTING_DEFAULT = 3
-
-} dtn_routing_class;
+#include <dtn/dtn_cbor.h>
 
 /*---------------------------------------------------------------------------*/
 
-typedef struct dtn_routing_info {
-
-    dtn_routing_class class;
-    dtn_socket_configuration remote;
-    char interface[DTN_HOST_NAME_MAX];
-
-} dtn_routing_info;
+typedef struct dtn_tunnel_core dtn_tunnel_core;
 
 /*---------------------------------------------------------------------------*/
 
-typedef struct dtn_routing dtn_routing;
-
-/*---------------------------------------------------------------------------*/
-
-typedef struct dtn_routing_config {
+typedef struct dtn_tunnel_core_config{
 
     dtn_event_loop *loop;
 
-    char name[PATH_MAX];
-    char route_config_path[PATH_MAX];
+    dtn_socket_configuration tunnel;
+    dtn_socket_configuration remote;
 
     struct {
 
-        uint64_t threadlock_timeout_usecs;
+        uint64_t threadlock_timeout_usec;
+        uint64_t message_queue_capacity;
+        uint64_t threads;
+        uint64_t link_check;
+        uint64_t buffer_time_cleanup_usecs;
+        uint64_t max_buffer_time_secs;
+        uint64_t history_secs;
 
     } limits;
 
-} dtn_routing_config;
+} dtn_tunnel_core_config;
 
 /*
  *      ------------------------------------------------------------------------
@@ -81,23 +69,38 @@ typedef struct dtn_routing_config {
  *      ------------------------------------------------------------------------
  */
 
-dtn_routing *dtn_routing_create(dtn_routing_config config);
-dtn_routing *dtn_routing_free(dtn_routing *self);
+dtn_tunnel_core *dtn_tunnel_core_create(dtn_tunnel_core_config config);
+dtn_tunnel_core *dtn_tunnel_core_free(dtn_tunnel_core *self);
+dtn_tunnel_core *dtn_tunnel_core_cast(const void *data);
 
-bool dtn_routing_dump(FILE *file, dtn_routing* self);
-
-/*---------------------------------------------------------------------------*/
-
-/**
- *  Find a list of routing entries for the given uri,
- *  @returns a list of dtn_routing_info items.
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      CONFIG FUNCTIONS
+ *
+ *      ------------------------------------------------------------------------
  */
-dtn_list *dtn_routing_get_info_for_uri(
-    dtn_routing *self, const dtn_dtn_uri *uri);
+
+bool dtn_tunnel_core_enable_ip_interfaces(
+        dtn_tunnel_core *self,
+        const dtn_item *config);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_routing_load(dtn_routing *self, const char *path);
-bool dtn_routing_save(dtn_routing *self, const char *path);
+bool dtn_tunnel_core_enable_routes(
+        dtn_tunnel_core *self, 
+        const char *path);
 
-#endif /* dtn_routing_h */
+/*---------------------------------------------------------------------------*/
+
+bool dtn_tunnel_core_set_source_uri(
+        dtn_tunnel_core *self, 
+        const char *uri);
+
+/*---------------------------------------------------------------------------*/
+
+bool dtn_tunnel_core_set_destination_uri(
+        dtn_tunnel_core *self, 
+        const char *uri);
+
+#endif /* dtn_tunnel_core_h */

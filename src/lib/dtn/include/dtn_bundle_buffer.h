@@ -48,8 +48,9 @@ typedef struct dtn_bundle_buffer_config {
     struct {
 
         uint64_t buffer_time_cleanup_usecs;
-        uint64_t max_buffer_time_usecs;
+        uint64_t max_buffer_time_secs;
         uint64_t threadlock_timeout_usecs;
+        uint64_t history_secs;
 
     } limits;
 

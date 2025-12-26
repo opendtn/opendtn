@@ -34,6 +34,7 @@
 #include <dtn_base/dtn_utils.h>
 #include <dtn_base/dtn_io_buffer.h>
 #include <dtn_base/dtn_dump.h>
+#include <dtn_base/dtn_thread_lock.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -55,10 +56,106 @@ struct dtn_interface_ip {
 
     struct {
 
+        dtn_thread_lock lock;
+        dtn_list *queue;
+
+    } out;
+
+    struct {
+
         uint32_t link_check;
 
     } timer;
 };
+
+/*---------------------------------------------------------------------------*/
+
+struct out_data {
+
+    dtn_socket_configuration remote;
+    dtn_buffer *buffer;
+};
+
+/*---------------------------------------------------------------------------*/
+
+static void *out_data_free(void *data){
+
+    if (!data) return NULL;
+
+    struct out_data *self = (struct out_data*) data;
+    self->buffer = dtn_buffer_free(self->buffer);
+    self = dtn_data_pointer_free(self);
+    return NULL;
+}
+
+/*---------------------------------------------------------------------------*/
+
+static bool start_sending_queue(dtn_interface_ip *self){
+
+    if (!dtn_thread_lock_try_lock(&self->out.lock)) goto done;
+
+    struct out_data *data = dtn_list_queue_pop(self->out.queue);
+    
+    while(data){
+
+        struct sockaddr_storage sa = {0};
+        socklen_t sock_len = sizeof(sa);
+    
+        int type = AF_INET;
+    
+        char *ptr = memchr(data->remote.host, '.', strlen(data->remote.host));
+        
+        if (ptr){
+            sock_len = sizeof(struct sockaddr_in);
+            type = AF_INET;
+        } else {
+            sock_len = sizeof(struct sockaddr_in6);
+            type = AF_INET6;
+        }
+    
+        dtn_socket_fill_sockaddr_storage(&sa, type, data->remote.host, data->remote.port);
+    
+        ssize_t bytes = sendto(self->socket, data->buffer->start, data->buffer->length, 0, 
+            (struct sockaddr*)&sa, sock_len);
+
+        if (-1 == bytes){
+            dtn_list_queue_push(self->out.queue, data);
+            data = NULL;
+        }
+    
+        data = out_data_free(data);
+        data = dtn_list_queue_pop(self->out.queue);
+    }
+
+    if (!dtn_thread_lock_unlock(&self->out.lock)){
+        dtn_log_error("failed to unlock out queue");
+    }
+
+done:
+    return true;
+}
+
+/*---------------------------------------------------------------------------*/
+
+static bool process_state_change(dtn_interface_ip *self){
+
+    switch(self->link){
+
+        case DTN_IP_LINK_UP:
+            break;
+
+        default:
+            goto done;
+
+    }
+
+    // change to up, we start sending
+
+    start_sending_queue(self);
+
+done:
+    return true;
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -75,6 +172,10 @@ static bool check_link_status(uint32_t timer_id, void *userdata){
 
     if (current == self->link) goto reschedule;
 
+    self->link = current;
+
+    process_state_change(self);
+
     if (self->config.callbacks.state){
 
         self->config.callbacks.state(
@@ -83,8 +184,6 @@ static bool check_link_status(uint32_t timer_id, void *userdata){
             self->config.socket.host);
     
     }
-
-    self->link = current;
 
 reschedule:
     
@@ -294,6 +393,9 @@ static bool init_config(dtn_interface_ip_config *config){
     if (0 == config->limits.link_check)
         config->limits.link_check = 1000000; // every second
 
+    if (0 == config->limits.threadlock_timeout_usecs)
+        config->limits.threadlock_timeout_usecs = 100000;
+
     return true;
 error:
     return false;
@@ -336,6 +438,15 @@ dtn_interface_ip *dtn_interface_ip_create(dtn_interface_ip_config config){
 
     self->buffer = dtn_io_buffer_create((dtn_io_buffer_config){0});
     if (!self->buffer) goto error;
+
+    if (!dtn_thread_lock_init(&self->out.lock, 
+        self->config.limits.threadlock_timeout_usecs)) goto error;
+
+    self->out.queue = dtn_list_create((dtn_list_config){
+        .item.free = out_data_free
+    });
+    
+    if (!self->out.queue) goto error;
 
     dtn_log_info("IP interface %s:%i activated",
         self->config.socket.host, self->config.socket.port);
@@ -394,33 +505,25 @@ bool dtn_interface_ip_send(dtn_interface_ip *self,
     const uint8_t *buffer,
     size_t size){
 
+    struct out_data *data = NULL;
+
     if (!self || !buffer || size < 1) goto error;
 
-    if (0 == remote.host[0]) goto error;
-    if (UDP != remote.type) goto error;
+    data = calloc(1, sizeof(struct out_data));
+    if (!data) goto error;
 
-    struct sockaddr_storage sa = {0};
-    socklen_t sock_len = sizeof(sa);
+    data->remote = remote;
+    data->buffer = dtn_buffer_create(size);
+    dtn_buffer_push(data->buffer, (uint8_t*)buffer, size);
 
-    int type = AF_INET;
-
-    char *ptr = memchr(remote.host, '.', strlen(remote.host));
-    
-    if (ptr){
-        sock_len = sizeof(struct sockaddr_in);
-        type = AF_INET;
-    } else {
-        sock_len = sizeof(struct sockaddr_in6);
-        type = AF_INET6;
+    if (!dtn_thread_lock_try_lock(&self->out.lock)) goto error;
+    if (!dtn_list_queue_push(self->out.queue, data)) goto error;
+    if (!dtn_thread_lock_unlock(&self->out.lock)){
+        dtn_log_error("failed to unlock out queue");
     }
 
-    if (!dtn_socket_fill_sockaddr_storage(&sa, type, remote.host, remote.port))
-        goto error;
-
-    ssize_t bytes = sendto(self->socket, buffer, size, 0, 
-        (struct sockaddr*)&sa, sock_len);
-
-    if (bytes < 1) goto error;
+    if (DTN_IP_LINK_UP == self->link)
+        start_sending_queue(self);
 
     return true;
 error:

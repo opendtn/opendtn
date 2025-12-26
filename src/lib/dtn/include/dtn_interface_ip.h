@@ -50,6 +50,7 @@ typedef struct dtn_interface_ip_config {
     struct {
 
         uint64_t link_check;
+        uint64_t threadlock_timeout_usecs;
 
     } limits;
 

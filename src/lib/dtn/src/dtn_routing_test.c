@@ -30,6 +30,11 @@
 #include <dtn_base/testrun.h>
 #include "dtn_routing.c"
 
+#ifndef DTN_TEST_RESOURCE_DIR
+#error "Must provide -D DTN_TEST_RESOURCE_DIR=value while compiling this file."
+#endif
+
+
 /*
  *      ------------------------------------------------------------------------
  *
@@ -38,13 +43,136 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_case(){
-        testrun(1 == 1);
+int test_dtn_routing_create(){
+    
+    dtn_event_loop_config loop_config = (dtn_event_loop_config){
+        .max.sockets = 100,
+        .max.timers = 100};
 
-        return testrun_log_success();
+    dtn_event_loop *loop = dtn_event_loop_default(loop_config);
+    testrun(loop);
+
+    dtn_routing_config config = (dtn_routing_config){
+        .loop = loop,
+        .route_config_path = DTN_TEST_RESOURCE_DIR "/routes" 
+    };
+
+    dtn_routing *self = dtn_routing_create(config);
+    testrun(self);
+    testrun(self->routes.data);
+
+    testrun(NULL == dtn_routing_free(self));
+    testrun(NULL == dtn_event_loop_free(loop));
+
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
+
+int test_dtn_routing_free(){
+    
+    dtn_event_loop_config loop_config = (dtn_event_loop_config){
+        .max.sockets = 100,
+        .max.timers = 100};
+
+    dtn_event_loop *loop = dtn_event_loop_default(loop_config);
+    testrun(loop);
+
+    dtn_routing_config config = (dtn_routing_config){
+        .loop = loop,
+        .route_config_path = DTN_TEST_RESOURCE_DIR "/routes" 
+    };
+
+    dtn_routing *self = dtn_routing_create(config);
+    testrun(self);
+    testrun(self->routes.data);
+
+    testrun(NULL == dtn_routing_free(self));
+    testrun(NULL == dtn_event_loop_free(loop));
+
+    return testrun_log_success();
+}
+
+/*----------------------------------------------------------------------------*/
+
+int test_dtn_routing_dump(){
+    
+    dtn_event_loop_config loop_config = (dtn_event_loop_config){
+        .max.sockets = 100,
+        .max.timers = 100};
+
+    dtn_event_loop *loop = dtn_event_loop_default(loop_config);
+    testrun(loop);
+
+    dtn_routing_config config = (dtn_routing_config){
+        .loop = loop,
+        .route_config_path = DTN_TEST_RESOURCE_DIR "/routes" 
+    };
+
+    dtn_routing *self = dtn_routing_create(config);
+    
+    testrun(dtn_routing_dump(stderr, self));
+
+    testrun(NULL == dtn_routing_free(self));
+    testrun(NULL == dtn_event_loop_free(loop));
+
+    return testrun_log_success();
+}
+
+/*----------------------------------------------------------------------------*/
+
+int test_dtn_routing_save(){
+    
+    dtn_event_loop_config loop_config = (dtn_event_loop_config){
+        .max.sockets = 100,
+        .max.timers = 100};
+
+    dtn_event_loop *loop = dtn_event_loop_default(loop_config);
+    testrun(loop);
+
+    dtn_routing_config config = (dtn_routing_config){
+        .loop = loop,
+        .route_config_path = DTN_TEST_RESOURCE_DIR "/routes" 
+    };
+
+    dtn_routing *self = dtn_routing_create(config);
+
+    testrun(dtn_routing_save(self, NULL));
+    testrun(dtn_routing_save(self, DTN_TEST_RESOURCE_DIR "/test"));
+
+    testrun(NULL == dtn_routing_free(self));
+    testrun(NULL == dtn_event_loop_free(loop));
+
+    return testrun_log_success();
+}
+
+/*----------------------------------------------------------------------------*/
+
+int test_dtn_routing_load(){
+    
+    dtn_event_loop_config loop_config = (dtn_event_loop_config){
+        .max.sockets = 100,
+        .max.timers = 100};
+
+    dtn_event_loop *loop = dtn_event_loop_default(loop_config);
+    testrun(loop);
+
+    dtn_routing_config config = (dtn_routing_config){
+        .loop = loop,
+        .route_config_path = DTN_TEST_RESOURCE_DIR "/routes" 
+    };
+
+    dtn_routing *self = dtn_routing_create(config);
+
+    testrun(dtn_routing_load(self, NULL));
+    testrun(dtn_routing_load(self, DTN_TEST_RESOURCE_DIR "/test"));
+
+    testrun(NULL == dtn_routing_free(self));
+    testrun(NULL == dtn_event_loop_free(loop));
+
+    return testrun_log_success();
+}
+
 
 /*
  *      ------------------------------------------------------------------------
@@ -56,10 +184,14 @@ int test_case(){
 
 int all_tests() {
 
-        testrun_init();
-        testrun_test(test_case);
+    testrun_init();
+    testrun_test(test_dtn_routing_create);
+    testrun_test(test_dtn_routing_free);
+    testrun_test(test_dtn_routing_dump);
+    testrun_test(test_dtn_routing_save);
+    testrun_test(test_dtn_routing_load);
 
-        return testrun_counter;
+    return testrun_counter;
 }
 
 /*

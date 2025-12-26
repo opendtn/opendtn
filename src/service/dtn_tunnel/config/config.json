@@ -23,16 +23,33 @@
 			"path" : "./src/service/dtn_file_node/config/routes"
 		},
 
+		"tunnel" :{
+
+			"destination" : "dtn://test/one",
+			"socket" : {
+
+				"host" : "127.0.0.1",
+				"port" : 12346,
+				"type" : "UDP"
+			},
+			"remote" : {
+
+				"host" : "127.0.0.1",
+				"port" : 20001,
+				"type" : "UDP"
+			}
+		},
+
 		"node" : {
 
 			"name" : "DTN FILE NODE",
 			"path" : "/tmp/opendtn/input",
-			"uri"  : "dtn://test/one",
+			"uri"  : "dtn://test/two",
 
 			"socket" : {
 
-				"host" : "127.0.0.1",
-				"port" : 14444,
+				"host" : "0.0.0.0",
+				"port" : 14445,
 				"type" : "TCP"
 			},
 
@@ -50,10 +67,7 @@
 				"threadlock_timeout_usec" : 0,
 				"link_check_usec" : 0,
 				"message_queue_capacity" : 0,
-				"threads" : 0,
-				"buffer_time_cleanup_usecs" : 0,
-				"max_buffer_time_secs" : 0,
-				"history_secs" : 0
+				"threads" : 0
 			},
 
 			"sockets" :
@@ -61,18 +75,9 @@
 				{
 					"host" : "127.0.0.1",
 					"type" : "UDP",
-					"port" : 4556
+					"port" : 4557
 				}
-			],
-			"cbor" :
-			{
-				"string_size" : 1500,
-				"utf8_string_size" : 1500,
-				"array_size" : 1000,
-				"undef_length_array" : 1000,
-				"map_size" : 1000,
-				"undef_length_map" : 1000
-			}
+			]
 		}
 
 	}

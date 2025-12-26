@@ -2942,6 +2942,10 @@ int check_crc_generation(){
         buffer, next - buffer, &out, &next));
     testrun(out);
 
+    // check we can encode (set crc) more than once
+    testrun(dtn_bundle_encode(bundle, buffer, size, &next));
+    testrun(dtn_bundle_encode(bundle, buffer, size, &next));
+
     out = dtn_bundle_free(out);
     bundle = dtn_bundle_free(out);
 
@@ -2978,6 +2982,10 @@ int check_crc_generation(){
     testrun(DTN_CBOR_MATCH_FULL == dtn_bundle_decode(
         buffer, next - buffer, &out, &next));
     testrun(out);
+
+     // check we can encode (set crc) more than once
+    testrun(dtn_bundle_encode(bundle, buffer, size, &next));
+    testrun(dtn_bundle_encode(bundle, buffer, size, &next));
 
     out = dtn_bundle_free(out);
     bundle = dtn_bundle_free(out);

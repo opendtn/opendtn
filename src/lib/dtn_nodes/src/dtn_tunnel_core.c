@@ -19,22 +19,22 @@
 
         ------------------------------------------------------------------------
 *//**
-        @file           dtn_file_node_core.c
+        @file           dtn_tunnel_core.c
         @author         Töpfer, Markus
 
-        @date           2025-12-23
+        @date           2025-12-25
 
 
         ------------------------------------------------------------------------
 */
-#include "../include/dtn_file_node_core.h"
+#include "../include/dtn_tunnel_core.h"
+
 
 #include <limits.h>
 #include <stdlib.h>
 #include <libgen.h>
 
 #include <dtn/dtn_interface_ip.h>
-#include <dtn/dtn_routing.h>
 #include <dtn/dtn_dtn_uri.h>
 #include <dtn/dtn_bundle_buffer.h>
 
@@ -55,34 +55,42 @@
 
 /*---------------------------------------------------------------------------*/
 
-#define DTN_FILE_NODE_CORE_MAGIC_BYTE 0xc053
+#define dtn_tunnel_core_MAGIC_BYTE 0xc053
 
 typedef enum ThreadMessageType {
 
-    BUNDLE_IO = 0,
+    DTN_TUNNEL_IO = 0,
+    UDP_TUNNEL_IO,
     STATE_CHANGE
 
 }ThreadMessageType;
 
 /*---------------------------------------------------------------------------*/
 
-struct dtn_file_node_core {
+struct dtn_tunnel_core {
 
     uint16_t magic_byte;
-    dtn_file_node_core_config config;
+    dtn_tunnel_core_config config;
 
     dtn_garbadge_colloctor *garbadge;
+
+    int socket;
 
     uint64_t sequence;
 
     dtn_dtn_uri *uri;
-    char *path;
+    char *destination_uri;
 
     dtn_thread_loop *tloop;
 
     dtn_bundle_buffer *buffer;
 
-    dtn_routing *routing;
+    struct {
+
+        dtn_thread_lock lock;
+        dtn_item *data;
+
+    } routes;
 
     struct {
 
@@ -139,6 +147,7 @@ typedef struct Threadmessage {
     dtn_bundle *bundle;
     dtn_socket_data remote;
     char *interface;
+    dtn_buffer *buffer;
 
 } Threadmessage;
 
@@ -151,6 +160,7 @@ static dtn_thread_message *thread_message_free(dtn_thread_message *self){
     Threadmessage *msg = (Threadmessage*) self;
     msg->bundle = dtn_bundle_free(msg->bundle);
     msg->interface = dtn_data_pointer_free(msg->interface);
+    msg->buffer = dtn_buffer_free(msg->buffer);
     msg = dtn_data_pointer_free(msg);
     return NULL;
 }
@@ -185,7 +195,7 @@ static dtn_thread_message *thread_message_create(
     msg->generic.type = 1;
     msg->generic.free = thread_message_free;
 
-    msg->type = BUNDLE_IO;
+    msg->type = DTN_TUNNEL_IO;
     msg->bundle = bundle;
     msg->remote = *remote;
     msg->interface = dtn_string_dup(name);
@@ -194,9 +204,26 @@ static dtn_thread_message *thread_message_create(
 
 /*----------------------------------------------------------------------------*/
 
+static dtn_thread_message *thread_message_tunnel_io_create(
+    dtn_buffer *buffer){
+
+    Threadmessage *msg = calloc(1, sizeof(Threadmessage));
+    if (!msg) return NULL;
+    
+    msg->generic.magic_bytes = DTN_THREAD_MESSAGE_MAGIC_BYTES;
+    msg->generic.type = 1;
+    msg->generic.free = thread_message_free;
+
+    msg->type = UDP_TUNNEL_IO;
+    msg->buffer = buffer;
+    return dtn_thread_message_cast(msg);
+}
+
+/*----------------------------------------------------------------------------*/
+
 static bool handle_in_loop(dtn_thread_loop *tloop, dtn_thread_message *msg){
 
-    dtn_file_node_core *self = dtn_thread_loop_get_data(tloop);
+    dtn_tunnel_core *self = dtn_thread_loop_get_data(tloop);
     if (!self || !msg) goto error;
 
     TODO("... to be implemented.");
@@ -216,62 +243,37 @@ static void cb_payload(void *userdata,
                        const char *source,
                        const char *destination){
 
-    dtn_dtn_uri *dest = NULL;
-    char inpath[PATH_MAX];
-    memset(inpath, 0, PATH_MAX);
-
-    char cleanpath[PATH_MAX];
-    memset(cleanpath, 0, PATH_MAX);
-
-    char path[2 * PATH_MAX];
-    memset(path, 0, 2 * PATH_MAX);
-
-    char rpath[PATH_MAX];
-    memset(rpath, 0, PATH_MAX);
-
-    dtn_file_node_core *self = dtn_file_node_core_cast(userdata);
+    dtn_tunnel_core *self = dtn_tunnel_core_cast(userdata);
     if (!self || !payload || size < 1 || !source || !destination) goto error;
 
     dtn_log_debug("GOT PAYLOAD from %s for %s", source, destination);
 
-    dest = dtn_dtn_uri_decode(destination);
-    
-    if (0 != dtn_string_compare(dest->scheme, self->uri->scheme))
-        goto error;
+    struct sockaddr_storage sa = {0};
+    socklen_t sa_len = sizeof(sa);
+    int af = AF_INET6;
 
-    if (0 != dtn_string_compare(dest->name, self->uri->name))
-        goto error;
+    char *ptr = memchr(self->config.remote.host, '.', DTN_HOST_NAME_MAX);
+    if (ptr) af = AF_INET;
 
-    // prepare path
-    snprintf(inpath, PATH_MAX, "%s", dest->demux);
-    if (!dtn_dtn_uri_path_remove_dot_segments(inpath, cleanpath)) goto error;
-    snprintf(path, 2 * PATH_MAX, "%s/%s", self->path, cleanpath);
-    strncpy(rpath, path, PATH_MAX);
+    dtn_socket_fill_sockaddr_storage(&sa, af, 
+        self->config.remote.host,
+        self->config.remote.port);
 
-    char *dir = dirname(rpath);
-    if (!dtn_dir_tree_create(dir)) goto error;
-
-    if (DTN_FILE_SUCCESS != dtn_file_write(path, payload, size, "w+")){
-        dtn_log_error("failed to write file %s", path);
-    } else {
-        dtn_log_info("new file received %s", path);
-    }
+    ssize_t bytes = sendto(self->socket, payload, size, 0, (struct sockaddr*)&sa, sa_len);
+    dtn_log_debug("forwared %i bytes to %s:%i", bytes, 
+        self->config.remote.host, self->config.remote.port);
 
 error:
-    dtn_dtn_uri_free(dest);
     return;
 }
 
 /*---------------------------------------------------------------------------*/
 
-static bool message_bundle_process(dtn_file_node_core *self, Threadmessage *msg){
+static bool message_bundle_process(dtn_tunnel_core *self, Threadmessage *msg){
 
     if (!self || !msg) goto error;
 
-/*
-    dtn_log_debug("THREAD IO at %s from %s:%i", msg->interface, 
-        msg->remote.host, msg->remote.port);
-*/
+    dtn_log_debug("GOT BUNDLE");
     
     if (!dtn_bundle_buffer_push(self->buffer, msg->bundle)){
         dtn_log_error("failed to push bundle to buffer - dropping.");
@@ -288,9 +290,423 @@ error:
 
 }
 
+/*----------------------------------------------------------------------------*/
+
+struct container_interface {
+
+    dtn_tunnel_core *self;
+    const char *uri;
+    dtn_socket_configuration remote;
+    char *interface;
+    dtn_interface_ip *result;
+    dtn_interface_ip *fit;
+};
+
+/*----------------------------------------------------------------------------*/
+
+static bool find_interface_for_uri(
+    const char *key, dtn_item const *val, void *userdata){
+
+    if (!key) return true;
+
+    struct container_interface *container = (struct container_interface*) userdata;
+
+    if (container->fit) return true;
+
+    dtn_item *uris = dtn_item_object_get(val, "uris");
+    dtn_item *item = dtn_item_object_get(uris, container->uri);
+
+    if (item){
+
+        const char *in = dtn_item_get_string(dtn_item_get(item, "/interface"));
+        const char *name = dtn_interface_ip_name(container->result);
+        
+        if (0 == dtn_string_compare(in, name))
+            container->fit = container->result;
+    }
+
+    return true;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static bool search_interface_for_uri(const void *key, void *val, void *data){
+
+    if (!key) return true;
+
+    struct container_interface *container = (struct container_interface*) data;
+    Interface *inter = (Interface*) val;
+
+    if (container->result) return true;
+
+    if (!dtn_thread_lock_try_lock(&container->self->routes.lock)) goto done;
+    
+    container->result = inter->interface;
+
+    dtn_item_object_for_each(container->self->routes.data,
+        find_interface_for_uri,
+        container);
+
+    if (!dtn_thread_lock_unlock(&container->self->routes.lock)){
+        dtn_log_error("failed to unlock routes");
+    }
+
+    container->result = NULL;
+    container->result = container->fit;
+
+done:
+    return true;   
+}
+
+/*----------------------------------------------------------------------------*/
+
+static dtn_interface_ip *get_interface_for_uri(dtn_tunnel_core *self,
+    const char *uri,
+    dtn_socket_configuration remote){
+
+    if (!self || !uri) goto error;
+
+    struct container_interface container = (struct container_interface){
+        .self = self,
+        .uri = uri,
+        .remote = remote,
+        .result = NULL
+    };
+
+    if (!dtn_thread_lock_try_lock(&self->interfaces.lock_ip))
+        goto error;
+
+    dtn_dict_for_each(self->interfaces.ip, 
+        &container, search_interface_for_uri);
+
+    if (!dtn_thread_lock_unlock(&self->interfaces.lock_ip)){
+        dtn_log_error("failed to unlock ip interfaces.");
+    }
+
+    return container.result;
+
+error:
+    return NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static bool find_default_interface(
+    const char *key, dtn_item const *val, void *userdata){
+
+    if (!key) return true;
+    struct container_interface *container = (struct container_interface*) userdata;
+
+    dtn_item *in = dtn_item_get(val, "/uris/default");
+    if (!in) goto done;
+
+    const char *interface_name = dtn_item_get_string(dtn_item_get(in, "/interface"));
+    Interface *interface = dtn_dict_get(container->self->interfaces.ip, interface_name);
+
+    if (interface)
+        container->result = interface->interface;
+
+done:
+    return true;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static dtn_interface_ip *get_default_interface(dtn_tunnel_core *self){
+
+    if (!dtn_thread_lock_try_lock(&self->routes.lock)) goto done;
+
+    struct container_interface container = (struct container_interface){
+        .self = self,
+        .result = NULL
+    };
+
+    dtn_item_object_for_each(
+        self->routes.data,
+        find_default_interface,
+        &container);
+
+    if (!dtn_thread_lock_unlock(&self->routes.lock)){
+        dtn_log_error("failed to unlock routes");
+    }
+
+done:
+    return container.result;
+
+}
+
+/*----------------------------------------------------------------------------*/
+
+static bool find_socket_config(
+    const char *key, dtn_item const *val, void *userdata){
+
+    if (!key) return true;
+
+    struct container_interface *container = (struct container_interface*) userdata;
+
+    dtn_item *uris = dtn_item_object_get(val, "uris");
+    if (!uris) goto done;
+
+    dtn_item *uri = dtn_item_object_get(uris, container->uri);
+    if (!uri) goto done;
+
+    container->remote = dtn_socket_configuration_from_item(
+        dtn_item_object_get(uri, "socket"));
+
+done:
+    return true;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static dtn_socket_configuration get_socket_config_for_uri(
+    dtn_tunnel_core *self, const char *uri){
+
+    if (!dtn_thread_lock_try_lock(&self->routes.lock)) goto done;
+
+    struct container_interface container = (struct container_interface){
+        .self = self,
+        .uri = uri,
+        .remote = (dtn_socket_configuration){0}
+    };
+
+    dtn_item_object_for_each(
+        self->routes.data,
+        find_socket_config,
+        &container);
+
+    if (!dtn_thread_lock_unlock(&self->routes.lock)){
+        dtn_log_error("failed to unlock routes");
+    }
+
+done:
+    return container.remote;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static dtn_list *create_bundles(dtn_tunnel_core *self, uint8_t *buffer, size_t size){
+
+    dtn_list *queue = NULL;
+    char *source = NULL;
+    dtn_cbor *payload = NULL;
+    dtn_bundle *bundle = NULL;
+
+    if (!self || !buffer || size < 1) goto error;
+
+    queue = dtn_linked_list_create((dtn_list_config){
+        .item.free = dtn_bundle_free_void
+    });
+
+    if (!queue) goto error;
+
+    uint8_t *ptr = buffer;
+    size_t chunk = 1200;    // use a chunk size smaller Ethernet MTU
+    size_t open = size;
+
+    self->sequence++;
+
+    uint64_t timestamp = dtn_time_get_current_time_usecs();
+    uint64_t lifetime = 24 * 60 * 60 * 1000; // 24h
+
+    char *destination = self->destination_uri;
+    source = dtn_dtn_uri_encode(self->uri);
+
+    if (size < chunk){
+
+        bundle = dtn_bundle_create();
+        if (!bundle) goto error;
+        if (!dtn_list_queue_push(queue, bundle)) goto error;
+
+        if (!dtn_bundle_add_primary_block(
+            bundle, 
+            0x00,
+            0x01,
+            destination,
+            source,
+            source,
+            timestamp,
+            self->sequence,
+            lifetime,
+            0,
+            0)) goto error;
+
+        payload = dtn_cbor_string("test");
+        if (!dtn_cbor_set_byte_string(payload, buffer, size)) goto error;
+
+        if (!dtn_bundle_add_block(
+            bundle,
+            0x01,
+            0x01,
+            0x00,
+            0x01,
+            payload)) goto error;
+
+        payload = NULL;
+
+        goto done;
+    }
+
+    while(open - chunk > 0){
+
+        bundle = dtn_bundle_create();
+        if (!bundle) goto error;
+        if (!dtn_list_queue_push(queue, bundle)) goto error;
+
+        if (!dtn_bundle_add_primary_block(
+            bundle, 
+            0x01,
+            0x01,
+            destination,
+            source,
+            source,
+            timestamp,
+            self->sequence,
+            lifetime,
+            ptr - buffer,
+            size)) goto error;
+
+        payload = dtn_cbor_string("test");
+        if (!dtn_cbor_set_byte_string(payload, ptr, chunk)) goto error;
+
+        if (!dtn_bundle_add_block(
+            bundle,
+            0x01,
+            0x01,
+            0x00,
+            0x01,
+            payload)) goto error;
+
+        payload = NULL;
+
+        ptr = ptr + chunk;
+
+        int64_t check = open - chunk;
+        if (check < 0) break;
+
+        open = open - chunk;
+        self->sequence++;
+    }
+
+    // add last block
+
+    bundle = dtn_bundle_create();
+    if (!bundle) goto error;
+    if (!dtn_list_queue_push(queue, bundle)) goto error;
+
+    if (!dtn_bundle_add_primary_block(
+            bundle, 
+            0x01,
+            0x01,
+            destination,
+            source,
+            source,
+            timestamp,
+            self->sequence,
+            lifetime,
+            ptr - buffer,
+            size)) goto error;
+
+    payload = dtn_cbor_string("test");
+    if (!dtn_cbor_set_byte_string(payload, ptr, open)) goto error;
+
+    if (!dtn_bundle_add_block(
+            bundle,
+            0x01,
+            0x01,
+            0x00,
+            0x01,
+            payload)) goto error;
+
+    payload = NULL;
+    
+    self->sequence++;
+
+done:    
+    dtn_data_pointer_free(source);
+    return queue;
+
+error:
+    dtn_bundle_free(bundle);
+    dtn_cbor_free(payload);
+    dtn_list_free(queue);
+    dtn_data_pointer_free(source);
+    return NULL;
+}
+
 /*---------------------------------------------------------------------------*/
 
-static bool message_state_change_process(dtn_file_node_core *self, Threadmessage *msg){
+static bool message_udp_process(dtn_tunnel_core *self, Threadmessage *msg){
+
+    dtn_list *queue = NULL;
+
+    uint8_t out[2048];
+    size_t out_size = 2048;
+    memset(out, 0, out_size);
+
+    char uri[2048];
+    size_t uri_size = 2048;
+    memset(uri, 0, uri_size);
+
+    if (!self || !msg) goto error;
+
+    dtn_dtn_uri *dest = dtn_dtn_uri_decode(self->destination_uri);
+
+    snprintf(uri, uri_size, "%s/%s", dest->name, dest->demux);
+
+    dtn_socket_configuration remote = get_socket_config_for_uri(self, uri);
+
+    dtn_interface_ip *interface = get_interface_for_uri(self, uri, remote);
+
+    dest = dtn_dtn_uri_free(dest);
+  
+    if (!interface) interface = get_default_interface(self);
+
+    if (!interface) goto error;
+
+    queue = create_bundles(self, msg->buffer->start,msg->buffer->length);
+    if (!queue) goto error;
+
+    dtn_bundle *bundle = dtn_list_queue_pop(queue);
+
+    while(bundle){
+
+        uint8_t *next = NULL;
+
+        memset(out, 0, out_size);
+
+        if (!dtn_bundle_encode(bundle, out, out_size, &next)) 
+            goto error;
+
+        if (!dtn_interface_ip_send(interface, remote, out, next - out))
+            goto error;
+
+        bundle = dtn_bundle_free(bundle);
+        bundle = dtn_list_queue_pop(queue);
+    }
+
+    dtn_log_debug("send to %s via %s:%i", 
+        self->destination_uri,
+        remote.host,
+        remote.port);
+
+    queue = dtn_list_free(queue);
+
+    dtn_thread_message_free(dtn_thread_message_cast(msg));
+    dtn_bundle_free(bundle);
+    return true;
+
+error:
+    dtn_thread_message_free(dtn_thread_message_cast(msg));
+    dtn_bundle_free(bundle);
+    dtn_list_free(queue);
+    return false;
+
+}
+
+/*---------------------------------------------------------------------------*/
+
+static bool message_state_change_process(dtn_tunnel_core *self, Threadmessage *msg){
 
     if (!self || !msg) goto error;
 
@@ -328,7 +744,7 @@ error:
 
 static bool handle_in_thread(dtn_thread_loop *tloop, dtn_thread_message *msg){
 
-    dtn_file_node_core *self = dtn_thread_loop_get_data(tloop);
+    dtn_tunnel_core *self = dtn_thread_loop_get_data(tloop);
     if (!self || !msg) goto error;
 
     if (msg->type != 1) goto error;
@@ -337,8 +753,12 @@ static bool handle_in_thread(dtn_thread_loop *tloop, dtn_thread_message *msg){
 
     switch(message->type){
 
-        case BUNDLE_IO:
+        case DTN_TUNNEL_IO:
             return message_bundle_process(self, message);
+            break;
+
+        case UDP_TUNNEL_IO:
+            return message_udp_process(self, message);
             break;
 
         case STATE_CHANGE:
@@ -356,7 +776,77 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool init_config(dtn_file_node_core_config *config){
+static bool cb_tunnel_io(int socket, uint8_t events, void *userdata){
+
+    dtn_buffer *buffer = NULL;
+
+    dtn_tunnel_core *self = dtn_tunnel_core_cast(userdata);
+    if (!self) goto error;
+
+    if ( (events & DTN_EVENT_IO_ERR) || (events & DTN_EVENT_IO_CLOSE) ){
+
+        dtn_log_error("tunnel socket closed.");
+        goto done;
+    }
+
+    buffer = dtn_buffer_create(2048);
+    if (!buffer) goto error;
+
+    struct sockaddr_storage sa = {0};
+    socklen_t sa_len = sizeof(sa);
+
+    ssize_t bytes = recvfrom(socket, buffer->start, buffer->capacity, 
+        0, (struct sockaddr *)&sa, &sa_len);
+
+    if (bytes < 1) goto error;
+
+    buffer->length = bytes;
+
+    dtn_thread_message *msg = thread_message_tunnel_io_create(buffer);
+    if (!msg) goto error;
+
+    if (!dtn_thread_loop_send_message(self->tloop, msg, DTN_RECEIVER_THREAD)){
+        msg = dtn_thread_message_free(msg);
+    }
+done:
+    return true;
+error:
+    dtn_buffer_free(buffer);
+    return false;
+}
+
+/*---------------------------------------------------------------------------*/
+
+static bool open_tunnel_socket(dtn_tunnel_core *self){
+
+    if (!self) goto error;
+
+    self->config.tunnel.type = UDP;
+    self->socket = dtn_socket_create(self->config.tunnel, false, NULL);
+    if (-1 == self->socket) goto error;
+    if (!dtn_socket_ensure_nonblocking(self->socket)) goto error;
+
+    if (!dtn_event_loop_set(
+        self->config.loop,
+        self->socket,
+        DTN_EVENT_IO_IN | DTN_EVENT_IO_ERR | DTN_EVENT_IO_CLOSE,
+        self, 
+        cb_tunnel_io)) goto error;
+
+    dtn_log_info("opened tunnel %s:%i", self->config.tunnel.host, 
+        self->config.tunnel.port);
+
+    return true;
+error:
+    if (self)
+        dtn_log_error("failed to open tunnel %s:%i", self->config.tunnel.host, 
+        self->config.tunnel.port);
+    return false;
+}
+
+/*---------------------------------------------------------------------------*/
+
+static bool init_config(dtn_tunnel_core_config *config){
 
     if (!config || !config->loop) goto error;
 
@@ -389,16 +879,16 @@ error:
  *      ------------------------------------------------------------------------
  */
 
-dtn_file_node_core *dtn_file_node_core_create(dtn_file_node_core_config config){
+dtn_tunnel_core *dtn_tunnel_core_create(dtn_tunnel_core_config config){
 
-    dtn_file_node_core *self = NULL;
+    dtn_tunnel_core *self = NULL;
     
     if (!init_config(&config)) goto error;
 
-    self = calloc(1, sizeof(dtn_file_node_core));
+    self = calloc(1, sizeof(dtn_tunnel_core));
     if (!self) goto error;
 
-    self->magic_byte = DTN_FILE_NODE_CORE_MAGIC_BYTE;
+    self->magic_byte = dtn_tunnel_core_MAGIC_BYTE;
     self->config = config;
 
     self->tloop = dtn_thread_loop_create(self->config.loop,
@@ -429,6 +919,10 @@ dtn_file_node_core *dtn_file_node_core_create(dtn_file_node_core_config config){
         self->config.limits.threadlock_timeout_usec))
         goto error;
 
+    if (!dtn_thread_lock_init(&self->routes.lock, 
+        self->config.limits.threadlock_timeout_usec))
+        goto error;
+
     self->garbadge = dtn_garbadge_colloctor_create((dtn_garbadge_colloctor_config){
         .loop = config.loop,
         .limits.threadlock_timeout_usec = config.limits.threadlock_timeout_usec,
@@ -440,40 +934,35 @@ dtn_file_node_core *dtn_file_node_core_create(dtn_file_node_core_config config){
     self->buffer = dtn_bundle_buffer_create((dtn_bundle_buffer_config){
         .loop = self->config.loop,
         .limits.buffer_time_cleanup_usecs = self->config.limits.buffer_time_cleanup_usecs,
-        .limits.history_secs = self->config.limits.history_secs,
         .limits.max_buffer_time_secs = self->config.limits.max_buffer_time_secs,
+        .limits.history_secs = self->config.limits.history_secs,
         .limits.threadlock_timeout_usecs = self->config.limits.threadlock_timeout_usec,
         .callbacks.userdata = self,
         .callbacks.payload = cb_payload
     });
 
-    dtn_routing_config routing = (dtn_routing_config){
-
-        .loop = config.loop,
-        .limits.threadlock_timeout_usecs = config.limits.threadlock_timeout_usec
-    };
-
-    self->routing = dtn_routing_create(routing);
-    if (!self->routing) goto error;
+    if (0 != self->config.tunnel.host[0])
+        open_tunnel_socket(self);
 
     return self;
 error:
-    dtn_file_node_core_free(self);
+    dtn_tunnel_core_free(self);
     return NULL;
 }
 
 /*---------------------------------------------------------------------------*/
 
-dtn_file_node_core *dtn_file_node_core_free(dtn_file_node_core *self){
+dtn_tunnel_core *dtn_tunnel_core_free(dtn_tunnel_core *self){
 
-    if (!dtn_file_node_core_cast(self)) return self;
+    if (!dtn_tunnel_core_cast(self)) return self;
 
     dtn_thread_lock_clear(&self->interfaces.lock_ip);
+    dtn_thread_lock_clear(&self->routes.lock);
 
     self->buffer = dtn_bundle_buffer_free(self->buffer);
     self->uri = dtn_dtn_uri_free(self->uri);
-    self->path = dtn_data_pointer_free(self->path);
-    self->routing = dtn_routing_free(self->routing); 
+    self->destination_uri = dtn_data_pointer_free(self->destination_uri);
+    self->routes.data = dtn_item_free(self->routes.data);
     self->garbadge = dtn_garbadge_colloctor_free(self->garbadge);
     self->interfaces.ip = dtn_dict_free(self->interfaces.ip);
     self->tloop = dtn_thread_loop_free(self->tloop);
@@ -483,14 +972,14 @@ dtn_file_node_core *dtn_file_node_core_free(dtn_file_node_core *self){
 
 /*---------------------------------------------------------------------------*/
 
-dtn_file_node_core *dtn_file_node_core_cast(const void *data){
+dtn_tunnel_core *dtn_tunnel_core_cast(const void *data){
 
     if (!data) return NULL;
 
-    if (*(uint16_t *)data != DTN_FILE_NODE_CORE_MAGIC_BYTE)
+    if (*(uint16_t *)data != dtn_tunnel_core_MAGIC_BYTE)
         return NULL;
 
-    return (dtn_file_node_core *)data;
+    return (dtn_tunnel_core *)data;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -498,7 +987,7 @@ dtn_file_node_core *dtn_file_node_core_cast(const void *data){
 static void interface_io(void *userdata, const dtn_socket_data *remote, 
     dtn_bundle *bundle, const char *name){
 
-    dtn_file_node_core *self = dtn_file_node_core_cast(userdata);
+    dtn_tunnel_core *self = dtn_tunnel_core_cast(userdata);
     if (!self || !remote || !bundle || !name) return;
 
     // dtn_log_debug("IO at %s from %s:%i", name, remote->host, remote->port);
@@ -522,7 +1011,7 @@ error:
 static void interface_state(void *userdata, 
     dtn_ip_link_state state, const char *name){
 
-    dtn_file_node_core *self = dtn_file_node_core_cast(userdata);
+    dtn_tunnel_core *self = dtn_tunnel_core_cast(userdata);
     if (!self || !name) return;
 
     const char *string = NULL;
@@ -568,7 +1057,7 @@ done:
 
 static void interface_close(void *userdata, const char *name){
 
-    dtn_file_node_core *self = dtn_file_node_core_cast(userdata);
+    dtn_tunnel_core *self = dtn_tunnel_core_cast(userdata);
     if (!userdata || !name) return;
 
     dtn_log_error("Interface %s lost", name);
@@ -599,7 +1088,7 @@ error:
 /*---------------------------------------------------------------------------*/
 
 static bool open_interface(dtn_socket_configuration socket, 
-    dtn_file_node_core *self){
+    dtn_tunnel_core *self){
 
     dtn_interface_ip_config config = (dtn_interface_ip_config){
         .loop = self->config.loop,
@@ -671,7 +1160,7 @@ error:
 struct container {
 
     const char *key;
-    dtn_file_node_core *app;
+    dtn_tunnel_core *app;
 };
 
 /*---------------------------------------------------------------------------*/
@@ -703,7 +1192,7 @@ error:
 
 static bool open_socket_interface(void *item, void *userdata){
 
-    dtn_file_node_core *self = dtn_file_node_core_cast(userdata);
+    dtn_tunnel_core *self = dtn_tunnel_core_cast(userdata);
     if (!item || !self) goto error;
 
     dtn_socket_configuration socket = dtn_socket_configuration_from_item(item);
@@ -720,7 +1209,7 @@ static bool open_local_interface(const char *key, dtn_item const *val, void *use
 
     if (!key) return true;
 
-    dtn_file_node_core *self = dtn_file_node_core_cast(userdata);
+    dtn_tunnel_core *self = dtn_tunnel_core_cast(userdata);
 
     struct container container = (struct container){
         .key = key,
@@ -736,7 +1225,7 @@ static bool open_local_interface(const char *key, dtn_item const *val, void *use
 
 /*---------------------------------------------------------------------------*/
 
-static bool open_all_interfaces(dtn_file_node_core *self){
+static bool open_all_interfaces(dtn_tunnel_core *self){
 
     dtn_item *interfaces = NULL;
 
@@ -765,8 +1254,8 @@ error:
  *      ------------------------------------------------------------------------
  */
 
-bool dtn_file_node_core_enable_ip_interfaces(
-        dtn_file_node_core *self,
+bool dtn_tunnel_core_enable_ip_interfaces(
+        dtn_tunnel_core *self,
         const dtn_item *input){
 
     bool result = false;
@@ -796,19 +1285,39 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_file_node_core_enable_routes(dtn_file_node_core *self, const char *path){
+bool dtn_tunnel_core_enable_routes(dtn_tunnel_core *self, const char *path){
 
     if (!self || !path) goto error;
 
-    return dtn_routing_load(self->routing, path);
+    dtn_log_info("enable routes from %s", path);
+
+    dtn_item *routes = dtn_item_json_read_dir(path, "route");
+
+    if (!routes) goto error;
+
+    char *string = dtn_item_to_json(routes);
+    dtn_log_debug("loaded routes %s", string);
+    string = dtn_data_pointer_free(string);
+
+    if (!dtn_thread_lock_try_lock(&self->routes.lock))
+        goto error;
+
+    self->routes.data = dtn_item_free(self->routes.data);
+    self->routes.data = routes;
+
+    if (!dtn_thread_lock_unlock(&self->routes.lock)){
+        dtn_log_error("failed to unlock routes.");
+    }
+
+    return true;
 error:
     return false;
 }
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_file_node_core_set_source_uri(
-        dtn_file_node_core *self, 
+bool dtn_tunnel_core_set_source_uri(
+        dtn_tunnel_core *self, 
         const char *uri){
 
     if (!self) goto error;
@@ -825,253 +1334,17 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_file_node_core_set_reception_path(
-        dtn_file_node_core *self, 
-        const char *path){
+bool dtn_tunnel_core_set_destination_uri(
+        dtn_tunnel_core *self, 
+        const char *uri){
 
     if (!self) goto error;
 
-    self->path = dtn_data_pointer_free(self->path);
-    self->path = dtn_string_dup(path);
+    self->destination_uri = dtn_data_pointer_free(self->destination_uri);
+    self->destination_uri = dtn_string_dup(uri);
 
-    dtn_log_info("SET RECEPTION PATH TO %s", path);
+    dtn_log_info("SET DESTINATION URI TO %s", uri);
     return true;
 error:
-    return false;
-}
-
-/*
- *      ------------------------------------------------------------------------
- *
- *      SEND FUNCTIONS
- *
- *      ------------------------------------------------------------------------
- */
-
-/*----------------------------------------------------------------------------*/
-
-static dtn_list *create_bundles_for_file(dtn_file_node_core *self,
-    const dtn_dtn_uri *uri, const char *path, uint8_t *buffer, size_t size){
-
-    dtn_list *queue = NULL;
-    char *source = NULL;
-    dtn_cbor *payload = NULL;
-    dtn_bundle *bundle = NULL;
-
-    if (!self || !path || !buffer || size < 1) goto error;
-
-    queue = dtn_linked_list_create((dtn_list_config){
-        .item.free = dtn_bundle_free_void
-    });
-
-    if (!queue) goto error;
-
-    uint8_t *ptr = buffer;
-    size_t chunk = 1200;    // use a chunk size smaller Ethernet MTU
-    size_t open = size;
-
-    self->sequence++;
-
-    uint64_t timestamp = dtn_time_get_current_time_usecs();
-    uint64_t lifetime = 24 * 60 * 60 * 1000; // 24h
-
-    char destination[2 * PATH_MAX];
-    memset(destination, 0, 2 * PATH_MAX);
-
-    char *uri_dest = dtn_dtn_uri_encode(uri);
-
-    if (path[0] == '/'){
-
-        snprintf(destination, 2 *PATH_MAX, "%s%s", uri_dest, path);
-
-    } else {
-
-        snprintf(destination, 2 *PATH_MAX, "%s/%s", uri_dest, path);
-    }
-    
-    uri_dest = dtn_data_pointer_free(uri_dest);
-    source = dtn_dtn_uri_encode(self->uri);
-
-    while(open - chunk > 0){
-
-        bundle = dtn_bundle_create();
-        if (!bundle) goto error;
-        if (!dtn_list_queue_push(queue, bundle)) goto error;
-
-        if (!dtn_bundle_add_primary_block(
-            bundle, 
-            0x01,
-            0x01,
-            destination,
-            source,
-            source,
-            timestamp,
-            self->sequence,
-            lifetime,
-            ptr - buffer,
-            size)) goto error;
-
-        payload = dtn_cbor_string("test");
-        if (!dtn_cbor_set_byte_string(payload, ptr, chunk)) goto error;
-
-        if (!dtn_bundle_add_block(
-            bundle,
-            0x01,
-            0x01,
-            0x00,
-            0x01,
-            payload)) goto error;
-
-        payload = NULL;
-
-        ptr = ptr + chunk;
-
-        int64_t check = open - chunk;
-        if (check < 0) break;
-
-        open = open - chunk;
-        self->sequence++;
-    }
-
-    // add last block
-
-    self->sequence++;
-
-    bundle = dtn_bundle_create();
-    if (!bundle) goto error;
-    if (!dtn_list_queue_push(queue, bundle)) goto error;
-
-    if (!dtn_bundle_add_primary_block(
-            bundle, 
-            0x01,
-            0x01,
-            destination,
-            source,
-            source,
-            timestamp,
-            self->sequence,
-            lifetime,
-            ptr - buffer,
-            size)) goto error;
-
-    payload = dtn_cbor_string("test");
-    if (!dtn_cbor_set_byte_string(payload, ptr, open)) goto error;
-
-    if (!dtn_bundle_add_block(
-            bundle,
-            0x01,
-            0x01,
-            0x00,
-            0x01,
-            payload)) goto error;
-
-    payload = NULL;
-    
-   
-    dtn_data_pointer_free(source);
-    return queue;
-
-error:
-    dtn_bundle_free(bundle);
-    dtn_cbor_free(payload);
-    dtn_list_free(queue);
-    dtn_data_pointer_free(source);
-    return NULL;
-}
-
-/*----------------------------------------------------------------------------*/
-
-bool dtn_file_node_core_send_file(
-    dtn_file_node_core *self,
-    const char *uri,
-    const char *source_path,
-    const char *dest_path){
-
-    uint8_t out[2048];
-    size_t out_size = 2048;
-    memset(out, 0, out_size);
-
-    dtn_list *queue = NULL;
-    uint8_t *buffer = NULL;
-    size_t size = 0;
-    dtn_list *list = NULL;
-    dtn_dtn_uri *destination = NULL;
-
-    if (!self || !uri || !source_path || !dest_path) goto error;
-
-    if (DTN_FILE_SUCCESS != dtn_file_read(source_path, &buffer, &size))
-        goto error; 
-
-    destination = dtn_dtn_uri_decode(uri);
-    if (!destination){
-        dtn_log_error("%s not a DTN uri", uri);
-        goto error;
-    }
-
-    list = dtn_routing_get_info_for_uri(self->routing, destination);
-    if (!list) goto error;
-
-    queue = create_bundles_for_file(self, destination, dest_path, buffer, size);
-    if (!queue) goto error;
-
-    dtn_bundle *bundle = dtn_list_queue_pop(queue);
-
-    while(bundle){
-
-        uint8_t *next = NULL;
-
-        memset(out, 0, out_size);
-
-        if (!dtn_bundle_encode(bundle, out, out_size, &next)) 
-            goto error;
-
-        dtn_routing_info *info = NULL;
-
-        void *nxt = list->iter(list);
-
-        while(nxt){
-
-            nxt = list->next(list, nxt, (void**)&info);
-
-            if (!dtn_thread_lock_try_lock(&self->interfaces.lock_ip))
-                continue;
-
-            Interface *in = dtn_dict_get(self->interfaces.ip, info->interface);
-            if (in){
-
-                dtn_thread_lock_try_lock(&in->lock);
-            }
-
-            dtn_thread_lock_unlock(&self->interfaces.lock_ip);
-
-            bool result = dtn_interface_ip_send(in->interface, 
-                info->remote, out, next - out);
-
-            dtn_thread_lock_unlock(&in->lock);
-
-            if (result)
-                dtn_log_debug("send bundle at %s to %s:%i",
-                    info->interface, info->remote.host, info->remote.port);
-
-        } 
-
-        bundle = dtn_bundle_free(bundle);
-        bundle = dtn_list_queue_pop(queue);
-    }
-
-    dtn_log_info("Send file %s", source_path);
-
-    queue = dtn_list_free(queue);
-    buffer = dtn_data_pointer_free(buffer);
-    destination = dtn_dtn_uri_free(destination);
-    list = dtn_list_free(list);
-    return true;
-error:
-    bundle = dtn_bundle_free(bundle);
-    queue = dtn_list_free(queue);
-    buffer = dtn_data_pointer_free(buffer);
-    destination = dtn_dtn_uri_free(destination);
-    list = dtn_list_free(list);
-
     return false;
 }

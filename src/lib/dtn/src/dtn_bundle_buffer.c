@@ -49,6 +49,12 @@ struct dtn_bundle_buffer {
 
     } data;
 
+    struct {
+
+        dtn_thread_lock lock;
+        dtn_dict *dict;
+
+    } history;
     
 
     struct {
@@ -98,14 +104,18 @@ static bool init_config(dtn_bundle_buffer_config *config){
 
     if (!config || !config->loop) goto error;
 
-    if (0 == config->limits.max_buffer_time_usecs)
-        config->limits.max_buffer_time_usecs = 60 * 1000000; // 60 min
+
+    if (0 == config->limits.max_buffer_time_secs)
+        config->limits.max_buffer_time_secs =  24 * 60 * 60; // 24h
 
     if (0 == config->limits.threadlock_timeout_usecs)
         config->limits.threadlock_timeout_usecs = 100000; // 100ms
 
     if (0 == config->limits.buffer_time_cleanup_usecs)
         config->limits.buffer_time_cleanup_usecs = 5000000; // 5min
+
+    if (0 == config->limits.history_secs)
+        config->limits.history_secs = 24 * 60 * 60; // 24h
 
     return true;
 error:
@@ -131,7 +141,7 @@ static bool search_expired_keys(const void *key, void *val, void *data){
     Data *self = (Data*) val;
 
     if (container->now - self->created > 
-        container->self->config.limits.max_buffer_time_usecs){
+        1000000 *container->self->config.limits.max_buffer_time_secs){
 
         dtn_list_push(container->list, (void*) key);
     }
@@ -147,6 +157,26 @@ static bool drop_expired_keys(void *item, void *data){
     dtn_dict_del(dict, item);
     return true;
 }
+
+/*---------------------------------------------------------------------------*/
+
+static bool search_expired_keys_history(const void *key, void *val, void *data){
+
+    if (!key) return true;
+
+    struct container *container = (struct container*) data;
+
+    uint64_t created = (uintptr_t)val;
+
+    if (container->now - created > 
+        1000000 * container->self->config.limits.history_secs){
+
+        dtn_list_push(container->list, (void*) key);
+    }
+
+    return true;
+}
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -177,6 +207,30 @@ static bool run_cleanup(uint32_t id, void *data){
     if (!dtn_thread_lock_unlock(&self->data.lock)){
         dtn_log_error("failed to unlock data");
     }
+
+    if (!dtn_thread_lock_try_lock(&self->history.lock)) goto reschedule;
+
+    container = (struct container){
+
+        .now = dtn_time_get_current_time_usecs(),
+        .self = self,
+        .list = dtn_linked_list_create((dtn_list_config){0})
+    };
+
+    dtn_dict_for_each(self->history.dict, 
+                      &container, 
+                      search_expired_keys_history);
+
+    dtn_list_for_each(container.list, 
+                     self->history.dict,
+                     drop_expired_keys);
+
+    container.list = dtn_list_free(container.list);
+
+    if (!dtn_thread_lock_unlock(&self->history.lock)){
+        dtn_log_error("failed to unlock data");
+    }
+
 
 reschedule:
     
@@ -215,7 +269,16 @@ dtn_bundle_buffer *dtn_bundle_buffer_create(dtn_bundle_buffer_config config){
     self->data.dict = dtn_dict_create(d_config);
     if (!self->data.dict) goto error;
 
+    d_config = dtn_dict_string_key_config(255);
+    d_config.value.data_function.free = NULL;
+
+    self->history.dict = dtn_dict_create(d_config);
+    if (!self->history.dict) goto error;
+
     if (!dtn_thread_lock_init(&self->data.lock, 
+        config.limits.threadlock_timeout_usecs)) goto error;
+
+    if (!dtn_thread_lock_init(&self->history.lock, 
         config.limits.threadlock_timeout_usecs)) goto error;
 
     self->timer.cleanup = dtn_event_loop_timer_set(
@@ -319,6 +382,40 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
+static bool bundle_history_contained(dtn_bundle_buffer *self, 
+    const char *source, uint64_t timestamp, uint64_t sequence){
+
+    char buffer[2048];
+    ssize_t size = 2048;
+    memset(buffer, 0, size);
+
+    snprintf(buffer, size, "%s|%"PRIu64"|%"PRIu64, source, timestamp, sequence);
+
+    if (!dtn_thread_lock_try_lock(&self->history.lock)) goto error;
+
+    bool result = dtn_dict_is_set(self->history.dict, buffer);
+
+    if (!result){
+
+        uint64_t now = dtn_time_get_current_time_usecs();
+        char *key = dtn_string_dup(buffer);
+
+        if (!dtn_dict_set(self->history.dict, key, (void*)(uintptr_t)now, NULL)){
+            key = dtn_data_pointer_free(key);
+        }
+    }
+
+    if (!dtn_thread_lock_unlock(&self->history.lock)){
+        dtn_log_error("failed to unlock history");
+    }
+
+    return result;
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
 bool dtn_bundle_buffer_push(dtn_bundle_buffer *self, dtn_bundle *bundle){
 
     char buffer[2048];
@@ -341,6 +438,9 @@ bool dtn_bundle_buffer_push(dtn_bundle_buffer *self, dtn_bundle *bundle){
 
     if (!dtn_bundle_primary_get_timestamp(
         bundle, &timestamp, &sequence)) goto error;
+
+    if (bundle_history_contained(self, source, timestamp, sequence))
+        goto drop;
 
     ssize_t bytes = snprintf(buffer, size, "%s|%"PRIu64, source, timestamp);
     if (bytes >= size) goto error;
@@ -475,6 +575,9 @@ done:
         }
     }
 
+    return true;
+drop:
+    dtn_bundle_free(bundle);
     return true;
 error:
     dtn_bundle_free(bundle);

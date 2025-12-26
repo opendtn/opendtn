@@ -653,7 +653,7 @@ static bool set_crc_primary(dtn_cbor *block){
 
     if (!block) goto error;
     
-    //uint64_t count = dtn_cbor_array_count(block);
+    uint64_t count = dtn_cbor_array_count(block);
 
     const dtn_cbor *crc_type = dtn_cbor_array_get(block, 2);
     if (!dtn_cbor_is_uint(crc_type)) goto error;
@@ -669,19 +669,42 @@ static bool set_crc_primary(dtn_cbor *block){
             goto done;
             break;
         case 0x01:
-            
-            crc = dtn_cbor_string("12");
-            if (!dtn_cbor_array_push(block, crc))
-                goto error;
 
+            if (count == 9){
+
+                crc = dtn_cbor_array_get(block, 8);
+
+            } else if (count == 11){
+
+                crc = dtn_cbor_array_get(block, 10);
+           
+            } else {
+
+                crc = dtn_cbor_string("12");
+                if (!dtn_cbor_array_push(block, crc))
+                    goto error;
+
+            }
 
             break;
 
         case 0x02:
 
-            crc = dtn_cbor_string("1234");
-            if (!dtn_cbor_array_push(block, crc))
-                goto error;
+            if (count == 9){
+
+                crc = dtn_cbor_array_get(block, 8);
+
+            } else if (count == 11){
+
+                crc = dtn_cbor_array_get(block, 10);
+           
+            } else {
+
+                crc = dtn_cbor_string("1234");
+                if (!dtn_cbor_array_push(block, crc))
+                    goto error;
+
+            }
             
             break;
 
@@ -758,7 +781,7 @@ static bool set_crc_block(dtn_cbor *block){
 
     if (!block) goto error;
     
-    //uint64_t count = dtn_cbor_array_count(block);
+    uint64_t count = dtn_cbor_array_count(block);
 
     const dtn_cbor *crc_type = dtn_cbor_array_get(block, 3);
     if (!dtn_cbor_is_uint(crc_type)) goto error;
@@ -773,18 +796,33 @@ static bool set_crc_block(dtn_cbor *block){
             goto done;
             break;
         case 0x01:
+
+            if (count == 6){
+
+                crc = dtn_cbor_array_get(block, 5);
             
-            crc = dtn_cbor_string("12");
-            if (!dtn_cbor_array_push(block, crc))
-                goto error;
+            } else {
+
+                crc = dtn_cbor_string("12");
+                if (!dtn_cbor_array_push(block, crc))
+                    goto error;
+            }
             
             break;
         case 0x02:
 
-            crc = dtn_cbor_string("1234");
-            if (!dtn_cbor_array_push(block, crc))
-                goto error;
 
+            if (count == 6){
+
+                crc = dtn_cbor_array_get(block, 5);
+            
+            } else {
+
+                crc = dtn_cbor_string("1234");
+                if (!dtn_cbor_array_push(block, crc))
+                    goto error;
+            }
+            
             break;
         default:
             goto error;

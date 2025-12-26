@@ -504,8 +504,6 @@ static void interface_close(void *userdata, const char *name){
 
     }
 
-    dtn_routing_deregister_interface(self->routing, name);
-
 error:
     return;
 }
@@ -572,9 +570,6 @@ static bool open_interface(dtn_socket_configuration socket,
         return true;
 
     }
-
-    if (!dtn_routing_register_interface(self->routing, name))
-        goto error;
 
     dtn_log_info("created interface %s:%i",
             socket.host,

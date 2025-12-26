@@ -23,6 +23,23 @@
 			"path" : "./src/service/dtn_file_node/config/routes"
 		},
 
+		"tunnel" :{
+
+			"destination" : "dtn://test/two",
+			"socket" : {
+
+				"host" : "127.0.0.1",
+				"port" : 12345,
+				"type" : "UDP"
+			},
+			"remote" : {
+
+				"host" : "127.0.0.1",
+				"port" : 20000,
+				"type" : "UDP"
+			}
+		},
+
 		"node" : {
 
 			"name" : "DTN FILE NODE",

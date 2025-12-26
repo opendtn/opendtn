@@ -51,7 +51,8 @@ typedef struct dtn_file_node_core_config{
         uint64_t threads;
         uint64_t link_check;
         uint64_t buffer_time_cleanup_usecs;
-        uint64_t max_buffer_time_usecs;
+        uint64_t history_secs;
+        uint64_t max_buffer_time_secs;
 
     } limits;
 

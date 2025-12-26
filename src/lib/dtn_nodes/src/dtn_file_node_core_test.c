@@ -62,7 +62,6 @@ int test_dtn_file_node_core_create(){
     testrun(dtn_file_node_core_cast(core));
     testrun(core->garbadge);
     testrun(core->tloop);
-    testrun(!core->routes.data);
     testrun(core->interfaces.ip);
 
     testrun(NULL == dtn_file_node_core_free(core));
@@ -102,154 +101,6 @@ int test_dtn_file_node_core_enable_ip_interfaces(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_file_node_core_enable_routes(){
-    
-    dtn_event_loop_config loop_config = (dtn_event_loop_config){
-        .max.sockets = dtn_socket_get_max_supported_runtime_sockets(0),
-        .max.timers = dtn_socket_get_max_supported_runtime_sockets(0)};
-
-    dtn_event_loop *loop = dtn_event_loop_default(loop_config);
-    testrun(loop);
-
-    dtn_file_node_core *core = dtn_file_node_core_create(
-        (dtn_file_node_core_config){
-            .loop = loop
-        });
-
-    testrun(core);
-    testrun(dtn_file_node_core_enable_routes(core, 
-        DTN_TEST_RESOURCE_DIR"/config/routes"));
-    testrun(0 < dtn_item_count(core->routes.data));
-
-    testrun(NULL == dtn_file_node_core_free(core));
-    testrun(NULL == dtn_event_loop_free(loop));
-
-    return testrun_log_success();
-}
-
-/*----------------------------------------------------------------------------*/
-
-int check_get_default_interface(){
-    
-    dtn_event_loop_config loop_config = (dtn_event_loop_config){
-        .max.sockets = dtn_socket_get_max_supported_runtime_sockets(0),
-        .max.timers = dtn_socket_get_max_supported_runtime_sockets(0)};
-
-    dtn_event_loop *loop = dtn_event_loop_default(loop_config);
-    testrun(loop);
-
-    dtn_file_node_core *core = dtn_file_node_core_create(
-        (dtn_file_node_core_config){
-            .loop = loop
-        });
-
-    testrun(core);
-    testrun(dtn_file_node_core_enable_routes(core, 
-        DTN_TEST_RESOURCE_DIR"/config/routes"));
-    testrun(0 < dtn_item_count(core->routes.data));
-    dtn_item *conf = dtn_item_json_read_file(DTN_TEST_RESOURCE_DIR"/config/default_config.json");
-    testrun(dtn_file_node_core_enable_ip_interfaces(core, conf));
-    testrun(1 == dtn_dict_count(core->interfaces.ip));
-    testrun(NULL == dtn_item_free(conf));
-
-    dtn_interface_ip *ip = get_default_interface(core);
-    testrun(ip);
-
-    testrun(NULL == dtn_file_node_core_free(core));
-    testrun(NULL == dtn_event_loop_free(loop));
-
-    return testrun_log_success();
-}
-
-/*----------------------------------------------------------------------------*/
-
-int check_get_socket_config_for_uri(){
-    
-    dtn_event_loop_config loop_config = (dtn_event_loop_config){
-        .max.sockets = dtn_socket_get_max_supported_runtime_sockets(0),
-        .max.timers = dtn_socket_get_max_supported_runtime_sockets(0)};
-
-    dtn_event_loop *loop = dtn_event_loop_default(loop_config);
-    testrun(loop);
-
-    dtn_file_node_core *core = dtn_file_node_core_create(
-        (dtn_file_node_core_config){
-            .loop = loop
-        });
-
-    testrun(core);
-    testrun(dtn_file_node_core_enable_routes(core, 
-        DTN_TEST_RESOURCE_DIR"/config/routes"));
-    testrun(0 < dtn_item_count(core->routes.data));
-    dtn_item *conf = dtn_item_json_read_file(DTN_TEST_RESOURCE_DIR"/config/default_config.json");
-    testrun(dtn_file_node_core_enable_ip_interfaces(core, conf));
-    testrun(1 == dtn_dict_count(core->interfaces.ip));
-    testrun(NULL == dtn_item_free(conf));
-
-    dtn_socket_configuration c = get_socket_config_for_uri(core, "test/one");
-    testrun(0 == dtn_string_compare(c.host, "127.0.0.1"));
-    testrun(4556 == c.port);
-
-    c = get_socket_config_for_uri(core, "test/two");
-    testrun(0 == dtn_string_compare(c.host, "127.0.0.1"));
-    testrun(4557 == c.port);
-
-
-    testrun(NULL == dtn_file_node_core_free(core));
-    testrun(NULL == dtn_event_loop_free(loop));
-
-    return testrun_log_success();
-}
-
-/*----------------------------------------------------------------------------*/
-
-int check_get_interface_for_uri(){
-    
-    dtn_event_loop_config loop_config = (dtn_event_loop_config){
-        .max.sockets = dtn_socket_get_max_supported_runtime_sockets(0),
-        .max.timers = dtn_socket_get_max_supported_runtime_sockets(0)};
-
-    dtn_event_loop *loop = dtn_event_loop_default(loop_config);
-    testrun(loop);
-
-    dtn_file_node_core *core = dtn_file_node_core_create(
-        (dtn_file_node_core_config){
-            .loop = loop
-        });
-
-    testrun(core);
-    testrun(dtn_file_node_core_enable_routes(core, 
-        DTN_TEST_RESOURCE_DIR"/config/routes"));
-    testrun(0 < dtn_item_count(core->routes.data));
-    dtn_item *conf = dtn_item_json_read_file(DTN_TEST_RESOURCE_DIR"/config/default_config.json");
-    testrun(dtn_file_node_core_enable_ip_interfaces(core, conf));
-    testrun(1 == dtn_dict_count(core->interfaces.ip));
-    testrun(NULL == dtn_item_free(conf));
-
-    dtn_socket_configuration c = get_socket_config_for_uri(core, "test/one");
-    testrun(0 == dtn_string_compare(c.host, "127.0.0.1"));
-    testrun(4556 == c.port);
-
-    dtn_interface_ip *in = get_interface_for_uri(core, "test/one", c);
-    testrun(in);
-    testrun(0 == dtn_string_compare("127.0.0.1", dtn_interface_ip_name(in)));
-
-    c = get_socket_config_for_uri(core, "test/two");
-    testrun(0 == dtn_string_compare(c.host, "127.0.0.1"));
-    testrun(4557 == c.port);
-
-    in = get_interface_for_uri(core, "test/two", c);
-    testrun(in);
-    testrun(0 == dtn_string_compare("127.0.0.1", dtn_interface_ip_name(in)));
-
-    testrun(NULL == dtn_file_node_core_free(core));
-    testrun(NULL == dtn_event_loop_free(loop));
-
-    return testrun_log_success();
-}
-
-/*----------------------------------------------------------------------------*/
-
 
 /*
  *      ------------------------------------------------------------------------
@@ -264,10 +115,6 @@ int all_tests() {
     testrun_init();
     testrun_test(test_dtn_file_node_core_create);
     testrun_test(test_dtn_file_node_core_enable_ip_interfaces);
-    testrun_test(test_dtn_file_node_core_enable_routes);
-    testrun_test(check_get_default_interface);
-    testrun_test(check_get_socket_config_for_uri);
-    testrun_test(check_get_interface_for_uri);
 
     return testrun_counter;
 }
