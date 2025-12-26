@@ -37,6 +37,7 @@
 #include <dtn/dtn_interface_ip.h>
 #include <dtn/dtn_dtn_uri.h>
 #include <dtn/dtn_bundle_buffer.h>
+#include <dtn/dtn_routing.h>
 
 #include <dtn_base/dtn_utils.h>
 #include <dtn_base/dtn_thread_loop.h>
@@ -85,12 +86,7 @@ struct dtn_tunnel_core {
 
     dtn_bundle_buffer *buffer;
 
-    struct {
-
-        dtn_thread_lock lock;
-        dtn_item *data;
-
-    } routes;
+    dtn_routing *routing;
 
     struct {
 
@@ -292,199 +288,6 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-struct container_interface {
-
-    dtn_tunnel_core *self;
-    const char *uri;
-    dtn_socket_configuration remote;
-    char *interface;
-    dtn_interface_ip *result;
-    dtn_interface_ip *fit;
-};
-
-/*----------------------------------------------------------------------------*/
-
-static bool find_interface_for_uri(
-    const char *key, dtn_item const *val, void *userdata){
-
-    if (!key) return true;
-
-    struct container_interface *container = (struct container_interface*) userdata;
-
-    if (container->fit) return true;
-
-    dtn_item *uris = dtn_item_object_get(val, "uris");
-    dtn_item *item = dtn_item_object_get(uris, container->uri);
-
-    if (item){
-
-        const char *in = dtn_item_get_string(dtn_item_get(item, "/interface"));
-        const char *name = dtn_interface_ip_name(container->result);
-        
-        if (0 == dtn_string_compare(in, name))
-            container->fit = container->result;
-    }
-
-    return true;
-}
-
-/*----------------------------------------------------------------------------*/
-
-static bool search_interface_for_uri(const void *key, void *val, void *data){
-
-    if (!key) return true;
-
-    struct container_interface *container = (struct container_interface*) data;
-    Interface *inter = (Interface*) val;
-
-    if (container->result) return true;
-
-    if (!dtn_thread_lock_try_lock(&container->self->routes.lock)) goto done;
-    
-    container->result = inter->interface;
-
-    dtn_item_object_for_each(container->self->routes.data,
-        find_interface_for_uri,
-        container);
-
-    if (!dtn_thread_lock_unlock(&container->self->routes.lock)){
-        dtn_log_error("failed to unlock routes");
-    }
-
-    container->result = NULL;
-    container->result = container->fit;
-
-done:
-    return true;   
-}
-
-/*----------------------------------------------------------------------------*/
-
-static dtn_interface_ip *get_interface_for_uri(dtn_tunnel_core *self,
-    const char *uri,
-    dtn_socket_configuration remote){
-
-    if (!self || !uri) goto error;
-
-    struct container_interface container = (struct container_interface){
-        .self = self,
-        .uri = uri,
-        .remote = remote,
-        .result = NULL
-    };
-
-    if (!dtn_thread_lock_try_lock(&self->interfaces.lock_ip))
-        goto error;
-
-    dtn_dict_for_each(self->interfaces.ip, 
-        &container, search_interface_for_uri);
-
-    if (!dtn_thread_lock_unlock(&self->interfaces.lock_ip)){
-        dtn_log_error("failed to unlock ip interfaces.");
-    }
-
-    return container.result;
-
-error:
-    return NULL;
-}
-
-/*----------------------------------------------------------------------------*/
-
-static bool find_default_interface(
-    const char *key, dtn_item const *val, void *userdata){
-
-    if (!key) return true;
-    struct container_interface *container = (struct container_interface*) userdata;
-
-    dtn_item *in = dtn_item_get(val, "/uris/default");
-    if (!in) goto done;
-
-    const char *interface_name = dtn_item_get_string(dtn_item_get(in, "/interface"));
-    Interface *interface = dtn_dict_get(container->self->interfaces.ip, interface_name);
-
-    if (interface)
-        container->result = interface->interface;
-
-done:
-    return true;
-}
-
-/*----------------------------------------------------------------------------*/
-
-static dtn_interface_ip *get_default_interface(dtn_tunnel_core *self){
-
-    if (!dtn_thread_lock_try_lock(&self->routes.lock)) goto done;
-
-    struct container_interface container = (struct container_interface){
-        .self = self,
-        .result = NULL
-    };
-
-    dtn_item_object_for_each(
-        self->routes.data,
-        find_default_interface,
-        &container);
-
-    if (!dtn_thread_lock_unlock(&self->routes.lock)){
-        dtn_log_error("failed to unlock routes");
-    }
-
-done:
-    return container.result;
-
-}
-
-/*----------------------------------------------------------------------------*/
-
-static bool find_socket_config(
-    const char *key, dtn_item const *val, void *userdata){
-
-    if (!key) return true;
-
-    struct container_interface *container = (struct container_interface*) userdata;
-
-    dtn_item *uris = dtn_item_object_get(val, "uris");
-    if (!uris) goto done;
-
-    dtn_item *uri = dtn_item_object_get(uris, container->uri);
-    if (!uri) goto done;
-
-    container->remote = dtn_socket_configuration_from_item(
-        dtn_item_object_get(uri, "socket"));
-
-done:
-    return true;
-}
-
-/*----------------------------------------------------------------------------*/
-
-static dtn_socket_configuration get_socket_config_for_uri(
-    dtn_tunnel_core *self, const char *uri){
-
-    if (!dtn_thread_lock_try_lock(&self->routes.lock)) goto done;
-
-    struct container_interface container = (struct container_interface){
-        .self = self,
-        .uri = uri,
-        .remote = (dtn_socket_configuration){0}
-    };
-
-    dtn_item_object_for_each(
-        self->routes.data,
-        find_socket_config,
-        &container);
-
-    if (!dtn_thread_lock_unlock(&self->routes.lock)){
-        dtn_log_error("failed to unlock routes");
-    }
-
-done:
-    return container.remote;
-}
-
-/*----------------------------------------------------------------------------*/
-
 static dtn_list *create_bundles(dtn_tunnel_core *self, uint8_t *buffer, size_t size){
 
     dtn_list *queue = NULL;
@@ -590,6 +393,8 @@ static dtn_list *create_bundles(dtn_tunnel_core *self, uint8_t *buffer, size_t s
 
     // add last block
 
+    self->sequence++;
+
     bundle = dtn_bundle_create();
     if (!bundle) goto error;
     if (!dtn_list_queue_push(queue, bundle)) goto error;
@@ -619,8 +424,6 @@ static dtn_list *create_bundles(dtn_tunnel_core *self, uint8_t *buffer, size_t s
             payload)) goto error;
 
     payload = NULL;
-    
-    self->sequence++;
 
 done:    
     dtn_data_pointer_free(source);
@@ -639,31 +442,19 @@ error:
 static bool message_udp_process(dtn_tunnel_core *self, Threadmessage *msg){
 
     dtn_list *queue = NULL;
+    dtn_list *list = NULL;
 
     uint8_t out[2048];
     size_t out_size = 2048;
     memset(out, 0, out_size);
 
-    char uri[2048];
-    size_t uri_size = 2048;
-    memset(uri, 0, uri_size);
 
     if (!self || !msg) goto error;
 
     dtn_dtn_uri *dest = dtn_dtn_uri_decode(self->destination_uri);
-
-    snprintf(uri, uri_size, "%s/%s", dest->name, dest->demux);
-
-    dtn_socket_configuration remote = get_socket_config_for_uri(self, uri);
-
-    dtn_interface_ip *interface = get_interface_for_uri(self, uri, remote);
-
+    list = dtn_routing_get_info_for_uri(self->routing, dest);
     dest = dtn_dtn_uri_free(dest);
   
-    if (!interface) interface = get_default_interface(self);
-
-    if (!interface) goto error;
-
     queue = create_bundles(self, msg->buffer->start,msg->buffer->length);
     if (!queue) goto error;
 
@@ -678,17 +469,39 @@ static bool message_udp_process(dtn_tunnel_core *self, Threadmessage *msg){
         if (!dtn_bundle_encode(bundle, out, out_size, &next)) 
             goto error;
 
-        if (!dtn_interface_ip_send(interface, remote, out, next - out))
-            goto error;
+        dtn_routing_info *info = NULL;
+
+        void *nxt = list->iter(list);
+
+        while(nxt){
+
+            nxt = list->next(list, nxt, (void**)&info);
+
+            if (!dtn_thread_lock_try_lock(&self->interfaces.lock_ip))
+                continue;
+
+            Interface *in = dtn_dict_get(self->interfaces.ip, info->interface);
+            if (in){
+
+                dtn_thread_lock_try_lock(&in->lock);
+            }
+
+            dtn_thread_lock_unlock(&self->interfaces.lock_ip);
+
+            bool result = dtn_interface_ip_send(in->interface, 
+                info->remote, out, next - out);
+
+            dtn_thread_lock_unlock(&in->lock);
+
+            if (result)
+                dtn_log_debug("send bundle at %s to %s:%i",
+                    info->interface, info->remote.host, info->remote.port);
+
+        } 
 
         bundle = dtn_bundle_free(bundle);
         bundle = dtn_list_queue_pop(queue);
     }
-
-    dtn_log_debug("send to %s via %s:%i", 
-        self->destination_uri,
-        remote.host,
-        remote.port);
 
     queue = dtn_list_free(queue);
 
@@ -919,10 +732,6 @@ dtn_tunnel_core *dtn_tunnel_core_create(dtn_tunnel_core_config config){
         self->config.limits.threadlock_timeout_usec))
         goto error;
 
-    if (!dtn_thread_lock_init(&self->routes.lock, 
-        self->config.limits.threadlock_timeout_usec))
-        goto error;
-
     self->garbadge = dtn_garbadge_colloctor_create((dtn_garbadge_colloctor_config){
         .loop = config.loop,
         .limits.threadlock_timeout_usec = config.limits.threadlock_timeout_usec,
@@ -944,6 +753,15 @@ dtn_tunnel_core *dtn_tunnel_core_create(dtn_tunnel_core_config config){
     if (0 != self->config.tunnel.host[0])
         open_tunnel_socket(self);
 
+    dtn_routing_config routing = (dtn_routing_config){
+
+        .loop = config.loop,
+        .limits.threadlock_timeout_usecs = config.limits.threadlock_timeout_usec
+    };
+
+    self->routing = dtn_routing_create(routing);
+    if (!self->routing) goto error;
+
     return self;
 error:
     dtn_tunnel_core_free(self);
@@ -957,12 +775,11 @@ dtn_tunnel_core *dtn_tunnel_core_free(dtn_tunnel_core *self){
     if (!dtn_tunnel_core_cast(self)) return self;
 
     dtn_thread_lock_clear(&self->interfaces.lock_ip);
-    dtn_thread_lock_clear(&self->routes.lock);
-
+    
     self->buffer = dtn_bundle_buffer_free(self->buffer);
     self->uri = dtn_dtn_uri_free(self->uri);
     self->destination_uri = dtn_data_pointer_free(self->destination_uri);
-    self->routes.data = dtn_item_free(self->routes.data);
+    self->routing = dtn_routing_free(self->routing);
     self->garbadge = dtn_garbadge_colloctor_free(self->garbadge);
     self->interfaces.ip = dtn_dict_free(self->interfaces.ip);
     self->tloop = dtn_thread_loop_free(self->tloop);
@@ -1289,27 +1106,7 @@ bool dtn_tunnel_core_enable_routes(dtn_tunnel_core *self, const char *path){
 
     if (!self || !path) goto error;
 
-    dtn_log_info("enable routes from %s", path);
-
-    dtn_item *routes = dtn_item_json_read_dir(path, "route");
-
-    if (!routes) goto error;
-
-    char *string = dtn_item_to_json(routes);
-    dtn_log_debug("loaded routes %s", string);
-    string = dtn_data_pointer_free(string);
-
-    if (!dtn_thread_lock_try_lock(&self->routes.lock))
-        goto error;
-
-    self->routes.data = dtn_item_free(self->routes.data);
-    self->routes.data = routes;
-
-    if (!dtn_thread_lock_unlock(&self->routes.lock)){
-        dtn_log_error("failed to unlock routes.");
-    }
-
-    return true;
+    return dtn_routing_load(self->routing, path);
 error:
     return false;
 }
