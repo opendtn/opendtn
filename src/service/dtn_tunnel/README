@@ -1,0 +1,81 @@
+# dtn_tunnel
+
+dtn_tunnel is an app to tunnel some data via a DTN network. It provides some listen port for data to arrive and will forward that data to it's configured remote side. 
+You may have a look at src/service/dtn_tunnel/config/default_config.json to check the section tunnel for the tunnel configuration. 
+
+## dtn_tunnel configuration 
+
+The tunnel configuration is provided within the tunnels config files. The actuall tunnel content is shown below. 
+
+1. destination - This is the DTN remote node name
+2. socket - This is the tunnel socked opened to receive some data
+3. remote - This is the configuration for the remote side, which means this is the 
+configuration the tunnel forwards all data to. 
+
+```
+"tunnel" :{
+
+	"destination" : "dtn://test/two",
+	"socket" : {
+
+		"host" : "127.0.0.1",
+		"port" : 12345,
+		"type" : "UDP"
+	},
+	"remote" : {
+
+		"host" : "127.0.0.1",
+		"port" : 20000,
+		"type" : "UDP"
+	}
+},
+```
+
+## Usage
+
+To test the application it is recommended to use 4 terminals.
+
+In the first terminal open a sender node using:
+```
+~/opendtn$ ./build/bin/dtn_tunnel
+```
+
+In the second terminal open the receiver node using:
+```
+~/opendtn$ ./build/bin/dtn_tunnel -c src/service/dtn_tunnel/config/config.json 
+```
+
+In the third terminal open a remote node for node1 with nc:
+```
+~/opendtn$ nc -u -p 20001 127.0.0.1 12346
+```
+
+In the forth terminal open a remote node for node2 with nc:
+```
+~/opendtn$ nc -u 127.0.0.1 12345 -p 20000
+```
+
+This way you have setup 2 UDP nc programms sending to the tunnel endpoints, which forward the data via DTN to the remote tunnel endpoint, which forwards the data to the second nc program. 
+
+You now may type in some data in one of the nc sessions and see the data arrive at the second nc session. 
+
+### advanced
+
+Write your own application, which sends and receives data from a tunnel node and start experimenting. 
+
+## added features
+
+1. send to some remote node in bundles of 1200 byte chunks (below Ethernet MTU)
+2. receive some bundles and forward to a configured remote via UDP
+3. receive via multipath. This means more than one path may be used and the input will be received based on the sequence numbering of the sender. You may receive the input twice, if you send via 2 pathes, but you will only generate one final output. (Path Redundancy is covered here)
+
+## source code
+
+The main source code used within this program is available under
+```
+~/opendtn$ src/lib/dtn_nodes/include/dtn_tunnel_app.h 
+~/opendtn$ src/lib/dtn_nodes/include/dtn_tunnel_core.h
+~/opendtn$ src/lib/dtn_nodes/src/dtn_tunnel_app.c 
+~/opendtn$ src/lib/dtn_nodes/src/dtn_tunnel_core.c
+```
+The source code uses 2 source files, one for the application itself, which will process the commands send via the commandline app, or some other app connecting to the nodes Command and Control socket, and a second file *core.c containing the "business" logic of the file node. 

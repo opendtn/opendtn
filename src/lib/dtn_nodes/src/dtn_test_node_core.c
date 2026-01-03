@@ -197,8 +197,6 @@ static bool message_bundle_process(dtn_test_node_core *self, Threadmessage *msg)
     dtn_bundle_dump(stderr, msg->bundle);
     fprintf(stderr, "\n");
 
-    TODO(" ... process message.");
-
     dtn_thread_message_free(dtn_thread_message_cast(msg));
     return true;
 

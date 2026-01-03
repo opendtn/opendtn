@@ -57,10 +57,10 @@
 	},
 	"webserver" :{
 
-		"name" : "DTN TEST SERVER",
+		"name" : "localhost",
 		
 		"socket" : {
-			"host" : "0.0.0.0",
+			"host" : "localhost",
 			"port" : 12345,
 			"type" : "TLS"
 		},

@@ -1,0 +1,61 @@
+# dtn_file_node
+
+dtn_file_node is an application to send and receive some files. It is pretty basic in terms of operation, but is able to send and receive a file. 
+
+## Usage
+
+To test the application it is recommended to use 3 terminals.
+
+In the first terminal open a sender node using:
+
+```
+~/opendtn$ ./build/bin/dtn_tunnel
+```
+This will use the default_config.json provided under src/service/dtn_file_node/config and will be configured as dtn://test/one.
+
+In the second terminal open a receiver node using:
+
+```
+~/opendtn$ ./build/bin/dtn_file_node -c src/service/dtn_file_node/config/config.json 
+```
+This will use a second config, prepared to be the counterpart of the sender with the config provided as src/service/dtn_file_node/config/config.json and will be configured as dtn://test/two.
+
+In the third terminal open the commandline client to control node 1:
+
+```
+~/opendtn$ ./build/bin/dtn_cc_cli -i 127.0.0.1 -p 14444 -x admin
+```
+This will use the password admin and connect to node 1 within the default config. 
+Now you can control node1. The first step is to login to the node, otherwise the command chain will not work. 
+
+1. login 
+Put in the terminal the following command:
+```
+login
+```
+
+2. send file
+Put in the terminal the following command:
+```
+send_file
+```
+This will start a dialog to setup the parameter. As source path you need to provide some path to some file. As destination path you should put in the destination file name. The last step is to set the correct URI to send to node2. This uri is dtn://test/two
+
+Once you press enter the file will be delivered to dtn://test/two/<your filename>.
+
+## added features
+
+1. send to some remote node in bundles of 1200 byte chunks (below Ethernet MTU)
+2. receive some bundles and generate a file out of the bundles
+3. receive via multipath. This means more than one path may be used and the file will be received based on the sequence numbering of the sender. You may receive the file twice, if you send via 2 pathes, but you will only generate one final file. (Path Redundancy is covered here)
+
+## source code
+
+The main source code used within this program is available under
+```
+~/opendtn$ src/lib/dtn_nodes/include/dtn_file_node_app.h 
+~/opendtn$ src/lib/dtn_nodes/include/dtn_file_node_core.h
+~/opendtn$ src/lib/dtn_nodes/src/dtn_file_node_app.c 
+~/opendtn$ src/lib/dtn_nodes/src/dtn_file_node_core.c
+```
+The source code uses 2 source files, one for the application itself which will process the commands send via the commandline app, or some other app connecting to the nodes Command and Control socket, and a second file *core.c containing the "business" logic of the file node. 

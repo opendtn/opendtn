@@ -1,5 +1,27 @@
 # dtn_web_server
 
-# dtn_web_node
+This is a simple webnode to send DTN packages for testing. To test the app you need a webbrowser and a running server.
 
-This is a simple webnode to send DTN packages for testing.
+## Usage
+
+Open a terminal and put in the following command:
+```
+~/opendtn$ ./build/bin/dtn_web_node 
+```
+This will start a small webserver listening on https://localhost:12345.
+You may now use your webbrowser to connect a websession. 
+
+Open a second terminal as the receiver of the message:
+```
+~/opendtn$ ./build/bin/dtn_web_node -c src/service/dtn_web_node/config/config.json 
+```
+
+Now open a webbrowser and connect to 
+```
+https://localhost:12345
+```
+This loads the CBOR Test page. You may send some packages to the test node and the test node dumps the packages.
+
+The receiver will dump the message received.
+
+

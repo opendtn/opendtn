@@ -1359,56 +1359,6 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-static int tls_client_hello_callback_no_sni(SSL *ssl, int *al, void *arg) {
-
-  Connection *conn = (Connection *)arg;
-
-  const unsigned char *str = NULL;
-  size_t str_len = 0;
-
-  if (0 == SSL_client_hello_get0_ext(ssl, TLSEXT_NAMETYPE_host_name, &str,
-                                     &str_len)) {
-
-    /* In case the header extension for host name is NOT set,
-     * the default certificate of the configured will be used.*/
-
-  } else {
-
-    /* check SNI */
-
-    DTN_ASSERT(str);
-    DTN_ASSERT(0 < str_len);
-
-    /* min valid length without chars for hostname content */
-    if (4 >= str_len)
-      goto error;
-
-    /* check if the first entry is host name */
-    if (0 != str[3])
-      goto error;
-
-    size_t hostname_length = str[4];
-
-    if (str_len < hostname_length + 5)
-      goto error;
-
-    uint8_t *hostname = (uint8_t *)str + 5;
-
-    if (0 !=
-        strncmp((char *)hostname, conn->config.ssl.domain, hostname_length))
-      goto error;
-  }
-
-  return SSL_CLIENT_HELLO_SUCCESS;
-
-error:
-  if (al)
-    *al = SSL_TLSEXT_ERR_ALERT_FATAL;
-  return SSL_CLIENT_HELLO_ERROR;
-}
-
-/*----------------------------------------------------------------------------*/
-
 static bool open_listener_ctx(dtn_io *self, Connection *conn) {
 
   DTN_ASSERT(self);
@@ -1431,7 +1381,7 @@ static bool open_listener_ctx(dtn_io *self, Connection *conn) {
   if (!load_verify_locations(ctx, &conn->config.ssl))
     goto error;
 
-  SSL_CTX_set_client_hello_cb(ctx, tls_client_hello_callback_no_sni, conn);
+  SSL_CTX_set_client_hello_cb(ctx, tls_client_hello_callback, conn);
 
   conn->tls.ctx = ctx;
   return true;
@@ -2188,7 +2138,12 @@ stop:
 
   if (!result) goto error;
 
-  stream_send(self, conn);
+  if (conn->tls.ssl){
+    io_stream_ssl_send(self, conn);
+  } else {
+    stream_send(self, conn);
+  }
+  
   return true;
   }
 
@@ -2212,7 +2167,11 @@ stop:
   if (!dtn_thread_lock_unlock(&conn->io_data.lock))
         goto error;
 
-  stream_send(self, conn);
+  if (conn->tls.ssl){
+    io_stream_ssl_send(self, conn);
+  } else {
+    stream_send(self, conn);
+  }
   return true;
 
 error:
