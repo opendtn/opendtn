@@ -1660,14 +1660,14 @@ out:
 
     if (!self->data) goto error;
 
-    ptr = (uint8_t*) buffer + 1;
+    ptr = (uint8_t*) buffer + len;
 
     for (uint64_t i = 0; i < arr_items; i++){
 
         dtn_cbor *item = NULL;
-
+        
         dtn_cbor_match match = dtn_cbor_decode(
-            ptr, size - (ptr - buffer) - len + 1, &item, &ptr);
+            ptr, size - (ptr - buffer), &item, &ptr);
 
         switch (match){
 
@@ -1694,7 +1694,7 @@ out:
         }
     }
     
-    len += ptr - (uint8_t*) buffer - 1;
+    len = ptr - (uint8_t*) buffer;
 
 done:
     

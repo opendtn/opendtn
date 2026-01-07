@@ -187,6 +187,13 @@ int test_dtn_dtn_uri_decode(){
     testrun(0 == self->demux);
     self = dtn_dtn_uri_free(self);
 
+    self = dtn_dtn_uri_decode("dtn://source");
+    testrun(self);
+    testrun(0 == strcmp(self->scheme, "dtn"));
+    testrun(0 == strcmp(self->name, "source"));
+    testrun(0 == self->demux);
+    self = dtn_dtn_uri_free(self);
+
     return testrun_log_success();
 }
 

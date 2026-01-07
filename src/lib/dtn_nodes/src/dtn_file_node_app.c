@@ -496,6 +496,9 @@ dtn_file_node_app *dtn_file_node_app_create(dtn_file_node_app_config config){
         .limits.max_buffer_time_secs = config.limits.max_buffer_time_secs
     };
 
+    if (0 != config.keys[0])
+        strncpy(core.keys, config.keys, PATH_MAX);
+
     self->core = dtn_file_node_core_create(core);
     if (!self->core) goto error;
 
@@ -612,6 +615,9 @@ dtn_file_node_app_config dtn_file_node_app_config_from_item(const dtn_item *inpu
 
     str = dtn_item_get_string(dtn_item_get(conf, "/uri"));
     if (str) strncpy(config.uri, str, PATH_MAX);
+
+    str = dtn_item_get_string(dtn_item_get(conf, "/keys"));
+    if (str) strncpy(config.keys, str, PATH_MAX);
 
     return config;
 }

@@ -33,6 +33,9 @@
 #include <errno.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <libgen.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include <dtn_base/dtn_dict.h>
 #include <dtn_base/dtn_file.h>
@@ -153,6 +156,82 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
+static bool read_sub_dir(dtn_key_store *self, const char *path){
+
+    if (!self || !path) goto error;
+
+    errno = 0;
+
+    DIR *dp = NULL;
+    struct dirent *ep = NULL;
+    
+    size_t dirlen = strlen(path);
+    
+    char filename[PATH_MAX + 1];
+    memset(filename, 0, PATH_MAX + 1);
+
+    char name[PATH_MAX + 1];
+    memset(name, 0, PATH_MAX + 1);
+    
+    int len, i;
+    
+    dp = opendir(path);
+    
+    if (dp == NULL) {
+    
+      dtn_log_debug("KEY LOAD,"
+                   "could not open dir %s ERRNO %i | %s",
+                   path, errno, strerror(errno));
+      goto error;
+    }
+    
+    while ((ep = readdir(dp))) {
+
+        memset(filename, 0, PATH_MAX);
+        memset(name, 0, PATH_MAX);
+        
+        /*
+         *  Do not try to read /. or /..
+         */
+        
+        if (0 == strcmp(ep->d_name, ".") || (0 == strcmp(ep->d_name, "..")))
+            continue;
+
+        strcpy(filename, path);
+
+        if (path[dirlen] != '/')
+            strncat(filename, "/", PATH_MAX);
+        
+        strcat(filename, ep->d_name);
+
+        len = strlen(ep->d_name);
+        i = len;
+    
+        while (i > 0) {
+            if (ep->d_name[i] == '.')
+                break;
+            i--;
+        }
+    
+        if (i != 0)
+            continue;
+
+        snprintf(name, PATH_MAX, "%s/%s", basename((char*)path), ep->d_name);
+        
+        if (!add_file_key(self, filename, name)) goto error;
+        
+    }
+
+    (void)closedir(dp);
+    return true;
+
+error:
+    if (dp) closedir(dp);
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
 static bool read_dir(dtn_key_store *self, const char *path){
 
     errno = 0;
@@ -178,7 +257,9 @@ static bool read_dir(dtn_key_store *self, const char *path){
     }
     
     while ((ep = readdir(dp))) {
-    
+        
+        struct stat st;
+
         memset(filename, 0, PATH_MAX);
         
         /*
@@ -187,27 +268,41 @@ static bool read_dir(dtn_key_store *self, const char *path){
         
         if (0 == strcmp(ep->d_name, ".") || (0 == strcmp(ep->d_name, "..")))
             continue;
-        
+
+        if (fstatat(dirfd(dp), ep->d_name, &st, 0) < 0)
+        {
+            continue;
+        }
+
         strcpy(filename, path);
 
         if (path[dirlen] != '/')
             strncat(filename, "/", PATH_MAX);
         
         strcat(filename, ep->d_name);
+
+        if (S_ISDIR(st.st_mode)) {
+
+            read_sub_dir(self, filename);
         
-        len = strlen(ep->d_name);
-        i = len;
+        } else {
 
-        while (i > 0) {
-            if (ep->d_name[i] == '.')
-                break;
-            i--;
-        }
-
-        if (i != 0)
-            continue;
+            len = strlen(ep->d_name);
+            i = len;
     
-        if (!add_file_key(self, filename, ep->d_name)) goto error;
+            while (i > 0) {
+                if (ep->d_name[i] == '.')
+                    break;
+                i--;
+            }
+    
+            if (i != 0)
+                continue;
+        
+            if (!add_file_key(self, filename, ep->d_name)) goto error;
+
+        }
+        
     }
 
     (void)closedir(dp);

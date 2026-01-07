@@ -8,7 +8,7 @@
 	"io" : {
 
 		"domain" : {
-			"path" : "./src/service/dtn_file_node/config/domain"
+			"path" : "./src/service/dtn_tunnel/config/domain"
 		},
 		"limits": {
 			"reconnect_usecs" : 3000000,
@@ -20,7 +20,7 @@
 
 		"routes" : {
 
-			"path" : "./src/service/dtn_file_node/config/routes"
+			"path" : "./src/service/dtn_tunnel/config/routes"
 		},
 
 		"tunnel" :{
@@ -45,6 +45,7 @@
 			"name" : "DTN FILE NODE",
 			"path" : "/tmp/opendtn/input",
 			"uri"  : "dtn://test/one",
+			"keys" : "./src/service/dtn_tunnel/config/keys",
 
 			"socket" : {
 

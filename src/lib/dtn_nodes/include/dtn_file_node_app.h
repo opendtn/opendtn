@@ -53,6 +53,7 @@ typedef struct dtn_file_node_app_config {
     char name[PATH_MAX];
     char path[PATH_MAX];
     char uri[PATH_MAX];
+    char keys[PATH_MAX];
 
     dtn_socket_configuration socket; // command & control socket
 

@@ -54,6 +54,8 @@
 #include <dtn_base/dtn_dump.h>
 #include <dtn_base/dtn_dir.h>
 
+#include <dtn_core/dtn_key_store.h>
+
 /*---------------------------------------------------------------------------*/
 
 #define dtn_tunnel_core_MAGIC_BYTE 0xc053
@@ -87,6 +89,8 @@ struct dtn_tunnel_core {
     dtn_bundle_buffer *buffer;
 
     dtn_routing *routing;
+
+    dtn_key_store *keys;
 
     struct {
 
@@ -762,6 +766,18 @@ dtn_tunnel_core *dtn_tunnel_core_create(dtn_tunnel_core_config config){
     self->routing = dtn_routing_create(routing);
     if (!self->routing) goto error;
 
+    dtn_key_store_config keys = (dtn_key_store_config){
+        .limits.threadlock_timeout_usec = config.limits.threadlock_timeout_usec
+    };
+
+    if (0 != config.keys[0])
+        strncpy(keys.path, config.keys, PATH_MAX);
+
+    self->keys = dtn_key_store_create(keys);
+    if (!self->keys) goto error;
+
+    dtn_key_store_load(self->keys, NULL);
+
     return self;
 error:
     dtn_tunnel_core_free(self);
@@ -776,6 +792,7 @@ dtn_tunnel_core *dtn_tunnel_core_free(dtn_tunnel_core *self){
 
     dtn_thread_lock_clear(&self->interfaces.lock_ip);
     
+    self->keys = dtn_key_store_free(self->keys);
     self->buffer = dtn_bundle_buffer_free(self->buffer);
     self->uri = dtn_dtn_uri_free(self->uri);
     self->destination_uri = dtn_data_pointer_free(self->destination_uri);

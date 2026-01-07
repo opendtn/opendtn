@@ -154,8 +154,8 @@ dtn_dtn_uri *dtn_dtn_uri_decode(const char *string){
     if (scheme_delimiter[1] != '/') goto error;
     if (scheme_delimiter[2] != '/') goto error;
 
-    char *delimiter = memchr(scheme_delimiter + 3, '/', 
-        size - (scheme_delimiter - string - 3));
+    char *ptr = scheme_delimiter + 3;
+    char *delimiter = memchr(ptr, '/', size - (ptr - string));
 
     if (!delimiter){
 

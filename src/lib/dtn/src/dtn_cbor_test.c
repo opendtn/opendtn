@@ -2672,7 +2672,7 @@ int test_decode_array(){
     count = 0;
 
     for (int i = 0; i < 10; i++){
-        
+
         buffer[1] = i;
         buffer[2] = 0x10;
         buffer[3] = 0x11;
@@ -2702,12 +2702,13 @@ int test_decode_array(){
             match = decode_array(buffer, i - 1, &out, &next);
             testrun(match == DTN_CBOR_MATCH_PARTIAL);
         }
-        match = decode_array(buffer, 2 + i, &out, &next);
+        match = decode_array(buffer, 3 + i, &out, &next);
         testrun(match == DTN_CBOR_MATCH_FULL);
         testrun(out);
         testrun(out->type == DTN_CBOR_ARRAY);
         testrun(count == dtn_list_count(out->data));
         testrun(next);
+        //fprintf(stdout, "%x|%li\n", next[0], next - buffer);
         testrun(next == buffer + count + 2);
         out = cbor_free(out);
 
@@ -2741,6 +2742,8 @@ int test_decode_array(){
         buffer[19] = 0x10;   // integer 10
         buffer[20] = 0x10;   // integer 10
 
+        //testrun_log("%x\n", i);
+
         if (i > 3){
             match = decode_array(buffer, i - 2, &out, &next);
             testrun(match == DTN_CBOR_MATCH_PARTIAL);
@@ -2751,8 +2754,10 @@ int test_decode_array(){
         testrun(match == DTN_CBOR_MATCH_FULL);
         testrun(out);
         testrun(out->type == DTN_CBOR_ARRAY);
+        fprintf(stdout, "%li|%li\n",count, dtn_list_count(out->data));
         testrun(count == dtn_list_count(out->data));
         testrun(next);
+        //fprintf(stdout, "%li\n", next - buffer);
         testrun(next == buffer + count + 3);
         out = cbor_free(out);
 
@@ -2916,6 +2921,25 @@ int test_decode_array(){
 
     match = decode_array(buffer, 10 , &out, &next);
     testrun(match == DTN_CBOR_NO_MATCH);
+
+    buffer[0] = 0x82; // params
+    buffer[1] = 0x82;   // 2
+    buffer[2] = 0x01;   // id
+    buffer[3] = 0x06;   // variant
+    buffer[4] = 0x82;   // 2
+    buffer[5] = 0x03;   // id
+    buffer[6] = 0x07;   // all flags
+    buffer[7] = 0xFF;
+
+    testrun(DTN_CBOR_MATCH_FULL == 
+            decode_array(buffer, 7 , &out, &next));
+
+    testrun(2 == dtn_cbor_array_count(out));
+    testrun(dtn_cbor_is_array( dtn_cbor_array_get(out, 0)));
+    testrun(dtn_cbor_is_array( dtn_cbor_array_get(out, 1)));
+    testrun(*next == 0xFF);
+    out = dtn_cbor_free(out);
+
 
     return testrun_log_success();
 }

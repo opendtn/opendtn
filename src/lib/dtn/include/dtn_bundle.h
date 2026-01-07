@@ -39,6 +39,10 @@
 
 #include <stdio.h>
 #include "dtn_cbor.h"
+#include "dtn_bpsec.h"
+
+#include <dtn_base/dtn_buffer.h>
+#include <dtn_core/dtn_key_store.h>
 
 typedef struct dtn_bundle dtn_bundle;
 
@@ -270,7 +274,55 @@ dtn_cbor *dtn_bundle_add_hop_count(
         uint64_t count,
         uint64_t limit);
 
+/*
+ *      ------------------------------------------------------------------------
+ *
+ *      SECURITY BLOCKS
+ *
+ *      ------------------------------------------------------------------------
+ */
+
+bool dtn_bundle_bib_protect(
+        dtn_bundle *self,
+        dtn_cbor *bib,
+        dtn_cbor *target,
+        const dtn_buffer *key,
+        uint8_t aad_flags,
+        dtn_bpsec_sha_variant sha,
+        dtn_dtn_uri *source,
+        bool add_new_key);
+
 /*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_is_bib_protected(const dtn_bundle *self);
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_bib_verify(
+        dtn_bundle *self,
+        dtn_key_store *store);
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_bcb_protect(
+        dtn_bundle *self,
+        dtn_cbor *bcb,
+        dtn_cbor *target,
+        const dtn_buffer *key,
+        dtn_dtn_uri *source,
+        uint8_t aad_flags,
+        dtn_bpsec_aes_variant aes,
+        bool add_key_key);
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_is_bcb_protected(const dtn_bundle *self);
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bundle_bcb_unprotect(
+        dtn_bundle *self,
+        dtn_key_store *store);
 
 
 #endif /* dtn_bundle_h */

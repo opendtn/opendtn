@@ -2993,6 +2993,756 @@ int check_crc_generation(){
     return testrun_log_success();
 }
 
+/*----------------------------------------------------------------------------*/
+
+int test_dtn_bundle_bib_protect(){
+
+    dtn_bundle *bundle = dtn_bundle_create();
+    testrun(bundle);
+
+    uint8_t *next = NULL;
+    uint8_t buffer[2048] = {0};
+    size_t size = 2048;
+
+    dtn_cbor *primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        1,
+        "dtn://destination",
+        "dtn://source",
+        "dtn://report",
+        3,
+        4,
+        5,
+        100,
+        200);
+
+    dtn_cbor *bib = dtn_bundle_add_block(
+        bundle, 
+        11,
+        2,
+        0,
+        0,
+        dtn_cbor_string(NULL));
+
+    dtn_cbor *payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        2,
+        dtn_cbor_string("test12345678901234567890"));
+
+    testrun(primary);
+    testrun(bib);
+    testrun(payload);
+
+    dtn_dtn_uri *source = dtn_dtn_uri_decode("dtn://source/1");
+    testrun(source);
+
+    dtn_buffer *key = generate_new_key(HMAC256);
+
+    testrun(dtn_bundle_bib_protect(
+        bundle,
+        bib,
+        primary,
+        key,
+        0x07,
+        HMAC256,
+        source,
+        true));
+
+    testrun(dtn_bundle_encode(bundle, buffer, size, &next));
+
+    //dtn_dump_binary_as_hex(stdout, buffer, next - buffer);
+    //fprintf(stdout, "\n");
+    testrun(buffer[0]   == 0x9f); // undef array start
+    testrun(buffer[1]   == 0x88); // primary block array 8 items
+    testrun(buffer[2]   == 0x07); // version
+    testrun(buffer[3]   == 0x00); // flags 
+    testrun(buffer[4]   == 0x00); // crc
+    testrun(buffer[5]   == 0x51); // string
+    testrun(buffer[6]   == 0x64); // d
+    testrun(buffer[7]   == 0x74); // t
+    testrun(buffer[8]   == 0x6e); // n
+    testrun(buffer[9]   == 0x3a); // : 
+    testrun(buffer[10]  == 0x2f); // /
+    testrun(buffer[11]  == 0x2f); // /
+    testrun(buffer[12]  == 0x64); // d
+    testrun(buffer[13]  == 0x65); // e
+    testrun(buffer[14]  == 0x73); // s
+    testrun(buffer[15]  == 0x74); // t
+    testrun(buffer[16]  == 0x69); // i
+    testrun(buffer[17]  == 0x6e); // n
+    testrun(buffer[18]  == 0x61); // a
+    testrun(buffer[19]  == 0x74); // t
+    testrun(buffer[20]  == 0x69); // i
+    testrun(buffer[21]  == 0x6f); // o
+    testrun(buffer[22]  == 0x6e); // n
+    testrun(buffer[23]  == 0x4c); // string 
+    testrun(buffer[24]  == 0x64); // d
+    testrun(buffer[25]  == 0x74); // t
+    testrun(buffer[26]  == 0x6e); // n
+    testrun(buffer[27]  == 0x3a); // :
+    testrun(buffer[28]  == 0x2f); // /
+    testrun(buffer[29]  == 0x2f); // /
+    testrun(buffer[30]  == 0x73); // s
+    testrun(buffer[31]  == 0x6f); // o
+    testrun(buffer[32]  == 0x75); // u
+    testrun(buffer[33]  == 0x72); // r
+    testrun(buffer[34]  == 0x63); // c
+    testrun(buffer[35]  == 0x65); // e
+    testrun(buffer[36]  == 0x4c); // string
+    testrun(buffer[37]  == 0x64); // d
+    testrun(buffer[38]  == 0x74); // t
+    testrun(buffer[39]  == 0x6e); // n
+    testrun(buffer[40]  == 0x3a); // :
+    testrun(buffer[41]  == 0x2f); // /
+    testrun(buffer[42]  == 0x2f); // /
+    testrun(buffer[43]  == 0x72); // r
+    testrun(buffer[44]  == 0x65); // e
+    testrun(buffer[45]  == 0x70); // p
+    testrun(buffer[46]  == 0x6f); // o
+    testrun(buffer[47]  == 0x72); // r
+    testrun(buffer[48]  == 0x74); // t
+    testrun(buffer[49]  == 0x82); // array 
+    testrun(buffer[50]  == 0x03); // sequence
+    testrun(buffer[51]  == 0x04); // time
+    testrun(buffer[52]  == 0x05); // lifetime
+    testrun(buffer[53]  == 0x85); // array (bib)
+    testrun(buffer[54]  == 0x0b); // 11 type
+    testrun(buffer[55]  == 0x02); // Number
+    testrun(buffer[56]  == 0x00); // flags
+    testrun(buffer[57]  == 0x00); // csrc
+    testrun(buffer[58]  == 0x59); // string
+    testrun(buffer[59]  == 0x01); // length 
+    testrun(buffer[60]  == 0x4a); // length  41 31 83 82 01 05 82 02 59 01 08 93 ac 5c 13 38 cf
+    testrun(buffer[61]  == 0x81); // target
+    testrun(buffer[62]  == 0x00); // block 0
+    testrun(buffer[63]  == 0x01); // context_id 
+    testrun(buffer[64]  == 0x01); // context_flags
+    testrun(buffer[65]  == 0x81); // source
+    testrun(buffer[66]  == 0x82); // array dtn
+    testrun(buffer[67]  == 0x01); // dtn
+    testrun(buffer[68]  == 0x82); // 
+    testrun(buffer[69]  == 0x46); // string 3
+    testrun(buffer[70]  == 0x73); // s
+    testrun(buffer[71]  == 0x6f); // o
+    testrun(buffer[72]  == 0x75); // u
+    testrun(buffer[73]  == 0x72); // r
+    testrun(buffer[74]  == 0x63); // c
+    testrun(buffer[75]  == 0x65); // e
+    testrun(buffer[76]  == 0x41); // string
+    testrun(buffer[77]  == 0x31); // 1
+    testrun(buffer[78]  == 0x83); // sha256
+    testrun(buffer[79]  == 0x82); // array
+    testrun(buffer[80]  == 0x01); // id 1
+    testrun(buffer[81]  == 0x05); // sha 256
+    testrun(buffer[82]  == 0x82); // 
+    testrun(buffer[83]  == 0x02); // id 2
+    testrun(buffer[84]  == 0x59); // string
+    testrun(buffer[85]  == 0x01); // length
+    testrun(buffer[86]  == 0x08); // length
+    // ... wrapped key
+    testrun(buffer[351] == 0x82)
+    testrun(buffer[352] == 0x03); // id 3
+    testrun(buffer[353] == 0x07); // integrety flags
+    testrun(buffer[354] == 0x81); // result
+    testrun(buffer[355] == 0x82); // result 1
+    testrun(buffer[356] == 0x01); // id 1
+    testrun(buffer[357] == 0x58); // string
+    testrun(buffer[358] == 0x20); // length 32
+    // ...
+    testrun(buffer[391] == 0x86); // array 6 items
+    testrun(buffer[392] == 0x01); // payload (code)
+    testrun(buffer[393] == 0x01); // payload nbr
+    testrun(buffer[394] == 0x00); // flags
+    testrun(buffer[395] == 0x02); // crc
+    testrun(buffer[396] == 0x58); // string
+    testrun(buffer[397] == 0x18); // length 24
+    testrun(buffer[398] == 0x74); // t
+    testrun(buffer[399] == 0x65); // e
+    testrun(buffer[400] == 0x73); // s
+    testrun(buffer[401] == 0x74); // t
+    testrun(buffer[402] == 0x31); // 1
+    testrun(buffer[403] == 0x32); // ...
+    testrun(buffer[404] == 0x33);
+    testrun(buffer[405] == 0x34);
+    testrun(buffer[406] == 0x35);
+    testrun(buffer[407] == 0x36);
+    testrun(buffer[408] == 0x37);
+    testrun(buffer[409] == 0x38);
+    testrun(buffer[410] == 0x39);
+    testrun(buffer[411] == 0x30);
+    testrun(buffer[412] == 0x31);
+    testrun(buffer[413] == 0x32);
+    testrun(buffer[414] == 0x33);
+    testrun(buffer[415] == 0x34);
+    testrun(buffer[416] == 0x35);
+    testrun(buffer[417] == 0x36);
+    testrun(buffer[418] == 0x37);
+    testrun(buffer[419] == 0x38);
+    testrun(buffer[420] == 0x39);
+    testrun(buffer[421] == 0x30);
+    testrun(buffer[422] == 0x44); // string
+    testrun(buffer[423] == 0xf1); // crc 
+    testrun(buffer[424] == 0x00);
+    testrun(buffer[425] == 0x68);
+    testrun(buffer[426] == 0x78);
+    testrun(buffer[427] == 0xff); // undef array end
+
+    key = dtn_buffer_free(key);
+    source = dtn_dtn_uri_free(source);
+    bundle = dtn_bundle_free(bundle);
+
+    bundle = dtn_bundle_create();
+
+    primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        1,
+        "dtn://destination",
+        "dtn://source",
+        "dtn://report",
+        3,
+        4,
+        5,
+        100,
+        200);
+
+    bib = dtn_bundle_add_block(
+        bundle, 
+        11,
+        2,
+        0,
+        0,
+        dtn_cbor_string(NULL));
+
+    payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        2,
+        dtn_cbor_string("test12345678901234567890"));
+
+    testrun(primary);
+    testrun(bib);
+    testrun(payload);
+
+    source = dtn_dtn_uri_decode("dtn://source/1");
+    testrun(source);
+
+    key = generate_new_key(HMAC256);
+
+    testrun(dtn_bundle_bib_protect(
+        bundle,
+        bib,
+        primary,
+        key,
+        0x07,
+        HMAC256,
+        source,
+        false));
+
+    memset(buffer, 0, size);
+    testrun(dtn_bundle_encode(bundle, buffer, size, &next));
+
+    //dtn_dump_binary_as_hex(stdout, buffer, next - buffer);
+    //fprintf(stdout, "\n");
+    testrun(buffer[0]   == 0x9f); // undef array start
+    testrun(buffer[1]   == 0x88); // primary block array 8 items
+    testrun(buffer[2]   == 0x07); // version
+    testrun(buffer[3]   == 0x00); // flags 
+    testrun(buffer[4]   == 0x00); // crc
+    testrun(buffer[5]   == 0x51); // string
+    testrun(buffer[6]   == 0x64); // d
+    testrun(buffer[7]   == 0x74); // t
+    testrun(buffer[8]   == 0x6e); // n
+    testrun(buffer[9]   == 0x3a); // : 
+    testrun(buffer[10]  == 0x2f); // /
+    testrun(buffer[11]  == 0x2f); // /
+    testrun(buffer[12]  == 0x64); // d
+    testrun(buffer[13]  == 0x65); // e
+    testrun(buffer[14]  == 0x73); // s
+    testrun(buffer[15]  == 0x74); // t
+    testrun(buffer[16]  == 0x69); // i
+    testrun(buffer[17]  == 0x6e); // n
+    testrun(buffer[18]  == 0x61); // a
+    testrun(buffer[19]  == 0x74); // t
+    testrun(buffer[20]  == 0x69); // i
+    testrun(buffer[21]  == 0x6f); // o
+    testrun(buffer[22]  == 0x6e); // n
+    testrun(buffer[23]  == 0x4c); // string 
+    testrun(buffer[24]  == 0x64); // d
+    testrun(buffer[25]  == 0x74); // t
+    testrun(buffer[26]  == 0x6e); // n
+    testrun(buffer[27]  == 0x3a); // :
+    testrun(buffer[28]  == 0x2f); // /
+    testrun(buffer[29]  == 0x2f); // /
+    testrun(buffer[30]  == 0x73); // s
+    testrun(buffer[31]  == 0x6f); // o
+    testrun(buffer[32]  == 0x75); // u
+    testrun(buffer[33]  == 0x72); // r
+    testrun(buffer[34]  == 0x63); // c
+    testrun(buffer[35]  == 0x65); // e
+    testrun(buffer[36]  == 0x4c); // string
+    testrun(buffer[37]  == 0x64); // d
+    testrun(buffer[38]  == 0x74); // t
+    testrun(buffer[39]  == 0x6e); // n
+    testrun(buffer[40]  == 0x3a); // :
+    testrun(buffer[41]  == 0x2f); // /
+    testrun(buffer[42]  == 0x2f); // /
+    testrun(buffer[43]  == 0x72); // r
+    testrun(buffer[44]  == 0x65); // e
+    testrun(buffer[45]  == 0x70); // p
+    testrun(buffer[46]  == 0x6f); // o
+    testrun(buffer[47]  == 0x72); // r
+    testrun(buffer[48]  == 0x74); // t
+    testrun(buffer[49]  == 0x82); // array 
+    testrun(buffer[50]  == 0x03); // sequence
+    testrun(buffer[51]  == 0x04); // time
+    testrun(buffer[52]  == 0x05); // lifetime
+    testrun(buffer[53]  == 0x85); // array (bib)
+    testrun(buffer[54]  == 0x0b); // 11 type
+    testrun(buffer[55]  == 0x02); // Number
+    testrun(buffer[56]  == 0x00); // flags
+    testrun(buffer[57]  == 0x00); // csrc
+    testrun(buffer[58]  == 0x58); // string
+    testrun(buffer[59]  == 0x3d); // length 
+    testrun(buffer[60]  == 0x81); // target
+    testrun(buffer[61]  == 0x00); // block 0
+    testrun(buffer[62]  == 0x01); // context_id 
+    testrun(buffer[63]  == 0x01); // context_flags
+    testrun(buffer[64]  == 0x81); // source
+    testrun(buffer[65]  == 0x82); // array dtn
+    testrun(buffer[66]  == 0x01); // dtn
+    testrun(buffer[67]  == 0x82); // 
+    testrun(buffer[68]  == 0x46); // string 3
+    testrun(buffer[69]  == 0x73); // s
+    testrun(buffer[70]  == 0x6f); // o
+    testrun(buffer[71]  == 0x75); // u
+    testrun(buffer[72]  == 0x72); // r
+    testrun(buffer[73]  == 0x63); // c
+    testrun(buffer[74]  == 0x65); // e
+    testrun(buffer[75]  == 0x41); // string
+    testrun(buffer[76]  == 0x31); // 1
+    testrun(buffer[77]  == 0x82); // sha256
+    testrun(buffer[78]  == 0x82); // array
+    testrun(buffer[79]  == 0x01); // id 1
+    testrun(buffer[80]  == 0x05); // sha 256
+    testrun(buffer[81]  == 0x82); // 
+    testrun(buffer[82]  == 0x03); // id 3
+    testrun(buffer[83]  == 0x07); // integrety flags
+    testrun(buffer[84]  == 0x81); // result
+    testrun(buffer[85]  == 0x82); // result 1
+    testrun(buffer[86]  == 0x01); // id 1
+    testrun(buffer[87]  == 0x58); // string
+    testrun(buffer[88]  == 0x20); // length 32
+    // ... result
+    testrun(buffer[121] == 0x86); // array 6 items
+    testrun(buffer[122] == 0x01); // payload (code)
+    testrun(buffer[123] == 0x01); // payload nbr
+    testrun(buffer[124] == 0x00); // flags
+    testrun(buffer[125] == 0x02); // crc
+    testrun(buffer[126] == 0x58); // string
+    testrun(buffer[127] == 0x18); // length 24
+    testrun(buffer[128] == 0x74); // t
+    testrun(buffer[129] == 0x65); // e
+    testrun(buffer[130] == 0x73); // s
+    testrun(buffer[131] == 0x74); // t
+    testrun(buffer[132] == 0x31); // 1
+    testrun(buffer[133] == 0x32); // ...
+    testrun(buffer[134] == 0x33);
+    testrun(buffer[135] == 0x34);
+    testrun(buffer[136] == 0x35);
+    testrun(buffer[137] == 0x36);
+    testrun(buffer[138] == 0x37);
+    testrun(buffer[139] == 0x38);
+    testrun(buffer[140] == 0x39);
+    testrun(buffer[141] == 0x30);
+    testrun(buffer[142] == 0x31);
+    testrun(buffer[143] == 0x32);
+    testrun(buffer[144] == 0x33);
+    testrun(buffer[145] == 0x34);
+    testrun(buffer[146] == 0x35);
+    testrun(buffer[147] == 0x36);
+    testrun(buffer[148] == 0x37);
+    testrun(buffer[149] == 0x38);
+    testrun(buffer[150] == 0x39);
+    testrun(buffer[151] == 0x30);
+    testrun(buffer[152] == 0x44); // string
+    testrun(buffer[153] == 0xf1); // crc 
+    testrun(buffer[154] == 0x00);
+    testrun(buffer[155] == 0x68);
+    testrun(buffer[156] == 0x78);
+    testrun(buffer[157] == 0xff); // undef array end
+
+    key = dtn_buffer_free(key);
+    source = dtn_dtn_uri_free(source);
+    bundle = dtn_bundle_free(bundle);
+
+    return testrun_log_success();
+}
+
+/*----------------------------------------------------------------------------*/
+
+int test_dtn_bundle_bib_verify(){
+
+    dtn_bundle *bundle = dtn_bundle_create();
+    testrun(bundle);
+
+    dtn_cbor *primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        1,
+        "dtn://destination",
+        "dtn://source",
+        "dtn://report",
+        3,
+        4,
+        5,
+        100,
+        200);
+
+    dtn_cbor *bib = dtn_bundle_add_block(
+        bundle, 
+        11,
+        2,
+        0,
+        0,
+        dtn_cbor_string(NULL));
+
+    dtn_cbor *payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        2,
+        dtn_cbor_string("test12345678901234567890"));
+
+    testrun(primary);
+    testrun(bib);
+    testrun(payload);
+
+    dtn_dtn_uri *source = dtn_dtn_uri_decode("dtn://source/1");
+    testrun(source);
+
+    dtn_buffer *key = generate_new_key(HMAC256);
+
+    testrun(dtn_bundle_bib_protect(
+        bundle,
+        bib,
+        primary,
+        key,
+        0x07,
+        HMAC256,
+        source,
+        true));
+
+    dtn_key_store *store = dtn_key_store_create((dtn_key_store_config){0});
+    testrun(dtn_key_store_set(store, "source/1", key));
+
+    testrun(dtn_bundle_bib_verify(bundle, store));
+
+    store = dtn_key_store_free(store);
+    source = dtn_dtn_uri_free(source);
+    bundle = dtn_bundle_free(bundle);
+
+    return testrun_log_success();
+}
+
+/*----------------------------------------------------------------------------*/
+
+int test_dtn_bundle_bcb_protect(){
+
+    uint8_t *next = NULL;
+    uint8_t buffer[2048] = {0};
+    size_t size = 2048;
+
+    dtn_bundle *bundle = dtn_bundle_create();
+    testrun(bundle);
+
+    dtn_cbor *primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        1,
+        "dtn://destination",
+        "dtn://source",
+        "dtn://report",
+        3,
+        4,
+        5,
+        100,
+        200);
+
+    dtn_cbor *bcb = dtn_bundle_add_block(
+        bundle, 
+        12,
+        2,
+        0,
+        0,
+        dtn_cbor_string(NULL));
+
+    dtn_cbor *payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        2,
+        dtn_cbor_string("test12345678901234567890"));
+
+    testrun(primary);
+    testrun(bcb);
+    testrun(payload);
+
+    dtn_dtn_uri *source = dtn_dtn_uri_decode("dtn://source/1");
+    testrun(source);
+
+    dtn_buffer *key = generate_new_key(HMAC256);
+
+    testrun(dtn_bundle_bcb_protect(
+        bundle,
+        bcb,
+        payload,
+        key,
+        source,
+        0x07,
+        A128GCM,
+        false));
+
+    testrun(dtn_bundle_encode(bundle, buffer, size, &next));
+
+    //dtn_dump_binary_as_hex(stdout, buffer, next - buffer);
+    //fprintf(stdout, "\n");
+
+    testrun(buffer[0]   == 0x9f); // undef array start
+    testrun(buffer[1]   == 0x88); // primary block array 8 items
+    testrun(buffer[2]   == 0x07); // version
+    testrun(buffer[3]   == 0x00); // flags 
+    testrun(buffer[4]   == 0x00); // crc
+    testrun(buffer[5]   == 0x51); // string
+    testrun(buffer[6]   == 0x64); // d
+    testrun(buffer[7]   == 0x74); // t
+    testrun(buffer[8]   == 0x6e); // n
+    testrun(buffer[9]   == 0x3a); // : 
+    testrun(buffer[10]  == 0x2f); // /
+    testrun(buffer[11]  == 0x2f); // /
+    testrun(buffer[12]  == 0x64); // d
+    testrun(buffer[13]  == 0x65); // e
+    testrun(buffer[14]  == 0x73); // s
+    testrun(buffer[15]  == 0x74); // t
+    testrun(buffer[16]  == 0x69); // i
+    testrun(buffer[17]  == 0x6e); // n
+    testrun(buffer[18]  == 0x61); // a
+    testrun(buffer[19]  == 0x74); // t
+    testrun(buffer[20]  == 0x69); // i
+    testrun(buffer[21]  == 0x6f); // o
+    testrun(buffer[22]  == 0x6e); // n
+    testrun(buffer[23]  == 0x4c); // string 
+    testrun(buffer[24]  == 0x64); // d
+    testrun(buffer[25]  == 0x74); // t
+    testrun(buffer[26]  == 0x6e); // n
+    testrun(buffer[27]  == 0x3a); // :
+    testrun(buffer[28]  == 0x2f); // /
+    testrun(buffer[29]  == 0x2f); // /
+    testrun(buffer[30]  == 0x73); // s
+    testrun(buffer[31]  == 0x6f); // o
+    testrun(buffer[32]  == 0x75); // u
+    testrun(buffer[33]  == 0x72); // r
+    testrun(buffer[34]  == 0x63); // c
+    testrun(buffer[35]  == 0x65); // e
+    testrun(buffer[36]  == 0x4c); // string
+    testrun(buffer[37]  == 0x64); // d
+    testrun(buffer[38]  == 0x74); // t
+    testrun(buffer[39]  == 0x6e); // n
+    testrun(buffer[40]  == 0x3a); // :
+    testrun(buffer[41]  == 0x2f); // /
+    testrun(buffer[42]  == 0x2f); // /
+    testrun(buffer[43]  == 0x72); // r
+    testrun(buffer[44]  == 0x65); // e
+    testrun(buffer[45]  == 0x70); // p
+    testrun(buffer[46]  == 0x6f); // o
+    testrun(buffer[47]  == 0x72); // r
+    testrun(buffer[48]  == 0x74); // t
+    testrun(buffer[49]  == 0x82); // array 
+    testrun(buffer[50]  == 0x03); // sequence
+    testrun(buffer[51]  == 0x04); // time
+    testrun(buffer[52]  == 0x05); // lifetime
+    testrun(buffer[53]  == 0x85); // array (bcb)
+    testrun(buffer[54]  == 0x0c); // 12 type
+    testrun(buffer[55]  == 0x02); // Number
+    testrun(buffer[56]  == 0x00); // flags
+    testrun(buffer[57]  == 0x00); // csrc
+    testrun(buffer[58]  == 0x58); // string
+    testrun(buffer[59]  == 0x3b); // length 
+    testrun(buffer[60]  == 0x81); // target
+    testrun(buffer[61]  == 0x01); // block 1
+    testrun(buffer[62]  == 0x02); // context_id 
+    testrun(buffer[63]  == 0x01); // context_flags
+    testrun(buffer[64]  == 0x81); // source
+    testrun(buffer[65]  == 0x82); // array dtn
+    testrun(buffer[66]  == 0x01); // dtn
+    testrun(buffer[67]  == 0x82); // 
+    testrun(buffer[68]  == 0x46); // string 3
+    testrun(buffer[69]  == 0x73); // s
+    testrun(buffer[70]  == 0x6f); // o
+    testrun(buffer[71]  == 0x75); // u
+    testrun(buffer[72]  == 0x72); // r
+    testrun(buffer[73]  == 0x63); // c
+    testrun(buffer[74]  == 0x65); // e
+    testrun(buffer[75]  == 0x41); // string
+    testrun(buffer[76]  == 0x31); // 1
+    testrun(buffer[77]  == 0x83); // array 3 items
+    testrun(buffer[78]  == 0x82); // array 2 items
+    testrun(buffer[79]  == 0x01); // id 1
+    testrun(buffer[80]  == 0x4c); // string iv
+    // iv buffer 1
+    // iv buffer 2
+    // iv buffer 3
+    // iv buffer 4
+    // iv buffer 5
+    // iv buffer 6
+    // iv buffer 7
+    // iv buffer 8
+    // iv buffer 9
+    // iv buffer 10
+    // iv buffer 11
+    // iv buffer 12
+    testrun(buffer[93]  == 0x82); // array 2 items
+    testrun(buffer[94]  == 0x02); // id
+    testrun(buffer[95]  == 0x01); // AES Varinat 1
+    testrun(buffer[96]  == 0x82); // array 2 items
+    testrun(buffer[97]  == 0x03); // id 3
+    testrun(buffer[98]  == 0x07); // aad scope flags
+    testrun(buffer[99]  == 0x81); // array 1 item (result)
+    testrun(buffer[100] == 0x82); // array 2 items
+    testrun(buffer[101] == 0x01); // id 1
+    testrun(buffer[102] == 0x50); // string length 16
+    //result buffer 1
+    //result buffer 2
+    //result buffer 3
+    //result buffer 4
+    //result buffer 5
+    //result buffer 6
+    //result buffer 7
+    //result buffer 8
+    //result buffer 9
+    //result buffer 10
+    //result buffer 11
+    //result buffer 12
+    //result buffer 13
+    //result buffer 14
+    //result buffer 15
+    //result buffer 16
+    testrun(buffer[119] == 0x85); // payload start
+    testrun(buffer[120] == 0x01); // id 
+    testrun(buffer[121] == 0x01); // nbr
+    testrun(buffer[122] == 0x00); // flags
+    testrun(buffer[123] == 0x00); // csrc flags
+    testrun(buffer[124] == 0x58); // string
+    testrun(buffer[125] == 0x18); // length 24
+    // encrypted t
+    // encrypted e
+    // encrypted s
+    // encrypted t
+    // encrypted 1
+    // encrypted 2
+    // encrypted 3
+    // encrypted 4
+    // encrypted 5
+    // encrypted 6
+    // encrypted 7
+    // encrypted 8
+    // encrypted 9
+    // encrypted 0
+    // encrypted 1
+    // encrypted 2
+    // encrypted 3
+    // encrypted 4
+    // encrypted 5
+    // encrypted 6
+    // encrypted 7
+    // encrypted 8
+    // encrypted 9
+    // encrypted 0
+    testrun(buffer[150] == 0xff); // end of undef array
+
+    key = dtn_buffer_free(key);
+    source = dtn_dtn_uri_free(source);
+    bundle = dtn_bundle_free(bundle);
+
+    return testrun_log_success();
+}
+
+
+/*----------------------------------------------------------------------------*/
+
+int test_dtn_bundle_bcb_unprotect(){
+
+    dtn_bundle *bundle = dtn_bundle_create();
+    testrun(bundle);
+
+    dtn_cbor *primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        1,
+        "dtn://destination",
+        "dtn://source",
+        "dtn://report",
+        3,
+        4,
+        5,
+        100,
+        200);
+
+    dtn_cbor *bcb = dtn_bundle_add_block(
+        bundle, 
+        12,
+        2,
+        0,
+        0,
+        dtn_cbor_string(NULL));
+
+    dtn_cbor *payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        2,
+        dtn_cbor_string("test12345678901234567890"));
+
+    testrun(primary);
+    testrun(bcb);
+    testrun(payload);
+
+    dtn_dtn_uri *source = dtn_dtn_uri_decode("dtn://source/1");
+    testrun(source);
+
+    dtn_buffer *key = generate_new_key(HMAC256);
+
+    testrun(dtn_bundle_bcb_protect(
+        bundle,
+        bcb,
+        payload,
+        key,
+        source,
+        0x07,
+        A128GCM,
+        false));
+
+    dtn_key_store *store = dtn_key_store_create((dtn_key_store_config){0});
+    testrun(dtn_key_store_set(store, "source/1", key));
+
+    testrun(dtn_bundle_bcb_unprotect(bundle, store));
+
+    store = dtn_key_store_free(store);
+    source = dtn_dtn_uri_free(source);
+    bundle = dtn_bundle_free(bundle);
+
+    return testrun_log_success();
+}
+
 /*
  *      ------------------------------------------------------------------------
  *
@@ -3052,7 +3802,10 @@ int all_tests() {
     testrun_test(test_dtn_bundle_dump);
     testrun_test(test_dtn_bundle_copy);
     testrun_test(check_crc_generation);
-    
+    testrun_test(test_dtn_bundle_bib_protect);
+    testrun_test(test_dtn_bundle_bib_verify);
+    testrun_test(test_dtn_bundle_bcb_protect);
+    testrun_test(test_dtn_bundle_bcb_unprotect);
 
     return testrun_counter;
 }

@@ -28,6 +28,7 @@
 			"name" : "DTN FILE NODE",
 			"path" : "/tmp/opendtn/input",
 			"uri"  : "dtn://test/two",
+			"keys" : "./src/service/dtn_file_node/config/keys",
 
 			"socket" : {
 

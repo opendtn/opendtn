@@ -47,6 +47,8 @@ typedef struct dtn_tunnel_core_config{
     dtn_socket_configuration tunnel;
     dtn_socket_configuration remote;
 
+    char keys[PATH_MAX];
+
     struct {
 
         uint64_t threadlock_timeout_usec;

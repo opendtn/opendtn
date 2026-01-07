@@ -48,6 +48,9 @@ const char *dtn_hash_function_to_string(dtn_hash_function func) {
         case DTN_HASH_SHA256:
             return "sha256";
             break;
+        case DTN_HASH_SHA384:
+            return "sha384";
+            break;
         case DTN_HASH_SHA512:
             return "sha512";
             break;
@@ -79,6 +82,9 @@ const char *dtn_hash_function_to_RFC8122_string(dtn_hash_function func) {
             break;
         case DTN_HASH_SHA256:
             return "sha-256";
+            break;
+        case DTN_HASH_SHA384:
+            return "sha-384";
             break;
         case DTN_HASH_SHA512:
             return "sha-512";
@@ -124,6 +130,9 @@ dtn_hash_function dtn_hash_function_from_string(const char *string,
             if (0 == strncasecmp(string, "sha256", length))
                 return DTN_HASH_SHA256;
 
+            if (0 == strncasecmp(string, "sha384", length))
+                return DTN_HASH_SHA384;
+
             if (0 == strncasecmp(string, "sha512", length))
                 return DTN_HASH_SHA512;
 
@@ -133,6 +142,9 @@ dtn_hash_function dtn_hash_function_from_string(const char *string,
 
             if (0 == strncasecmp(string, "sha-256", length))
                 return DTN_HASH_SHA256;
+
+            if (0 == strncasecmp(string, "sha-384", length))
+                return DTN_HASH_SHA384;
 
             if (0 == strncasecmp(string, "sha-512", length))
                 return DTN_HASH_SHA512;
@@ -156,6 +168,9 @@ const EVP_MD *dtn_hash_function_to_EVP(dtn_hash_function type) {
             break;
         case DTN_HASH_SHA256:
             return EVP_sha256();
+            break;
+        case DTN_HASH_SHA384:
+            return EVP_sha384();
             break;
         case DTN_HASH_SHA512:
             return EVP_sha512();

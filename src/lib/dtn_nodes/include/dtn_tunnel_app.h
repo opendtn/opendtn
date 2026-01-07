@@ -50,6 +50,7 @@ typedef struct dtn_tunnel_app_config {
     char name[PATH_MAX];
     char uri[PATH_MAX];
     char destination_uri[PATH_MAX];
+    char keys[PATH_MAX];
 
     dtn_socket_configuration socket; // command & control socket
     dtn_socket_configuration tunnel; // tunnel socket
