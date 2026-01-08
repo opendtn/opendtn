@@ -64,6 +64,8 @@ typedef struct dtn_bundle_buffer_config {
                          const char *source_uri,
                          const char *destination_uri);
 
+        dtn_key_store *(*get_keys)(void *userdata);
+
     } callbacks;
 
 } dtn_bundle_buffer_config;

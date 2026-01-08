@@ -1544,9 +1544,11 @@ dtn_cbor *dtn_bundle_get_block(dtn_bundle *self,
 
     if (!self || !self->data) return NULL;
 
+    if (nbr == 0) return dtn_cbor_array_get(self->data, 0);
+
     uint64_t count = dtn_cbor_array_count(self->data);
 
-    for (uint64_t i = 0; i < count; i++){
+    for (uint64_t i = 1; i < count; i++){
 
         dtn_cbor *item = dtn_cbor_array_get(self->data, i);
 
@@ -2106,9 +2108,13 @@ bool dtn_bundle_bib_protect(
         new_key->length,
         hash,
         &hash_size)) goto error;
+
+    uint64_t nbr = 0;
+    if (target != dtn_cbor_array_get(self->data, 0))
+        nbr = dtn_bundle_get_number(target);
     
     asb = dtn_bpsec_asb_create();
-    if (!dtn_bpsec_add_target(asb, dtn_bundle_get_number(target))) goto error;
+    if (!dtn_bpsec_add_target(asb, nbr)) goto error;
     if (!dtn_bpsec_set_context_id(asb, 1)) goto error;
     if (!dtn_bpsec_set_context_flags(asb, 1)) goto error;
     if (!dtn_bpsec_set_source(asb, source)) goto error;
@@ -2116,8 +2122,8 @@ bool dtn_bundle_bib_protect(
     if (add_new_key){
         if (!dtn_bpsec_add_wrapped_key(asb, wrapped, wrapped_size)) goto error;
     }
-    if (!dtn_bpsec_add_integrity_flags(asb, aad_flags)) goto error;
-    if (!dtn_bpsec_add_result(asb, 1, hash, hash_size)) goto error;
+    if (!dtn_bpsec_add_integrity_flags_bib(asb, aad_flags)) goto error;
+    if (!dtn_bpsec_add_result(asb, hash, hash_size)) goto error;
 
     dtn_cbor *result = dtn_bpsec_asb_encode(asb);
     asb = dtn_bpsec_asb_free(asb);
@@ -2348,7 +2354,7 @@ static bool bib_verify(void *value, void *data){
     container->sha = dtn_bpsec_get_sha_variant(container->asb);
     dtn_bpsec_get_wrapped_key(container->asb, 
         &container->wrapped_key, &container->wrapped_key_size);
-    dtn_bpsec_get_integrity_flags(container->asb, &container->integrity_flags);
+    dtn_bpsec_get_integrity_flags_bib(container->asb, &container->integrity_flags);
 
     if (1 != container->context_id) goto error;
     
@@ -2531,6 +2537,114 @@ error:
     return false;
 }
 
+/*----------------------------------------------------------------------------*/
+
+static bool add_new_item_to_bcb(
+    dtn_bundle *bundle,
+    dtn_bpsec_asb *asb,
+    dtn_cbor *bcb,
+    dtn_cbor *target,
+    const dtn_buffer *key){
+
+    if (!bundle || !asb || !bcb || !target || !key) goto error;
+
+    uint8_t *iv = NULL;
+    size_t iv_len = 0;
+
+    uint8_t *plaintext = NULL;
+    size_t plaintext_size = 0;
+
+    uint8_t *wrapped_key = NULL;
+    size_t wrapped_key_size = 0;
+
+    uint8_t contained_key[4096] = {0};
+    size_t contained_key_size = 4096;
+
+    uint8_t ciphertext[4096] = {0};
+    size_t ciphertext_size = 4096;
+
+    uint8_t aad_input[4096] = {0};
+    size_t aad_input_size = 4096;
+
+    uint8_t tag[16] = {0};
+    size_t tag_size = 16;
+
+    uint64_t aad_flags = 0;
+
+    dtn_cbor *data = dtn_bundle_get_data(target);
+
+    if (!dtn_cbor_get_byte_string(data, &plaintext, &plaintext_size))
+        goto error;
+
+    dtn_bpsec_aes_variant aes = dtn_bpsec_get_aes_variant(asb);
+    dtn_bpsec_get_iv(asb, &iv, &iv_len);
+    dtn_bpsec_get_wrapped_key(asb, &wrapped_key, &wrapped_key_size);
+    dtn_bpsec_get_integrity_flags_bcb(asb, &aad_flags);
+
+    if (!generate_hash_input(
+        bundle, 
+        bcb, 
+        target, 
+        aad_flags,
+        (uint8_t*)aad_input,
+        &aad_input_size,
+        false)) goto error;
+
+    if (wrapped_key){
+
+        if (!dtn_aes_key_unwrap(
+            wrapped_key, wrapped_key_size,
+            contained_key, &contained_key_size,
+            key->start, key->length)) goto error;
+
+        if (!gcm_encrypt(aes,
+            plaintext,
+            plaintext_size,
+            (uint8_t*)aad_input,
+            aad_input_size,
+            (uint8_t*) contained_key,
+            contained_key_size,
+            iv,
+            iv_len,
+            ciphertext,
+            &ciphertext_size,
+            tag,
+            tag_size)) goto error;
+
+    } else {
+
+        if (!gcm_encrypt(aes,
+            plaintext,
+            plaintext_size,
+            (uint8_t*)aad_input,
+            aad_input_size,
+            key->start,
+            key->length,
+            iv,
+            iv_len,
+            ciphertext,
+            &ciphertext_size,
+            tag,
+            tag_size)) goto error;
+    }
+
+    if (!dtn_bpsec_add_target(asb, dtn_bundle_get_number(target))) 
+        goto error;
+
+    if (!dtn_bpsec_add_result(asb, tag, tag_size)) goto error;
+
+    dtn_cbor *result = dtn_bpsec_asb_encode(asb);
+    if (!dtn_bundle_set_data(bcb, result)) goto error;
+
+    if (!dtn_cbor_set_byte_string(data, ciphertext, ciphertext_size))
+        goto error;
+
+    asb = dtn_bpsec_asb_free(asb);
+    return true;
+error:
+    asb = dtn_bpsec_asb_free(asb);
+    return false;
+}
 
 /*----------------------------------------------------------------------------*/
 
@@ -2564,6 +2678,14 @@ bool dtn_bundle_bcb_protect(
 
     uint8_t wrapped[4096] = { 0 };
     size_t wrapped_size = 4096;
+
+    asb = dtn_bpsec_asb_decode(dtn_bundle_get_data(bcb));
+    if (asb) return add_new_item_to_bcb(
+        self,
+        asb,
+        bcb,
+        target,
+        key);
 
     if (add_new_key){
 
@@ -2626,19 +2748,6 @@ bool dtn_bundle_bcb_protect(
             tag,
             tag_size)) goto error;
     }
-
-    uint8_t p[4096] = {0};
-    size_t p_len = 4096;
-
-    if (!gcm_decrypt(
-        aes,
-        ciphertext, ciphertext_size,
-        aad_input, aad_input_size,
-        tag, tag_size,
-        key->start,
-        iv->start, iv->length,
-        p, &p_len
-        )) goto error;
     
     asb = dtn_bpsec_asb_create();
     if (!dtn_bpsec_add_target(asb, dtn_bundle_get_number(target))) goto error;
@@ -2650,8 +2759,8 @@ bool dtn_bundle_bcb_protect(
     if (add_new_key){
         if (!dtn_bpsec_add_wrapped_key(asb, wrapped, wrapped_size)) goto error;
     }
-    if (!dtn_bpsec_add_integrity_flags(asb, aad_flags)) goto error;
-    if (!dtn_bpsec_add_result(asb, 1, tag, tag_size)) goto error;
+    if (!dtn_bpsec_add_integrity_flags_bcb(asb, aad_flags)) goto error;
+    if (!dtn_bpsec_add_result(asb, tag, tag_size)) goto error;
 
     dtn_cbor *result = dtn_bpsec_asb_encode(asb);
     asb = dtn_bpsec_asb_free(asb);
@@ -2746,8 +2855,7 @@ static bool bcb_unprotect_target(void *item, void *data){
 
     container->count++;
 
-    if (!dtn_bpsec_get_source(container->asb, 
-        container->count, &uri, &ipn))
+    if (!dtn_bpsec_get_source(container->asb, 1, &uri, &ipn))
         goto error;
 
     if (uri) {
@@ -2848,7 +2956,7 @@ static bool bcb_unprotect(void *value, void *data){
         &container->wrapped_key, &container->wrapped_key_size);
     dtn_bpsec_get_iv(container->asb, 
         &container->iv, &container->iv_size);
-    dtn_bpsec_get_integrity_flags(container->asb, &container->integrity_flags);
+    dtn_bpsec_get_integrity_flags_bcb(container->asb, &container->integrity_flags);
 
     if (2 != container->context_id) goto error;
     

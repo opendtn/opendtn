@@ -346,10 +346,41 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
+struct container1 {
+
+    dtn_bundle_buffer *self;
+    dtn_buffer *buffer;
+};
+
+/*----------------------------------------------------------------------------*/
+
 static bool add_payload_to_buffer(void *val, void *data){
 
-    dtn_buffer *buffer = (dtn_buffer*)data;
+    struct container1 *container = (struct container1*)data;
+    
+    dtn_buffer *buffer = container->buffer;
     dtn_bundle *bundle = (dtn_bundle*)val;
+
+    dtn_key_store *keys = container->self->config.callbacks.get_keys(
+        container->self->config.callbacks.userdata);
+
+    if (dtn_bundle_is_bcb_protected(bundle)){
+
+        if (!dtn_bundle_bcb_unprotect(bundle, keys)){
+            dtn_log_error("BCB unprotect failed.");
+            goto error;
+        }
+
+    }
+
+    if (dtn_bundle_is_bib_protected(bundle)){
+
+        if (!dtn_bundle_bib_verify(bundle, keys)){
+            dtn_log_error("BIB verify failed.");
+            goto error;
+        }
+
+    }
 
     dtn_cbor *payload = dtn_bundle_get_block(bundle, 1);
     dtn_cbor *pdata = dtn_bundle_get_data(payload);
@@ -367,11 +398,16 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-static dtn_buffer *get_output_buffer(dtn_list *queue){
+static dtn_buffer *get_output_buffer(dtn_bundle_buffer *self, dtn_list *queue){
 
     dtn_buffer *buffer = dtn_buffer_create(2048);
 
-    if (!dtn_list_for_each(queue, buffer, add_payload_to_buffer))
+    struct container1 container = (struct container1){
+        .self = self,
+        .buffer = buffer
+    };
+
+    if (!dtn_list_for_each(queue, &container, add_payload_to_buffer))
         goto error;
 
     return buffer;
@@ -535,7 +571,7 @@ insert_before_current:
     size_payload += buf_size;
 
     if (size_payload >= size_all){
-        out = get_output_buffer(data->queue);
+        out = get_output_buffer(self, data->queue);
     }
 
 done:

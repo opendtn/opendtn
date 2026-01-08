@@ -38,6 +38,7 @@
 #include <dtn_core/dtn_io.h>
 #include <dtn_core/dtn_webserver.h>
 #include <dtn_core/dtn_password.h>
+#include <dtn/dtn_security_config.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -81,6 +82,8 @@ typedef struct dtn_file_node_app_config {
         } cbor;
 
     } limits;
+
+    dtn_security_config sec;
 
 } dtn_file_node_app_config;
 

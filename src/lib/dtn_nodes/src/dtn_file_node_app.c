@@ -493,7 +493,8 @@ dtn_file_node_app *dtn_file_node_app_create(dtn_file_node_app_config config){
         .limits.threads = config.limits.threads,
         .limits.buffer_time_cleanup_usecs = config.limits.buffer_time_cleanup_usecs,
         .limits.history_secs = config.limits.history_secs,
-        .limits.max_buffer_time_secs = config.limits.max_buffer_time_secs
+        .limits.max_buffer_time_secs = config.limits.max_buffer_time_secs,
+        .sec = config.sec
     };
 
     if (0 != config.keys[0])
@@ -619,6 +620,7 @@ dtn_file_node_app_config dtn_file_node_app_config_from_item(const dtn_item *inpu
     str = dtn_item_get_string(dtn_item_get(conf, "/keys"));
     if (str) strncpy(config.keys, str, PATH_MAX);
 
+    config.sec = dtn_security_config_from_item(conf);
     return config;
 }
 

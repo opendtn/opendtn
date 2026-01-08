@@ -105,12 +105,14 @@ bool dtn_bpsec_get_wrapped_key(dtn_bpsec_asb *asb, uint8_t **out, size_t *size);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_bpsec_add_integrity_flags(dtn_bpsec_asb *asb, uint8_t flags);
-bool dtn_bpsec_get_integrity_flags(dtn_bpsec_asb *asb, uint64_t *flags);
+bool dtn_bpsec_add_integrity_flags_bib(dtn_bpsec_asb *asb, uint8_t flags);
+bool dtn_bpsec_add_integrity_flags_bcb(dtn_bpsec_asb *asb, uint8_t flags);
+bool dtn_bpsec_get_integrity_flags_bib(dtn_bpsec_asb *asb, uint64_t *flags);
+bool dtn_bpsec_get_integrity_flags_bcb(dtn_bpsec_asb *asb, uint64_t *flags);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_bpsec_add_result(dtn_bpsec_asb *asb, uint64_t id, uint8_t *data, size_t size);
+bool dtn_bpsec_add_result(dtn_bpsec_asb *asb, uint8_t *data, size_t size);
 bool dtn_bpsec_get_result(dtn_bpsec_asb *asb, uint64_t id, uint8_t **data, size_t *size);
 
 /*
@@ -121,6 +123,7 @@ bool dtn_bpsec_get_result(dtn_bpsec_asb *asb, uint64_t id, uint8_t **data, size_
  *      ------------------------------------------------------------------------
  */
 
+uint64_t dtn_bpsec_count_targets(const dtn_bpsec_asb *asb);
 bool dtn_bpsec_add_target(dtn_bpsec_asb *asb, uint64_t nbr);
 
 bool dtn_bpsec_set_context_id(dtn_bpsec_asb *asb, uint64_t nbr);

@@ -360,6 +360,15 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
+static dtn_key_store *cb_get_keys(void *data){
+
+    dtn_file_node_core *self = dtn_file_node_core_cast(data);
+
+    return self->keys;
+}
+
+/*---------------------------------------------------------------------------*/
+
 static bool init_config(dtn_file_node_core_config *config){
 
     if (!config || !config->loop) goto error;
@@ -448,7 +457,8 @@ dtn_file_node_core *dtn_file_node_core_create(dtn_file_node_core_config config){
         .limits.max_buffer_time_secs = self->config.limits.max_buffer_time_secs,
         .limits.threadlock_timeout_usecs = self->config.limits.threadlock_timeout_usec,
         .callbacks.userdata = self,
-        .callbacks.payload = cb_payload
+        .callbacks.payload = cb_payload,
+        .callbacks.get_keys = cb_get_keys
     });
 
     dtn_routing_config routing = (dtn_routing_config){
@@ -874,6 +884,10 @@ static dtn_list *create_bundles_for_file(dtn_file_node_core *self,
     char *source = NULL;
     dtn_cbor *payload = NULL;
     dtn_bundle *bundle = NULL;
+    dtn_cbor *primary = NULL;
+    dtn_cbor *bib = NULL;
+    dtn_cbor *bcb = NULL;
+    dtn_buffer *key = NULL;
 
     if (!self || !path || !buffer || size < 1) goto error;
 
@@ -884,7 +898,7 @@ static dtn_list *create_bundles_for_file(dtn_file_node_core *self,
     if (!queue) goto error;
 
     uint8_t *ptr = buffer;
-    size_t chunk = 1200;    // use a chunk size smaller Ethernet MTU
+    size_t chunk = 1000;    // use a chunk size smaller Ethernet MTU
     size_t open = size;
 
     self->sequence++;
@@ -909,16 +923,25 @@ static dtn_list *create_bundles_for_file(dtn_file_node_core *self,
     uri_dest = dtn_data_pointer_free(uri_dest);
     source = dtn_dtn_uri_encode(self->uri);
 
+    char key_source[PATH_MAX];
+    memset(key_source, 0, PATH_MAX);
+    snprintf(key_source, PATH_MAX, "%s/%s", self->uri->name, self->uri->demux);
+
+    key = dtn_key_store_get(self->keys, key_source);
+
     while(open - chunk > 0){
 
         bundle = dtn_bundle_create();
+        bib = NULL;
+        bcb = NULL;
+
         if (!bundle) goto error;
         if (!dtn_list_queue_push(queue, bundle)) goto error;
 
-        if (!dtn_bundle_add_primary_block(
+        primary = dtn_bundle_add_primary_block(
             bundle, 
             0x01,
-            0x01,
+            0x00,
             destination,
             source,
             source,
@@ -926,22 +949,98 @@ static dtn_list *create_bundles_for_file(dtn_file_node_core *self,
             self->sequence,
             lifetime,
             ptr - buffer,
-            size)) goto error;
+            size);
+
+        if (!primary) goto error;
+
+        if (self->config.sec.bib.protect.header){
+
+            if (!key) goto error;
+
+            bib  = dtn_bundle_add_block(
+                bundle,
+                11,
+                2,
+                0,
+                0,
+                dtn_cbor_string("text"));
+
+        }
+
+        if (self->config.sec.bcb.protect.bib ||
+            self->config.sec.bcb.protect.payload){
+
+            if (!key) goto error;
+
+            bcb  = dtn_bundle_add_block(
+                bundle,
+                12,
+                3,
+                0,
+                0,
+                dtn_cbor_string("text"));
+            
+        }
 
         payload = dtn_cbor_string("test");
         if (!dtn_cbor_set_byte_string(payload, ptr, chunk)) goto error;
 
-        if (!dtn_bundle_add_block(
+        dtn_cbor *payload_block = dtn_bundle_add_block(
             bundle,
             0x01,
             0x01,
             0x00,
-            0x01,
-            payload)) goto error;
+            0x00,
+            payload);
+
+        if (!payload_block) goto error;
 
         payload = NULL;
-
         ptr = ptr + chunk;
+
+        if (bib){
+
+            if (!dtn_bundle_bib_protect(
+                bundle,
+                bib,
+                primary,
+                key, 
+                self->config.sec.bib.aad_flags,
+                self->config.sec.bib.sha,
+                self->uri,
+                self->config.sec.bib.new_key)) goto error;
+        }
+
+        if (bcb){
+
+            if (self->config.sec.bcb.protect.bib){
+
+                if (!dtn_bundle_bcb_protect(
+                    bundle, 
+                    bcb,
+                    bib,
+                    key,
+                    self->uri,
+                    self->config.sec.bcb.aad_flags,
+                    self->config.sec.bcb.aes,
+                    self->config.sec.bcb.new_key))
+                    goto error;
+            }
+
+            if (self->config.sec.bcb.protect.payload){
+
+                if (!dtn_bundle_bcb_protect(
+                    bundle, 
+                    bcb,
+                    payload_block,
+                    key,
+                    self->uri,
+                    self->config.sec.bcb.aad_flags,
+                    self->config.sec.bcb.aes,
+                    self->config.sec.bcb.new_key))
+                    goto error;
+            }
+        }
 
         int64_t check = open - chunk;
         if (check < 0) break;
@@ -952,16 +1051,19 @@ static dtn_list *create_bundles_for_file(dtn_file_node_core *self,
 
     // add last block
 
+    bib = NULL;
+    bcb = NULL;
+
     self->sequence++;
 
     bundle = dtn_bundle_create();
     if (!bundle) goto error;
     if (!dtn_list_queue_push(queue, bundle)) goto error;
 
-    if (!dtn_bundle_add_primary_block(
+    primary = dtn_bundle_add_primary_block(
             bundle, 
             0x01,
-            0x01,
+            0x00,
             destination,
             source,
             source,
@@ -969,30 +1071,109 @@ static dtn_list *create_bundles_for_file(dtn_file_node_core *self,
             self->sequence,
             lifetime,
             ptr - buffer,
-            size)) goto error;
+            size);
+
+    if (!primary) goto error;
+
+    if (self->config.sec.bib.protect.header){
+
+        if (!key) goto error;
+
+        bib  = dtn_bundle_add_block(
+                bundle,
+                11,
+                2,
+                0,
+                0,
+                dtn_cbor_string(NULL));
+
+    }
+
+    if (self->config.sec.bcb.protect.bib ||
+        self->config.sec.bcb.protect.payload){
+
+        if (!key) goto error;
+
+        bcb  = dtn_bundle_add_block(
+                bundle,
+                12,
+                3,
+                0,
+                0,
+                dtn_cbor_string(NULL));
+            
+    }
 
     payload = dtn_cbor_string("test");
     if (!dtn_cbor_set_byte_string(payload, ptr, open)) goto error;
 
-    if (!dtn_bundle_add_block(
+    dtn_cbor *payload_block =dtn_bundle_add_block(
             bundle,
             0x01,
             0x01,
             0x00,
-            0x01,
-            payload)) goto error;
+            0x00,
+            payload);
+
+    if (!payload_block) goto error;
 
     payload = NULL;
+
+    if (bib){
+
+            if (!dtn_bundle_bib_protect(
+                bundle,
+                bib,
+                primary,
+                key, 
+                self->config.sec.bib.aad_flags,
+                self->config.sec.bib.sha,
+                self->uri,
+                self->config.sec.bib.new_key)) goto error;
+    }
+
+    if (bcb){
+
+        if (self->config.sec.bcb.protect.bib){
+
+            if (!dtn_bundle_bcb_protect(
+                bundle, 
+                bcb,
+                bib,
+                key,
+                self->uri,
+                self->config.sec.bcb.aad_flags,
+                self->config.sec.bcb.aes,
+                self->config.sec.bcb.new_key))
+                goto error;
+        }
+
+        if (self->config.sec.bcb.protect.payload){
+
+            if (!dtn_bundle_bcb_protect(
+                bundle, 
+                bcb,
+                payload_block,
+                key,
+                self->uri,
+                self->config.sec.bcb.aad_flags,
+                self->config.sec.bcb.aes,
+                self->config.sec.bcb.new_key))
+                goto error;
+        }
+    }
+
+
     
-   
     dtn_data_pointer_free(source);
+    dtn_buffer_free(key);
     return queue;
 
 error:
     dtn_bundle_free(bundle);
-    dtn_cbor_free(payload);
     dtn_list_free(queue);
     dtn_data_pointer_free(source);
+    dtn_buffer_free(key);
     return NULL;
 }
 

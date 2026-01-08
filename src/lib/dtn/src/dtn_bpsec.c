@@ -94,6 +94,14 @@ bool dtn_bpsec_add_target(dtn_bpsec_asb *asb, uint64_t nbr){
 
 /*----------------------------------------------------------------------------*/
 
+uint64_t dtn_bpsec_count_targets(const dtn_bpsec_asb *asb){
+
+    return dtn_cbor_array_count(asb->target);
+
+}
+
+/*----------------------------------------------------------------------------*/
+
 bool dtn_bpsec_set_context_id(dtn_bpsec_asb *asb, uint64_t nbr){
 
     if (!asb) return false;
@@ -569,7 +577,7 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_bpsec_add_integrity_flags(dtn_bpsec_asb *asb, uint8_t flags){
+bool dtn_bpsec_add_integrity_flags_bib(dtn_bpsec_asb *asb, uint8_t flags){
 
      if (!asb || !asb->context_parameter) goto error;
 
@@ -581,11 +589,25 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_bpsec_get_integrity_flags(dtn_bpsec_asb *asb, uint64_t *flags){
+bool dtn_bpsec_add_integrity_flags_bcb(dtn_bpsec_asb *asb, uint8_t flags){
+
+     if (!asb || !asb->context_parameter) goto error;
+
+    dtn_cbor *param = dtn_cbor_uint(flags);
+    return dtn_bpsec_add_context_parameter(asb, 4, param);
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bpsec_get_integrity_flags_bib(dtn_bpsec_asb *asb, uint64_t *flags){
 
     if (!asb || !asb->context_parameter) goto error;
 
-    dtn_cbor *parameter = dtn_cbor_array_get(asb->context_parameter, 3);
+    uint64_t count = dtn_cbor_array_count(asb->context_parameter);
+
+    dtn_cbor *parameter = dtn_cbor_array_get(asb->context_parameter, count - 1);
     if (!dtn_cbor_is_array(parameter)) goto error;
 
     if (3 != dtn_cbor_get_uint(dtn_cbor_array_get(parameter, 0)))
@@ -601,11 +623,34 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_bpsec_add_result(dtn_bpsec_asb *asb, 
-    uint64_t id, uint8_t *data, size_t size){
+bool dtn_bpsec_get_integrity_flags_bcb(dtn_bpsec_asb *asb, uint64_t *flags){
+
+    if (!asb || !asb->context_parameter) goto error;
+
+    uint64_t count = dtn_cbor_array_count(asb->context_parameter);
+
+    dtn_cbor *parameter = dtn_cbor_array_get(asb->context_parameter, count - 1);
+    if (!dtn_cbor_is_array(parameter)) goto error;
+
+    if (4 != dtn_cbor_get_uint(dtn_cbor_array_get(parameter, 0)))
+        goto error;
+
+    dtn_cbor *value = dtn_cbor_array_get(parameter, 1);
+    uint64_t data = dtn_cbor_get_uint(value);
+    *flags = data;
+    return true;
+error:
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool dtn_bpsec_add_result(dtn_bpsec_asb *asb, uint8_t *data, size_t size){
 
     if (!asb) goto error;
     if (!asb->results) asb->results = dtn_cbor_array();
+
+    uint64_t id = dtn_cbor_array_count(asb->results) + 1;
 
     dtn_cbor *result = dtn_cbor_array();
     dtn_cbor_array_push(result, dtn_cbor_uint(id));

@@ -3613,7 +3613,7 @@ int test_dtn_bundle_bcb_protect(){
     testrun(buffer[94]  == 0x02); // id
     testrun(buffer[95]  == 0x01); // AES Varinat 1
     testrun(buffer[96]  == 0x82); // array 2 items
-    testrun(buffer[97]  == 0x03); // id 3
+    testrun(buffer[97]  == 0x04); // id 4
     testrun(buffer[98]  == 0x07); // aad scope flags
     testrun(buffer[99]  == 0x81); // array 1 item (result)
     testrun(buffer[100] == 0x82); // array 2 items
@@ -3672,6 +3672,220 @@ int test_dtn_bundle_bcb_protect(){
     source = dtn_dtn_uri_free(source);
     bundle = dtn_bundle_free(bundle);
 
+    bundle = dtn_bundle_create();
+    testrun(bundle);
+
+    primary = dtn_bundle_add_primary_block(
+        bundle,
+        0,
+        1,
+        "dtn://destination",
+        "dtn://source",
+        "dtn://report",
+        3,
+        4,
+        5,
+        100,
+        200);
+
+    dtn_cbor *bib = dtn_bundle_add_block(
+        bundle, 
+        11,
+        2,
+        0,
+        0,
+        dtn_cbor_string(NULL));
+
+    bcb = dtn_bundle_add_block(
+        bundle, 
+        12,
+        3,
+        0,
+        0,
+        dtn_cbor_string(NULL));
+
+    payload = dtn_bundle_add_block(
+        bundle,
+        1,
+        1,
+        0,
+        2,
+        dtn_cbor_string("test12345678901234567890"));
+
+    testrun(primary);
+    testrun(bib);
+    testrun(bcb);
+    testrun(payload);
+
+    source = dtn_dtn_uri_decode("dtn://source/1");
+    testrun(source);
+
+    key = generate_new_key(HMAC256);
+
+    testrun(dtn_bundle_bib_protect(
+        bundle,
+        bib,
+        primary,
+        key,
+        0x07,
+        HMAC256,
+        source,
+        false));
+
+    testrun(dtn_bundle_bcb_protect(
+        bundle,
+        bcb,
+        bib,
+        key,
+        source,
+        0x07,
+        A128GCM,
+        false));
+
+    testrun(dtn_bundle_bcb_protect(
+        bundle,
+        bcb,
+        payload,
+        key,
+        source,
+        0x07,
+        A128GCM,
+        false));
+
+    testrun(dtn_bundle_encode(bundle, buffer, size, &next));
+
+    //dtn_dump_binary_as_hex(stdout, buffer, next - buffer);
+    //fprintf(stdout, "\n");
+
+    testrun(buffer[0]   == 0x9f); // undef array start
+    testrun(buffer[1]   == 0x88); // primary block array 8 items
+    testrun(buffer[2]   == 0x07); // version
+    testrun(buffer[3]   == 0x00); // flags 
+    testrun(buffer[4]   == 0x00); // crc
+    testrun(buffer[5]   == 0x51); // string
+    testrun(buffer[6]   == 0x64); // d
+    testrun(buffer[7]   == 0x74); // t
+    testrun(buffer[8]   == 0x6e); // n
+    testrun(buffer[9]   == 0x3a); // : 
+    testrun(buffer[10]  == 0x2f); // /
+    testrun(buffer[11]  == 0x2f); // /
+    testrun(buffer[12]  == 0x64); // d
+    testrun(buffer[13]  == 0x65); // e
+    testrun(buffer[14]  == 0x73); // s
+    testrun(buffer[15]  == 0x74); // t
+    testrun(buffer[16]  == 0x69); // i
+    testrun(buffer[17]  == 0x6e); // n
+    testrun(buffer[18]  == 0x61); // a
+    testrun(buffer[19]  == 0x74); // t
+    testrun(buffer[20]  == 0x69); // i
+    testrun(buffer[21]  == 0x6f); // o
+    testrun(buffer[22]  == 0x6e); // n
+    testrun(buffer[23]  == 0x4c); // string 
+    testrun(buffer[24]  == 0x64); // d
+    testrun(buffer[25]  == 0x74); // t
+    testrun(buffer[26]  == 0x6e); // n
+    testrun(buffer[27]  == 0x3a); // :
+    testrun(buffer[28]  == 0x2f); // /
+    testrun(buffer[29]  == 0x2f); // /
+    testrun(buffer[30]  == 0x73); // s
+    testrun(buffer[31]  == 0x6f); // o
+    testrun(buffer[32]  == 0x75); // u
+    testrun(buffer[33]  == 0x72); // r
+    testrun(buffer[34]  == 0x63); // c
+    testrun(buffer[35]  == 0x65); // e
+    testrun(buffer[36]  == 0x4c); // string
+    testrun(buffer[37]  == 0x64); // d
+    testrun(buffer[38]  == 0x74); // t
+    testrun(buffer[39]  == 0x6e); // n
+    testrun(buffer[40]  == 0x3a); // :
+    testrun(buffer[41]  == 0x2f); // /
+    testrun(buffer[42]  == 0x2f); // /
+    testrun(buffer[43]  == 0x72); // r
+    testrun(buffer[44]  == 0x65); // e
+    testrun(buffer[45]  == 0x70); // p
+    testrun(buffer[46]  == 0x6f); // o
+    testrun(buffer[47]  == 0x72); // r
+    testrun(buffer[48]  == 0x74); // t
+    testrun(buffer[49]  == 0x82); // array 
+    testrun(buffer[50]  == 0x03); // sequence
+    testrun(buffer[51]  == 0x04); // time
+    testrun(buffer[52]  == 0x05); // lifetime
+    testrun(buffer[53]  == 0x85); // array (bib)
+    testrun(buffer[54]  == 0x0b); // 11
+    testrun(buffer[55]  == 0x02); // Number
+    testrun(buffer[56]  == 0x00); // flags
+    testrun(buffer[57]  == 0x00); // csrc
+    testrun(buffer[58]  == 0x58); // string
+    testrun(buffer[59]  == 0x3d); // length 61
+    // ... encrypted bib
+    testrun(buffer[121] == 0x85); // bcb
+    testrun(buffer[122] == 0x0c); // context id 12 
+    testrun(buffer[123] == 0x03); // block number 3
+    testrun(buffer[124] == 0x00); // 
+    testrun(buffer[125] == 0x00); // 
+    testrun(buffer[126] == 0x58); // string
+    testrun(buffer[127] == 0x4f); // length 79
+    testrun(buffer[128] == 0x82); // array targets
+    testrun(buffer[129] == 0x02); // bib block
+    testrun(buffer[130] == 0x01); // payload block
+    testrun(buffer[131] == 0x02); // BCB-AES-GCM 
+    testrun(buffer[132] == 0x01); // context_flags
+    testrun(buffer[133] == 0x81); // source
+    testrun(buffer[134] == 0x82); // array 2
+    testrun(buffer[135] == 0x01); // DTN
+    testrun(buffer[136] == 0x82); // array 2
+    testrun(buffer[137] == 0x46); // string 6
+    testrun(buffer[138] == 0x73); // s
+    testrun(buffer[139] == 0x6F); // o
+    testrun(buffer[140] == 0x75); // u
+    testrun(buffer[141] == 0x72); // r
+    testrun(buffer[142] == 0x63); // c
+    testrun(buffer[143] == 0x65); // e
+    testrun(buffer[144] == 0x41); // string 1
+    testrun(buffer[145] == 0x31); // 1
+    testrun(buffer[146] == 0x83); // context parameter 3
+    testrun(buffer[147] == 0x82); // initialization vector
+    testrun(buffer[148] == 0x01); // id 1
+    testrun(buffer[149] == 0x4c); // string 12
+    // ... initialization vector
+    testrun(buffer[162] == 0x82); //  AES variant
+    testrun(buffer[163] == 0x02); //  id 2
+    testrun(buffer[164] == 0x01); //  aes128
+    testrun(buffer[165] == 0x82); //  aad flags
+    testrun(buffer[166] == 0x04); //  id 4
+    testrun(buffer[167] == 0x07); //  value 7
+    testrun(buffer[168] == 0x82); //  results
+    testrun(buffer[169] == 0x82); //  result 1
+    testrun(buffer[170] == 0x01); //  id 1   
+    testrun(buffer[171] == 0x50); //  string 16
+    // ... 16 bytes result 1
+    testrun(buffer[188] == 0x82); // result
+    testrun(buffer[189] == 0x02); // id 2   
+    testrun(buffer[190] == 0x50); // string 16
+    // ... 16 bytes result 2
+    testrun(buffer[207] == 0x85); // payload block
+    testrun(buffer[208] == 0x01); // id 1
+    testrun(buffer[209] == 0x01); // number 1
+    testrun(buffer[210] == 0x00); // flags
+    testrun(buffer[211] == 0x00); // crc
+    testrun(buffer[212] == 0x58); // string  
+    testrun(buffer[213] == 0x18); // length 24
+    // ... 24 bytes encrypted payload
+    testrun(buffer[238] == 0xff);
+
+    testrun(dtn_bundle_is_bib_protected(bundle));
+    testrun(dtn_bundle_is_bcb_protected(bundle));
+
+    dtn_key_store *store = dtn_key_store_create((dtn_key_store_config){0});
+    testrun(dtn_key_store_set(store, "source/1", key));
+
+    testrun(dtn_bundle_bcb_unprotect(bundle, store));
+    testrun(dtn_bundle_bib_verify(bundle, store));
+
+
+    store = dtn_key_store_free(store);
+    source = dtn_dtn_uri_free(source);
+    bundle = dtn_bundle_free(bundle);
     return testrun_log_success();
 }
 

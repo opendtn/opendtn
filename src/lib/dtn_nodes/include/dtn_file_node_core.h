@@ -33,6 +33,7 @@
 
 #include <dtn_base/dtn_event_loop.h>
 #include <dtn/dtn_cbor.h>
+#include <dtn/dtn_security_config.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -57,6 +58,8 @@ typedef struct dtn_file_node_core_config{
         uint64_t max_buffer_time_secs;
 
     } limits;
+
+    dtn_security_config sec;
 
 } dtn_file_node_core_config;
 

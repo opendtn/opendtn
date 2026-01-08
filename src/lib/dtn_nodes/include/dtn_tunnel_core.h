@@ -33,6 +33,7 @@
 
 #include <dtn_base/dtn_event_loop.h>
 #include <dtn/dtn_cbor.h>
+#include <dtn/dtn_security_config.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -61,6 +62,8 @@ typedef struct dtn_tunnel_core_config{
 
     } limits;
 
+    dtn_security_config sec;
+    
 } dtn_tunnel_core_config;
 
 /*

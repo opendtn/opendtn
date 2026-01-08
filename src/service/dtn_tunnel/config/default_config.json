@@ -54,6 +54,33 @@
 				"type" : "TCP"
 			},
 
+			"security" : {
+
+				"bib" : {
+
+					"protect" : {
+
+						"header" : true
+					},
+					"new_key" : false,
+					"sha" : "sha256",
+					"aad" : true
+				},
+
+				"bcb" : {
+
+					"protect" : {
+
+						"bib" : true,
+						"payload" : true
+					},
+					"new_key" : false,
+					"aes" : "256",
+					"aad" : true
+
+				}
+			},
+
 			"password" : {
 				"blocksize":4,
 				"hash":"LjZ5FUfcp9As3IEa4/VZ8KCMOJYY+/8AarZqixgCC5lkp11iHFi4y69IcgsvrM7fsVBOgKLEQMbYaRZM8JpIhA==",
