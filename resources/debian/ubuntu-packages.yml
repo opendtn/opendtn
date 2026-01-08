@@ -1,6 +1,5 @@
 ov_basic_packages:
   - libssl-dev
-  - openssh-server
 
 ov_dev_packages:
   - libsystemd-dev
