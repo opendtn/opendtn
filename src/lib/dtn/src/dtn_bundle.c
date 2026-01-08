@@ -2919,6 +2919,8 @@ static bool bcb_unprotect_target(void *item, void *data){
         container->iv, container->iv_size,
         plaintext, &plaintext_size)) goto error;
 
+    fprintf(stderr, "PLAINTEXT %s\n", plaintext);
+
     if (!dtn_cbor_set_byte_string(target_data,  plaintext, plaintext_size))
         goto error;
 

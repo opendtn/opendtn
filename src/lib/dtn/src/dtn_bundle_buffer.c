@@ -318,6 +318,27 @@ static bool unfragmented_bundle(dtn_bundle_buffer *self, dtn_bundle *bundle){
     const char *dest = dtn_bundle_primary_get_destination(bundle);
     const char *source = dtn_bundle_primary_get_source(bundle);
 
+    dtn_key_store *keys = self->config.callbacks.get_keys(
+        self->config.callbacks.userdata);
+
+    if (dtn_bundle_is_bcb_protected(bundle)){
+
+        if (!dtn_bundle_bcb_unprotect(bundle, keys)){
+            dtn_log_error("BCB unprotect failed.");
+            goto error;
+        }
+
+    }
+
+    if (dtn_bundle_is_bib_protected(bundle)){
+
+        if (!dtn_bundle_bib_verify(bundle, keys)){
+            dtn_log_error("BIB verify failed.");
+            goto error;
+        }
+
+    }
+
     dtn_cbor *payload = dtn_bundle_get_block(bundle, 1);
     if (!payload) goto error;
 
