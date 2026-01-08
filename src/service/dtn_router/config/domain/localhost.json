@@ -1,8 +1,0 @@
-{
-	"name" : "localhost",
-	"path" : "./src/service/dtn_web_node/html",
-	"certificate": {
-		"file" : "./resources/certificate/opendtn.test.crt",
-		"key": "./resources/certificate/opendtn.test.key"
-	}
-}
