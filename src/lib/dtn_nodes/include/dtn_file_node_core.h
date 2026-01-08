@@ -31,9 +31,9 @@
 #ifndef dtn_file_node_core_h
 #define dtn_file_node_core_h
 
-#include <dtn_base/dtn_event_loop.h>
 #include <dtn/dtn_cbor.h>
 #include <dtn/dtn_security_config.h>
+#include <dtn_base/dtn_event_loop.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -41,7 +41,7 @@ typedef struct dtn_file_node_core dtn_file_node_core;
 
 /*---------------------------------------------------------------------------*/
 
-typedef struct dtn_file_node_core_config{
+typedef struct dtn_file_node_core_config {
 
     dtn_event_loop *loop;
 
@@ -83,27 +83,23 @@ dtn_file_node_core *dtn_file_node_core_cast(const void *data);
  *      ------------------------------------------------------------------------
  */
 
-bool dtn_file_node_core_enable_ip_interfaces(
-        dtn_file_node_core *self,
-        const dtn_item *config);
+bool dtn_file_node_core_enable_ip_interfaces(dtn_file_node_core *self,
+                                             const dtn_item *config);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_file_node_core_enable_routes(
-        dtn_file_node_core *self, 
-        const char *path);
+bool dtn_file_node_core_enable_routes(dtn_file_node_core *self,
+                                      const char *path);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_file_node_core_set_source_uri(
-        dtn_file_node_core *self, 
-        const char *uri);
+bool dtn_file_node_core_set_source_uri(dtn_file_node_core *self,
+                                       const char *uri);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_file_node_core_set_reception_path(
-        dtn_file_node_core *self, 
-        const char *path);
+bool dtn_file_node_core_set_reception_path(dtn_file_node_core *self,
+                                           const char *path);
 
 /*
  *      ------------------------------------------------------------------------
@@ -113,10 +109,8 @@ bool dtn_file_node_core_set_reception_path(
  *      ------------------------------------------------------------------------
  */
 
-bool dtn_file_node_core_send_file(
-    dtn_file_node_core *self,
-    const char *uri,
-    const char *source_path,
-    const char *destination_path);
+bool dtn_file_node_core_send_file(dtn_file_node_core *self, const char *uri,
+                                  const char *source_path,
+                                  const char *destination_path);
 
 #endif /* dtn_file_node_core_h */

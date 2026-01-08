@@ -94,7 +94,7 @@ typedef struct dtn_cbor_config {
 dtn_cbor *dtn_cbor_map();
 dtn_cbor *dtn_cbor_array();
 dtn_cbor *dtn_cbor_string(const char *string);
-dtn_cbor *dtn_cbor_utf8(const uint8_t *buffer , size_t size);
+dtn_cbor *dtn_cbor_utf8(const uint8_t *buffer, size_t size);
 dtn_cbor *dtn_cbor_true();
 dtn_cbor *dtn_cbor_false();
 dtn_cbor *dtn_cbor_null();
@@ -115,14 +115,14 @@ dtn_cbor *dtn_cbor_double(double nbr);
 dtn_cbor *dtn_cbor_free(dtn_cbor *self);
 dtn_cbor_type dtn_cbor_get_type(const dtn_cbor *self);
 
-void *dtn_cbor_copy(void** copy, void *self);
+void *dtn_cbor_copy(void **copy, void *self);
 
 /*----------------------------------------------------------------------------*/
 
 /**
  *  Configure MAX item values for the parser.
- * 
- *  SHOULD be used for every usage szenario due to potentially very large 
+ *
+ *  SHOULD be used for every usage szenario due to potentially very large
  *  allocation of memory.
  */
 bool dtn_cbor_configure(dtn_cbor_config config);
@@ -147,50 +147,42 @@ typedef enum dtn_cbor_match {
 
 /**
  *  Decode a CBOR buffer to some value.
- * 
+ *
  *  @param buffer   pointer to buffer to decode
  *  @param size     size of buffer
  *  @param out      pointer to decoded value
  *  @param next     pointer to next byte after decoded value
  */
-dtn_cbor_match dtn_cbor_decode(
-    const uint8_t *buffer, 
-    size_t size,
-    dtn_cbor **out, 
-    uint8_t **next);
+dtn_cbor_match dtn_cbor_decode(const uint8_t *buffer, size_t size,
+                               dtn_cbor **out, uint8_t **next);
 
 /*----------------------------------------------------------------------------*/
 
 /**
  *  Encode a CBOR value to some buffer.
- *  
+ *
  *  @param value    value to encode
  *  @param buffer   pointer to buffer
  *  @param size     size of buffer
  *  @param next     pointer to next byte after encoded value
  */
-bool dtn_cbor_encode(
-    const dtn_cbor *value,
-    uint8_t *buffer, 
-    size_t size,
-    uint8_t **next);
+bool dtn_cbor_encode(const dtn_cbor *value, uint8_t *buffer, size_t size,
+                     uint8_t **next);
 
 /*----------------------------------------------------------------------------*/
 
 /**
  *  Encode a CBOR array as a indefinite_length value to some buffer.
  *  This is the implemetation required for DTN bundle protocol RFC 9171
- *  
+ *
  *  @param value    value to encode
  *  @param buffer   pointer to buffer
  *  @param size     size of buffer
  *  @param next     pointer to next byte after encoded value
  */
-bool dtn_cbor_encode_array_of_indefinite_length(
-    const dtn_cbor *value,
-    uint8_t *buffer, 
-    size_t size,
-    uint8_t **next);
+bool dtn_cbor_encode_array_of_indefinite_length(const dtn_cbor *value,
+                                                uint8_t *buffer, size_t size,
+                                                uint8_t **next);
 
 /*----------------------------------------------------------------------------*/
 
@@ -234,8 +226,8 @@ bool dtn_cbor_is_double(const dtn_cbor *self);
  */
 
 /**
- *  Set some key / value pair, 
- *  on success key and value become part of the map 
+ *  Set some key / value pair,
+ *  on success key and value become part of the map
  *  @param map  map instance
  *  @param key  key to set in map
  *  @param val  value to set at key.
@@ -255,11 +247,11 @@ dtn_cbor *dtn_cbor_map_get(const dtn_cbor *map, const dtn_cbor *key);
 
 /**
  *  Set some value at a string key, the dtn_cbor_string for the key
- *  will be autgenerated. 
- *  This is a convinience function for usage of string key based maps. 
- * 
+ *  will be autgenerated.
+ *  This is a convinience function for usage of string key based maps.
+ *
  *  @param map  map instance
- *  @param key  string to set 
+ *  @param key  string to set
  *  @param val  value to be set at key, value will become part of the map
  */
 bool dtn_cbor_map_set_string(dtn_cbor *map, const char *key, dtn_cbor *val);
@@ -269,7 +261,7 @@ bool dtn_cbor_map_set_string(dtn_cbor *map, const char *key, dtn_cbor *val);
 /**
  *  Get some string based key using the string instead of a dtn_cbor string.
  *  This is a convinience function for usage of string key based maps.
- * 
+ *
  *  @param map  map instance
  *  @param key  keystring to search
  */
@@ -278,16 +270,16 @@ dtn_cbor *dtn_cbor_map_get_string(const dtn_cbor *map, const char *key);
 /*----------------------------------------------------------------------------*/
 
 /**
- *  This function will apply the function input on any item of the map. 
- *  Use with care and don't delete keys or values using this function. 
- *  
+ *  This function will apply the function input on any item of the map.
+ *  Use with care and don't delete keys or values using this function.
+ *
  *  @param map      map instance
  *  @param data     custom userdata to be used as input to the function
- *  @param function function to be applied to any key/value pair 
+ *  @param function function to be applied to any key/value pair
  */
-bool dtn_cbor_map_for_each(dtn_cbor *map,
-    void *data,
-    bool (*function)(const void *key, void *val, void *data));
+bool dtn_cbor_map_for_each(dtn_cbor *map, void *data,
+                           bool (*function)(const void *key, void *val,
+                                            void *data));
 
 /*----------------------------------------------------------------------------*/
 
@@ -302,8 +294,8 @@ uint64_t dtn_cbor_map_count(const dtn_cbor *map);
  */
 
 /**
- *  Get some item out of the array. 
- *  
+ *  Get some item out of the array.
+ *
  *  @param self     array instance
  *  @param index    index 0 ... max
  */
@@ -313,8 +305,8 @@ bool dtn_cbor_array_set(dtn_cbor *self, uint64_t pos, dtn_cbor *value);
 /*----------------------------------------------------------------------------*/
 
 /**
- *  Push some item to the end of the array. 
- *  
+ *  Push some item to the end of the array.
+ *
  *  @param self     array instance
  *  @param val      value to be set within the array.
  */
@@ -323,30 +315,29 @@ bool dtn_cbor_array_push(dtn_cbor *self, dtn_cbor *val);
 /*----------------------------------------------------------------------------*/
 
 /**
- *  Pop some item from the front of the array FIFO. 
+ *  Pop some item from the front of the array FIFO.
  */
 dtn_cbor *dtn_cbor_array_pop_queue(dtn_cbor *self);
 
 /*----------------------------------------------------------------------------*/
 
 /**
- *  Pop some item from the back of the array LIFO. 
+ *  Pop some item from the back of the array LIFO.
  */
 dtn_cbor *dtn_cbor_array_pop_stack(dtn_cbor *self);
 
 /*----------------------------------------------------------------------------*/
 
 /**
- *  This function will apply the function input on any item of the array. 
- *  Use with care and don't delete values using this function. 
- *  
+ *  This function will apply the function input on any item of the array.
+ *  Use with care and don't delete values using this function.
+ *
  *  @param self     array instance
  *  @param data     custom userdata to be used as input to the function
- *  @param function function to be applied to any key/value pair 
+ *  @param function function to be applied to any key/value pair
  */
-bool dtn_cbor_array_for_each(dtn_cbor *self, 
-    void *data,
-    bool (*function)(void *item, void *data));
+bool dtn_cbor_array_for_each(dtn_cbor *self, void *data,
+                             bool (*function)(void *item, void *data));
 
 /*----------------------------------------------------------------------------*/
 
@@ -364,7 +355,8 @@ const char *dtn_cbor_get_string(const dtn_cbor *self);
 bool dtn_cbor_set_string(dtn_cbor *self, const char *string);
 
 bool dtn_cbor_set_byte_string(dtn_cbor *self, const uint8_t *byte, size_t size);
-bool dtn_cbor_get_byte_string(const dtn_cbor *self, uint8_t **byte, size_t *size);
+bool dtn_cbor_get_byte_string(const dtn_cbor *self, uint8_t **byte,
+                              size_t *size);
 
 /*----------------------------------------------------------------------------*/
 

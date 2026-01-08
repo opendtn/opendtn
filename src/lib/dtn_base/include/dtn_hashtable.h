@@ -142,10 +142,10 @@ typedef struct dtn_hashtable_struct dtn_hashtable;
 
 typedef struct {
 
-  void (*key_free)(void *key);
-  void *(*key_copy)(const void *key);
-  int (*key_cmp)(const void *key, const void *value);
-  uint64_t (*hash)(const void *);
+    void (*key_free)(void *key);
+    void *(*key_copy)(const void *key);
+    int (*key_cmp)(const void *key, const void *value);
+    uint64_t (*hash)(const void *);
 
 } dtn_hashtable_funcs;
 
@@ -163,7 +163,8 @@ typedef struct {
         copy/free/hash various kinds of keys.
 
  */
-dtn_hashtable *dtn_hashtable_create(size_t num_buckets, dtn_hashtable_funcs funcs);
+dtn_hashtable *dtn_hashtable_create(size_t num_buckets,
+                                    dtn_hashtable_funcs funcs);
 
 /*----------------------------------------------------------------------------*/
 
@@ -205,9 +206,9 @@ void *dtn_hashtable_remdtne(dtn_hashtable *table, const void *key);
         @return number of processed entries.
  */
 size_t dtn_hashtable_for_each(const dtn_hashtable *table,
-                             bool (*process)(void const *key, void const *value,
-                                             void *arg),
-                             void *arg);
+                              bool (*process)(void const *key,
+                                              void const *value, void *arg),
+                              void *arg);
 
 /*---------------------------------------------------------------------------*/
 

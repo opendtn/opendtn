@@ -43,35 +43,36 @@ extern bool dtn_trace_active;
 #undef assert
 #include <assert.h>
 
-#define DTN_TRACE_IN                                                            \
-  int trace_time__ = time(0);                                                  \
-  if (dtn_trace_active) {                                                       \
-    fprintf(stderr, "TRACE IN %s: %i\n", __FUNCTION__, __LINE__);              \
-  }
+#define DTN_TRACE_IN                                                           \
+    int trace_time__ = time(0);                                                \
+    if (dtn_trace_active) {                                                    \
+        fprintf(stderr, "TRACE IN %s: %i\n", __FUNCTION__, __LINE__);          \
+    }
 
-#define DTN_TRACE_OUT                                                           \
-  if (dtn_trace_active) {                                                       \
-    trace_time__ = time(0) - trace_time__;                                     \
-    fprintf(stderr, "TRACE OUT %s: %i    secs passed: %i\n", __FUNCTION__,     \
-            __LINE__, trace_time__);                                           \
-    if (trace_time__ > dtn_TRACE_LIMIT_SECS) {                                  \
-      fprintf(stderr, "TRACE OUT: Function %s took too long: %i seconds\n",    \
-              __FUNCTION__, trace_time__);                                     \
-      assert(false);                                                           \
-    }                                                                          \
-  }
+#define DTN_TRACE_OUT                                                          \
+    if (dtn_trace_active) {                                                    \
+        trace_time__ = time(0) - trace_time__;                                 \
+        fprintf(stderr, "TRACE OUT %s: %i    secs passed: %i\n", __FUNCTION__, \
+                __LINE__, trace_time__);                                       \
+        if (trace_time__ > dtn_TRACE_LIMIT_SECS) {                             \
+            fprintf(stderr,                                                    \
+                    "TRACE OUT: Function %s took too long: %i seconds\n",      \
+                    __FUNCTION__, trace_time__);                               \
+            assert(false);                                                     \
+        }                                                                      \
+    }
 
-#define DTN_TRACE_TIMEOUT(start, now, entity)                                   \
-  if (dtn_trace_active) {                                                       \
-    fprintf(stderr, "TRACE: %s took %i secs\n", entity, now - start);          \
-    if ((now - start) > dtn_TRACE_LIMIT_SECS) {                                 \
-      fprintf(stderr, "\n");                                                   \
-      fprintf(stderr, "TRACE: ---- %s TOOK TOO LONG: %i seconds ----\n",       \
-              entity, now - start);                                            \
-      fprintf(stderr, "\n");                                                   \
-      assert(false);                                                           \
-    }                                                                          \
-  }
+#define DTN_TRACE_TIMEOUT(start, now, entity)                                  \
+    if (dtn_trace_active) {                                                    \
+        fprintf(stderr, "TRACE: %s took %i secs\n", entity, now - start);      \
+        if ((now - start) > dtn_TRACE_LIMIT_SECS) {                            \
+            fprintf(stderr, "\n");                                             \
+            fprintf(stderr, "TRACE: ---- %s TOOK TOO LONG: %i seconds ----\n", \
+                    entity, now - start);                                      \
+            fprintf(stderr, "\n");                                             \
+            assert(false);                                                     \
+        }                                                                      \
+    }
 
 #endif // dtn_TRACE_ACTIVE
 

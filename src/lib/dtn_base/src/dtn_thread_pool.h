@@ -80,15 +80,15 @@ extern const int dtn_THREADPOOL_NOTIFY_SIGNAL;
  */
 typedef struct {
 
-  struct {
-    uint64_t incoming;
-  } lock_blocked;
+    struct {
+        uint64_t incoming;
+    } lock_blocked;
 
-  struct {
-    uint64_t received;
-    uint64_t processed;
-    uint64_t lost;
-  } elements;
+    struct {
+        uint64_t received;
+        uint64_t processed;
+        uint64_t lost;
+    } elements;
 
 } dtn_thread_pool_statistics;
 
@@ -96,12 +96,12 @@ typedef struct {
 
 typedef struct {
 
-  /**
-   * 0 denotes: Choose at will. Might be cut down to a max number of
-   * threads
-   */
-  size_t num_threads;
-  void *userdata;
+    /**
+     * 0 denotes: Choose at will. Might be cut down to a max number of
+     * threads
+     */
+    size_t num_threads;
+    void *userdata;
 
 } dtn_thread_pool_config;
 
@@ -111,23 +111,23 @@ typedef struct dtn_thread_pool_struct dtn_thread_pool;
 
 struct dtn_thread_pool_struct {
 
-  uint32_t magic_bytes;
+    uint32_t magic_bytes;
 
-  bool (*start)(dtn_thread_pool *self);
-  bool (*stop)(dtn_thread_pool *self);
-  dtn_thread_pool *(*free)(dtn_thread_pool *self);
+    bool (*start)(dtn_thread_pool *self);
+    bool (*stop)(dtn_thread_pool *self);
+    dtn_thread_pool *(*free)(dtn_thread_pool *self);
 
-  dtn_thread_pool_statistics (*get_statistics)(dtn_thread_pool *self);
+    dtn_thread_pool_statistics (*get_statistics)(dtn_thread_pool *self);
 
-  void *user_data; /* User might add whatever he wants */
+    void *user_data; /* User might add whatever he wants */
 };
 
 /*---------------------------------------------------------------------------*/
 
 typedef struct {
 
-  dtn_thread_lock *lock;
-  dtn_ringbuffer *queue;
+    dtn_thread_lock *lock;
+    dtn_ringbuffer *queue;
 
 } dtn_thread_queue;
 
@@ -142,8 +142,8 @@ typedef bool (*dtn_thread_pool_function)(void *userdata, void *element);
  ******************************************************************************/
 
 dtn_thread_pool *dtn_thread_pool_create(dtn_thread_queue incoming_queue,
-                                      dtn_thread_pool_function process_func,
-                                      dtn_thread_pool_config config);
+                                        dtn_thread_pool_function process_func,
+                                        dtn_thread_pool_config config);
 
 /*---------------------------------------------------------------------------*/
 

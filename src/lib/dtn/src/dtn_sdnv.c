@@ -33,36 +33,34 @@
 
 #include <stdio.h>
 
+bool dtn_sdnv_decode(const uint8_t *start, size_t size, uint64_t *out,
+                     uint8_t **next) {
 
-bool dtn_sdnv_decode(
-        const uint8_t *start, 
-        size_t size,
-        uint64_t *out,
-        uint8_t **next){
-
-    if (!start || size < 1 || !out || !next) goto error;
+    if (!start || size < 1 || !out || !next)
+        goto error;
 
     uint8_t *last = NULL;
-    uint8_t *ptr = (uint8_t*) start;
+    uint8_t *ptr = (uint8_t *)start;
 
     uint64_t nbr = 0;
     uint64_t count = 0;
 
     int64_t ssize = size;
 
-    while(!last){
+    while (!last) {
 
         ssize--;
         count++;
 
-        if (count > 10){
+        if (count > 10) {
             dtn_log_error("Input number > uint64_t max - stopping");
             goto error;
         }
 
-        if (0 > ssize) goto error;
+        if (0 > ssize)
+            goto error;
 
-        if (ptr[0] & 0x80){
+        if (ptr[0] & 0x80) {
             ptr++;
             continue;
         }
@@ -70,24 +68,24 @@ bool dtn_sdnv_decode(
         last = ptr;
     }
 
-    ptr = (uint8_t*) start;
+    ptr = (uint8_t *)start;
 
-    if ( (last - start) > 9){
+    if ((last - start) > 9) {
 
         dtn_log_error("Input number > uint64_t max - stopping");
         goto error;
 
-    } else if (last - start == 9){
+    } else if (last - start == 9) {
 
-        if (start[0] > 0x81){
+        if (start[0] > 0x81) {
 
             dtn_log_error("Input number > uint64_t max - stopping");
             goto error;
         }
     }
 
-    while (ptr < last){
-        
+    while (ptr < last) {
+
         nbr += ((ptr[0] & 0x7F));
         nbr = nbr << 7;
         ptr++;
@@ -105,76 +103,83 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_sdnv_encode(
-        const uint64_t number,
-        uint8_t *buffer, 
-        size_t size,
-        uint8_t **next){
+bool dtn_sdnv_encode(const uint64_t number, uint8_t *buffer, size_t size,
+                     uint8_t **next) {
 
     uint8_t *last = NULL;
 
-    if (!buffer || size < 1 || !next) goto error;
+    if (!buffer || size < 1 || !next)
+        goto error;
 
     if (number > 0x7fFFffFFffFFffFF) {
 
-        if (size < 10) goto error;
+        if (size < 10)
+            goto error;
 
         last = buffer + 9;
 
     } else if (number > 0xFFffFFffFFffFF) {
 
-        if (size < 9) goto error;
+        if (size < 9)
+            goto error;
 
         last = buffer + 8;
 
     } else if (number > 0x1FFffFFffFFff) {
 
-        if (size < 8) goto error;
+        if (size < 8)
+            goto error;
 
         last = buffer + 7;
 
     } else if (number > 0x3FFffFFffFF) {
 
-        if (size < 7) goto error;
+        if (size < 7)
+            goto error;
 
         last = buffer + 6;
 
     } else if (number > 0x7FffFFffFF) {
 
-        if (size < 6) goto error;
+        if (size < 6)
+            goto error;
 
         last = buffer + 5;
 
     } else if (number > 0xFffFFff) {
 
-        if (size < 5) goto error;
+        if (size < 5)
+            goto error;
 
         last = buffer + 4;
 
     } else if (number > 0x1FffFF) {
 
-        if (size < 4) goto error;
+        if (size < 4)
+            goto error;
 
         last = buffer + 3;
 
     } else if (number > 0x3FFF) {
 
-        if (size < 3) goto error;
+        if (size < 3)
+            goto error;
 
         last = buffer + 2;
 
     } else if (number > 0x7F) {
 
-        if (size < 2) goto error;
+        if (size < 2)
+            goto error;
 
         last = buffer + 1;
-    
+
     } else {
 
-        if (size < 1) goto error;
+        if (size < 1)
+            goto error;
 
         last = buffer;
-
     }
 
     *next = last + 1;
@@ -183,7 +188,7 @@ bool dtn_sdnv_encode(
 
     last[0] = nbr & 0x7F;
 
-    while (last > buffer){
+    while (last > buffer) {
 
         last--;
 
@@ -191,9 +196,8 @@ bool dtn_sdnv_encode(
 
         last[0] = nbr & 0x7F;
         last[0] |= 0x80;
-
     }
-   
+
     return true;
 error:
     return false;

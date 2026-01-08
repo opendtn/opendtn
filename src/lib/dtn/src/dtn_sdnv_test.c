@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_sdnv.c"
+#include <dtn_base/testrun.h>
 
 #include <dtn_base/dtn_dump.h>
 
@@ -40,8 +40,8 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_sdnv_decode(){
-    
+int test_dtn_sdnv_decode() {
+
     uint8_t input[25] = {0};
 
     input[0] = 0x95;
@@ -143,14 +143,13 @@ int test_dtn_sdnv_decode(){
 
     testrun(!dtn_sdnv_decode(input, 25, &out, &next));
 
-
     return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_sdnv_encode(){
-    
+int test_dtn_sdnv_encode() {
+
     uint8_t buffer[25] = {0};
     uint8_t *next = NULL;
 
@@ -158,7 +157,7 @@ int test_dtn_sdnv_encode(){
     testrun(dtn_sdnv_encode(0xabc, buffer, 10, &next));
     testrun(next == buffer + 2);
 
-    //dtn_dump_binary_as_hex(stdout, buffer, 5);
+    // dtn_dump_binary_as_hex(stdout, buffer, 5);
 
     testrun(buffer[0] == 0x95);
     testrun(buffer[1] == 0x3C);
@@ -168,7 +167,7 @@ int test_dtn_sdnv_encode(){
     testrun(dtn_sdnv_encode(0x1234, buffer, 10, &next));
     testrun(next == buffer + 2);
 
-    //dtn_dump_binary_as_hex(stdout, buffer, 5);
+    // dtn_dump_binary_as_hex(stdout, buffer, 5);
 
     testrun(buffer[0] == 0xA4);
     testrun(buffer[1] == 0x34);
@@ -179,7 +178,7 @@ int test_dtn_sdnv_encode(){
     testrun(dtn_sdnv_encode(0x4234, buffer, 10, &next));
     testrun(next == buffer + 3);
 
-    //dtn_dump_binary_as_hex(stdout, buffer, 5);
+    // dtn_dump_binary_as_hex(stdout, buffer, 5);
 
     testrun(buffer[0] == 0x81);
     testrun(buffer[1] == 0x84);
@@ -197,7 +196,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x123456789, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 5);
 
     testrun(buffer[0] == 0x92);
@@ -211,7 +210,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x213456789, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 5);
 
     testrun(buffer[0] == 0xa1);
@@ -225,7 +224,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0xFFffffFFFF, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 6);
 
     testrun(buffer[0] == 0x9F);
@@ -239,7 +238,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x1FffFF, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 3);
 
     testrun(buffer[0] == 0xFF);
@@ -253,7 +252,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x2FffFF, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 4);
 
     testrun(buffer[0] == 0x81);
@@ -267,7 +266,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0xFffFFff, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 4);
 
     testrun(buffer[0] == 0xFF);
@@ -281,7 +280,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x1FffFFff, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 5);
 
     testrun(buffer[0] == 0x81);
@@ -295,7 +294,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x7FffFFffFF, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 5);
 
     testrun(buffer[0] == 0xFF);
@@ -309,7 +308,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x8FffFFffFF, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 6);
 
     testrun(buffer[0] == 0x91);
@@ -323,7 +322,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x3FFffFFffFF, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 6);
 
     testrun(buffer[0] == 0xFF);
@@ -337,7 +336,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x4FFffFFffFF, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 7);
 
     testrun(buffer[0] == 0x81);
@@ -351,7 +350,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x1FFffFFffFFff, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 7);
 
     testrun(buffer[0] == 0xFF);
@@ -365,7 +364,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x2FFffFFffFFff, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 8);
 
     testrun(buffer[0] == 0x81);
@@ -379,7 +378,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0xFFffFFffFFffFF, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 8);
 
     testrun(buffer[0] == 0xFF);
@@ -393,7 +392,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x1FFffFFffFFffFF, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 9);
 
     testrun(buffer[0] == 0x81);
@@ -411,7 +410,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x7fFFffFFffFFffFF, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 9);
 
     testrun(buffer[0] == 0xFF);
@@ -429,7 +428,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0x8fFFffFFffFFffFF, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 10);
 
     testrun(buffer[0] == 0x81);
@@ -447,7 +446,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(0xFFFFFFFFFFFFFFFF, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 10);
 
     testrun(buffer[0] == 0x81);
@@ -465,7 +464,7 @@ int test_dtn_sdnv_encode(){
 
     memset(buffer, 0, 25);
     testrun(dtn_sdnv_encode(UINT64_MAX, buffer, 25, &next));
-    //dtn_dump_binary_as_hex(stdout, buffer, 25);
+    // dtn_dump_binary_as_hex(stdout, buffer, 25);
     testrun(next == buffer + 10);
 
     testrun(buffer[0] == 0x81);

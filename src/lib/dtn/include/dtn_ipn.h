@@ -54,7 +54,7 @@ dtn_ipn *dtn_ipn_create();
 void *dtn_ipn_free(void *self);
 bool dtn_ipn_clear(void *self);
 bool dtn_ipn_dump(FILE *stream, void *self);
-void *dtn_ipn_copy(void** destination, void *source);
+void *dtn_ipn_copy(void **destination, void *source);
 
 /*
  *      ------------------------------------------------------------------------

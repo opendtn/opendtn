@@ -74,7 +74,7 @@ bool dtn_id_array_add(dtn_id ids[], size_t capacity, char const *id);
 bool dtn_id_array_del(dtn_id ids[], size_t capacity, char const *id);
 
 ssize_t dtn_id_array_get_index(dtn_id const *uuids, size_t capacity,
-                              char const *id);
+                               char const *id);
 
 /**
  * Returns the index of the first used ID entry in array AFTER `index`
@@ -82,7 +82,7 @@ ssize_t dtn_id_array_get_index(dtn_id const *uuids, size_t capacity,
  * call `dtn_uuid_array_next(uuids, c, -1);
  */
 ssize_t dtn_id_array_next(dtn_id const *uuids, size_t capacity,
-                         ssize_t last_index);
+                          ssize_t last_index);
 
 /*----------------------------------------------------------------------------*/
 #endif

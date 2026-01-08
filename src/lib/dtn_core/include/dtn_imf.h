@@ -100,6 +100,6 @@ struct tm dtn_imf_timestamp_to_tm(const char *start, size_t size, char **next);
         @param zone     optional string for zone to write
 */
 bool dtn_imf_tm_to_timestamp(const struct tm *source, char *buffer, size_t size,
-                            char **next, const char *zone);
+                             char **next, const char *zone);
 
 #endif /* dtn_imf_h */

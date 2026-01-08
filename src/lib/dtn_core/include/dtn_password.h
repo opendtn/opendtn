@@ -30,8 +30,8 @@
 #ifndef dtn_password_h
 #define dtn_password_h
 
-#include <inttypes.h>
 #include <dtn_base/dtn_item.h>
+#include <inttypes.h>
 
 #define DTN_AUTH_KEY_WORKFACTOR "workfactor"
 #define DTN_AUTH_KEY_BLOCKSIZE "blocksize"
@@ -41,9 +41,9 @@
 
 typedef struct dtn_password_hash_parameter {
 
-  uint16_t workfactor;
-  uint16_t blocksize;
-  uint16_t parallel;
+    uint16_t workfactor;
+    uint16_t blocksize;
+    uint16_t parallel;
 
 } dtn_password_hash_parameter;
 
@@ -67,10 +67,9 @@ typedef struct dtn_password {
  *      ------------------------------------------------------------------------
  */
 
-
 dtn_password dtn_password_generate(const char *secret,
-    dtn_password_hash_parameter params,
-    size_t length);
+                                   dtn_password_hash_parameter params,
+                                   size_t length);
 
 bool dtn_password_check(const char *secret, dtn_password password);
 
@@ -87,8 +86,7 @@ dtn_password dtn_password_from_item(const dtn_item *item);
     @see dtn_password_is_valid
 */
 dtn_item *dtn_password_hash(const char *password,
-                                dtn_password_hash_parameter params,
-                                size_t length);
+                            dtn_password_hash_parameter params, size_t length);
 
 /*----------------------------------------------------------------------------*/
 

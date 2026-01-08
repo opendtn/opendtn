@@ -30,8 +30,8 @@
 #ifndef dtn_test_node_core_h
 #define dtn_test_node_core_h
 
-#include <dtn_base/dtn_event_loop.h>
 #include <dtn/dtn_cbor.h>
+#include <dtn_base/dtn_event_loop.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -39,7 +39,7 @@ typedef struct dtn_test_node_core dtn_test_node_core;
 
 /*---------------------------------------------------------------------------*/
 
-typedef struct dtn_test_node_core_config{
+typedef struct dtn_test_node_core_config {
 
     dtn_event_loop *loop;
 
@@ -66,13 +66,11 @@ dtn_test_node_core *dtn_test_node_core_create(dtn_test_node_core_config config);
 dtn_test_node_core *dtn_test_node_core_free(dtn_test_node_core *self);
 dtn_test_node_core *dtn_test_node_core_cast(const void *data);
 
-bool dtn_test_node_core_enable_ip_interfaces(
-        dtn_test_node_core *self,
-        const dtn_item *config);
+bool dtn_test_node_core_enable_ip_interfaces(dtn_test_node_core *self,
+                                             const dtn_item *config);
 
-bool dtn_test_node_core_send_raw(
-        dtn_test_node_core *self,
-        dtn_socket_configuration remote,
-        const dtn_cbor *data);
+bool dtn_test_node_core_send_raw(dtn_test_node_core *self,
+                                 dtn_socket_configuration remote,
+                                 const dtn_cbor *data);
 
 #endif /* dtn_test_node_core_h */

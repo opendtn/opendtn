@@ -43,16 +43,16 @@ typedef struct dtn_json_io_buffer dtn_json_io_buffer;
 
 typedef struct dtn_json_io_buffer_config {
 
-  bool debug;
-  bool objects_only;
+    bool debug;
+    bool objects_only;
 
-  struct {
+    struct {
 
-    void *userdata;
-    void (*success)(void *userdata, int socket, dtn_item *value);
-    void (*failure)(void *userdata, int socket);
+        void *userdata;
+        void (*success)(void *userdata, int socket, dtn_item *value);
+        void (*failure)(void *userdata, int socket);
 
-  } callback;
+    } callback;
 
 } dtn_json_io_buffer_config;
 
@@ -83,7 +83,7 @@ dtn_json_io_buffer *dtn_json_io_buffer_cast(const void *self);
     in case of non valid content, the buffer will be emptied at id socket.
 */
 bool dtn_json_io_buffer_push(dtn_json_io_buffer *self, int socket,
-                            const dtn_memory_pointer content);
+                             const dtn_memory_pointer content);
 
 /*----------------------------------------------------------------------------*/
 

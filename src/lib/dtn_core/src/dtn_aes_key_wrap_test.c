@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_aes_key_wrap.c"
+#include <dtn_base/testrun.h>
 
 #include <dtn_base/dtn_dump.h>
 
@@ -40,19 +40,19 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_aes_key_wrap(){
-    
+int test_dtn_aes_key_wrap() {
+
     uint8_t key[256] = {0};
-    key[0]  = 0x00;
-    key[1]  = 0x01;
-    key[2]  = 0x02;
-    key[3]  = 0x03;
-    key[4]  = 0x04;
-    key[5]  = 0x05;
-    key[6]  = 0x06;
-    key[7]  = 0x07;
-    key[8]  = 0x08;
-    key[9]  = 0x09;
+    key[0] = 0x00;
+    key[1] = 0x01;
+    key[2] = 0x02;
+    key[3] = 0x03;
+    key[4] = 0x04;
+    key[5] = 0x05;
+    key[6] = 0x06;
+    key[7] = 0x07;
+    key[8] = 0x08;
+    key[9] = 0x09;
     key[10] = 0x0A;
     key[11] = 0x0B;
     key[12] = 0x0C;
@@ -62,16 +62,16 @@ int test_dtn_aes_key_wrap(){
 
     uint8_t data[256] = {0};
 
-    data[0]  = 0x00;
-    data[1]  = 0x11;
-    data[2]  = 0x22;
-    data[3]  = 0x33;
-    data[4]  = 0x44;
-    data[5]  = 0x55;
-    data[6]  = 0x66;
-    data[7]  = 0x77;
-    data[8]  = 0x88;
-    data[9]  = 0x99;
+    data[0] = 0x00;
+    data[1] = 0x11;
+    data[2] = 0x22;
+    data[3] = 0x33;
+    data[4] = 0x44;
+    data[5] = 0x55;
+    data[6] = 0x66;
+    data[7] = 0x77;
+    data[8] = 0x88;
+    data[9] = 0x99;
     data[10] = 0xAA;
     data[11] = 0xBB;
     data[12] = 0xCC;
@@ -80,16 +80,16 @@ int test_dtn_aes_key_wrap(){
     data[15] = 0xFF;
 
     uint8_t expect[256] = {0};
-    expect[0]  = 0x1F;
-    expect[1]  = 0xA6;
-    expect[2]  = 0x8B;
-    expect[3]  = 0x0A;
-    expect[4]  = 0x81;
-    expect[5]  = 0x12;
-    expect[6]  = 0xB4;
-    expect[7]  = 0x47;
-    expect[8]  = 0xAE;
-    expect[9]  = 0xF3;
+    expect[0] = 0x1F;
+    expect[1] = 0xA6;
+    expect[2] = 0x8B;
+    expect[3] = 0x0A;
+    expect[4] = 0x81;
+    expect[5] = 0x12;
+    expect[6] = 0xB4;
+    expect[7] = 0x47;
+    expect[8] = 0xAE;
+    expect[9] = 0xF3;
     expect[10] = 0x4B;
     expect[11] = 0xD8;
     expect[12] = 0xFB;
@@ -109,33 +109,27 @@ int test_dtn_aes_key_wrap(){
     expect[26] = 0x00;
     expect[27] = 0x00;
 
-    uint8_t buffer[1024] = { 0 };
+    uint8_t buffer[1024] = {0};
     size_t len = 1024;
 
-    testrun(dtn_aes_key_wrap(
-        data,
-        16,
-        buffer,
-        &len,
-        key,
-        16));
+    testrun(dtn_aes_key_wrap(data, 16, buffer, &len, key, 16));
 
     testrun(len == 24);
-    //dtn_dump_binary_as_hex(stdout, buffer, 24);
+    // dtn_dump_binary_as_hex(stdout, buffer, 24);
 
     testrun(0 == memcmp(buffer, expect, len));
 
     memset(key, 0, 256);
-    key[0]  = 0x00;
-    key[1]  = 0x01;
-    key[2]  = 0x02;
-    key[3]  = 0x03;
-    key[4]  = 0x04;
-    key[5]  = 0x05;
-    key[6]  = 0x06;
-    key[7]  = 0x07;
-    key[8]  = 0x08;
-    key[9]  = 0x09;
+    key[0] = 0x00;
+    key[1] = 0x01;
+    key[2] = 0x02;
+    key[3] = 0x03;
+    key[4] = 0x04;
+    key[5] = 0x05;
+    key[6] = 0x06;
+    key[7] = 0x07;
+    key[8] = 0x08;
+    key[9] = 0x09;
     key[10] = 0x0A;
     key[11] = 0x0B;
     key[12] = 0x0C;
@@ -154,16 +148,16 @@ int test_dtn_aes_key_wrap(){
 
     memset(buffer, 0, 1024);
 
-    expect[0]  = 0x96;
-    expect[1]  = 0x77;
-    expect[2]  = 0x8B;
-    expect[3]  = 0x25;
-    expect[4]  = 0xAE;
-    expect[5]  = 0x6C;
-    expect[6]  = 0xa4;
-    expect[7]  = 0x35;
-    expect[8]  = 0xF9;
-    expect[9]  = 0x2B;
+    expect[0] = 0x96;
+    expect[1] = 0x77;
+    expect[2] = 0x8B;
+    expect[3] = 0x25;
+    expect[4] = 0xAE;
+    expect[5] = 0x6C;
+    expect[6] = 0xa4;
+    expect[7] = 0x35;
+    expect[8] = 0xF9;
+    expect[9] = 0x2B;
     expect[10] = 0x5b;
     expect[11] = 0x97;
     expect[12] = 0xc0;
@@ -184,29 +178,22 @@ int test_dtn_aes_key_wrap(){
     expect[27] = 0x00;
 
     len = 1024;
-    testrun(dtn_aes_key_wrap(
-        data,
-        16,
-        buffer,
-        &len,
-        key,
-        24));
+    testrun(dtn_aes_key_wrap(data, 16, buffer, &len, key, 24));
 
-    //dtn_dump_binary_as_hex(stdout, buffer, 24);
-    testrun(len == 24)
-    testrun(0 == memcmp(buffer, expect, len));
+    // dtn_dump_binary_as_hex(stdout, buffer, 24);
+    testrun(len == 24) testrun(0 == memcmp(buffer, expect, len));
 
     memset(key, 0, 256);
-    key[0]  = 0x00;
-    key[1]  = 0x01;
-    key[2]  = 0x02;
-    key[3]  = 0x03;
-    key[4]  = 0x04;
-    key[5]  = 0x05;
-    key[6]  = 0x06;
-    key[7]  = 0x07;
-    key[8]  = 0x08;
-    key[9]  = 0x09;
+    key[0] = 0x00;
+    key[1] = 0x01;
+    key[2] = 0x02;
+    key[3] = 0x03;
+    key[4] = 0x04;
+    key[5] = 0x05;
+    key[6] = 0x06;
+    key[7] = 0x07;
+    key[8] = 0x08;
+    key[9] = 0x09;
     key[10] = 0x0A;
     key[11] = 0x0B;
     key[12] = 0x0C;
@@ -233,16 +220,16 @@ int test_dtn_aes_key_wrap(){
 
     memset(buffer, 0, 1024);
 
-    expect[0]  = 0x64;
-    expect[1]  = 0xE8;
-    expect[2]  = 0xc3;
-    expect[3]  = 0xf9;
-    expect[4]  = 0xce;
-    expect[5]  = 0x0f;
-    expect[6]  = 0x5b;
-    expect[7]  = 0xa2;
-    expect[8]  = 0x63;
-    expect[9]  = 0xe9;
+    expect[0] = 0x64;
+    expect[1] = 0xE8;
+    expect[2] = 0xc3;
+    expect[3] = 0xf9;
+    expect[4] = 0xce;
+    expect[5] = 0x0f;
+    expect[6] = 0x5b;
+    expect[7] = 0xa2;
+    expect[8] = 0x63;
+    expect[9] = 0xe9;
     expect[10] = 0x77;
     expect[11] = 0x79;
     expect[12] = 0x05;
@@ -263,29 +250,23 @@ int test_dtn_aes_key_wrap(){
     expect[27] = 0x00;
 
     len = 1024;
-    testrun(dtn_aes_key_wrap(
-        data,
-        16,
-        buffer,
-        &len,
-        key,
-        32));
+    testrun(dtn_aes_key_wrap(data, 16, buffer, &len, key, 32));
 
-    //dtn_dump_binary_as_hex(stdout, buffer, 24);
+    // dtn_dump_binary_as_hex(stdout, buffer, 24);
     testrun(len == 24);
     testrun(0 == memcmp(buffer, expect, 24));
 
     memset(key, 0, 256);
-    key[0]  = 0x00;
-    key[1]  = 0x01;
-    key[2]  = 0x02;
-    key[3]  = 0x03;
-    key[4]  = 0x04;
-    key[5]  = 0x05;
-    key[6]  = 0x06;
-    key[7]  = 0x07;
-    key[8]  = 0x08;
-    key[9]  = 0x09;
+    key[0] = 0x00;
+    key[1] = 0x01;
+    key[2] = 0x02;
+    key[3] = 0x03;
+    key[4] = 0x04;
+    key[5] = 0x05;
+    key[6] = 0x06;
+    key[7] = 0x07;
+    key[8] = 0x08;
+    key[9] = 0x09;
     key[10] = 0x0A;
     key[11] = 0x0B;
     key[12] = 0x0C;
@@ -303,16 +284,16 @@ int test_dtn_aes_key_wrap(){
 
     memset(data, 0, 256);
 
-    data[0]  = 0x00;
-    data[1]  = 0x11;
-    data[2]  = 0x22;
-    data[3]  = 0x33;
-    data[4]  = 0x44;
-    data[5]  = 0x55;
-    data[6]  = 0x66;
-    data[7]  = 0x77;
-    data[8]  = 0x88;
-    data[9]  = 0x99;
+    data[0] = 0x00;
+    data[1] = 0x11;
+    data[2] = 0x22;
+    data[3] = 0x33;
+    data[4] = 0x44;
+    data[5] = 0x55;
+    data[6] = 0x66;
+    data[7] = 0x77;
+    data[8] = 0x88;
+    data[9] = 0x99;
     data[10] = 0xAA;
     data[11] = 0xBB;
     data[12] = 0xCC;
@@ -331,16 +312,16 @@ int test_dtn_aes_key_wrap(){
 
     memset(buffer, 0, 1024);
 
-    expect[0]  = 0x03;
-    expect[1]  = 0x1D;
-    expect[2]  = 0x33;
-    expect[3]  = 0x26;
-    expect[4]  = 0x4E;
-    expect[5]  = 0x15;
-    expect[6]  = 0xd3;
-    expect[7]  = 0x32;
-    expect[8]  = 0x68;
-    expect[9]  = 0xf2;
+    expect[0] = 0x03;
+    expect[1] = 0x1D;
+    expect[2] = 0x33;
+    expect[3] = 0x26;
+    expect[4] = 0x4E;
+    expect[5] = 0x15;
+    expect[6] = 0xd3;
+    expect[7] = 0x32;
+    expect[8] = 0x68;
+    expect[9] = 0xf2;
     expect[10] = 0x4E;
     expect[11] = 0xc2;
     expect[12] = 0x60;
@@ -368,30 +349,24 @@ int test_dtn_aes_key_wrap(){
     expect[34] = 0x00;
 
     len = 1024;
-    testrun(dtn_aes_key_wrap(
-        data,
-        24,
-        buffer,
-        &len,
-        key,
-        24));
+    testrun(dtn_aes_key_wrap(data, 24, buffer, &len, key, 24));
 
-    //dtn_dump_binary_as_hex(stdout, buffer, 24);
+    // dtn_dump_binary_as_hex(stdout, buffer, 24);
 
     testrun(len == 32);
     testrun(0 == memcmp(buffer, expect, 32));
 
     memset(key, 0, 256);
-    key[0]  = 0x00;
-    key[1]  = 0x01;
-    key[2]  = 0x02;
-    key[3]  = 0x03;
-    key[4]  = 0x04;
-    key[5]  = 0x05;
-    key[6]  = 0x06;
-    key[7]  = 0x07;
-    key[8]  = 0x08;
-    key[9]  = 0x09;
+    key[0] = 0x00;
+    key[1] = 0x01;
+    key[2] = 0x02;
+    key[3] = 0x03;
+    key[4] = 0x04;
+    key[5] = 0x05;
+    key[6] = 0x06;
+    key[7] = 0x07;
+    key[8] = 0x08;
+    key[9] = 0x09;
     key[10] = 0x0A;
     key[11] = 0x0B;
     key[12] = 0x0C;
@@ -418,16 +393,16 @@ int test_dtn_aes_key_wrap(){
 
     memset(buffer, 0, 1024);
 
-    expect[0]  = 0xA8;
-    expect[1]  = 0xf9;
-    expect[2]  = 0xbc;
-    expect[3]  = 0x16;
-    expect[4]  = 0x12;
-    expect[5]  = 0xc6;
-    expect[6]  = 0x8b;
-    expect[7]  = 0x3f;
-    expect[8]  = 0xf6;
-    expect[9]  = 0xe6;
+    expect[0] = 0xA8;
+    expect[1] = 0xf9;
+    expect[2] = 0xbc;
+    expect[3] = 0x16;
+    expect[4] = 0x12;
+    expect[5] = 0xc6;
+    expect[6] = 0x8b;
+    expect[7] = 0x3f;
+    expect[8] = 0xf6;
+    expect[9] = 0xe6;
     expect[10] = 0xf4;
     expect[11] = 0xfb;
     expect[12] = 0xe3;
@@ -455,29 +430,23 @@ int test_dtn_aes_key_wrap(){
     expect[34] = 0x00;
 
     len = 1024;
-    testrun(dtn_aes_key_wrap(
-        data,
-        24,
-        buffer,
-        &len,
-        key,
-        32));
+    testrun(dtn_aes_key_wrap(data, 24, buffer, &len, key, 32));
 
     testrun(len == 32);
     testrun(0 == memcmp(buffer, expect, 32));
 
     memset(data, 0, 256);
 
-    data[0]  = 0x00;
-    data[1]  = 0x11;
-    data[2]  = 0x22;
-    data[3]  = 0x33;
-    data[4]  = 0x44;
-    data[5]  = 0x55;
-    data[6]  = 0x66;
-    data[7]  = 0x77;
-    data[8]  = 0x88;
-    data[9]  = 0x99;
+    data[0] = 0x00;
+    data[1] = 0x11;
+    data[2] = 0x22;
+    data[3] = 0x33;
+    data[4] = 0x44;
+    data[5] = 0x55;
+    data[6] = 0x66;
+    data[7] = 0x77;
+    data[8] = 0x88;
+    data[9] = 0x99;
     data[10] = 0xAA;
     data[11] = 0xBB;
     data[12] = 0xCC;
@@ -504,16 +473,16 @@ int test_dtn_aes_key_wrap(){
 
     memset(buffer, 0, 1024);
 
-    expect[0]  = 0x28;
-    expect[1]  = 0xc9;
-    expect[2]  = 0xf4;
-    expect[3]  = 0x04;
-    expect[4]  = 0xc4;
-    expect[5]  = 0xb8;
-    expect[6]  = 0x10;
-    expect[7]  = 0xf4;
-    expect[8]  = 0xcb;
-    expect[9]  = 0xcc;
+    expect[0] = 0x28;
+    expect[1] = 0xc9;
+    expect[2] = 0xf4;
+    expect[3] = 0x04;
+    expect[4] = 0xc4;
+    expect[5] = 0xb8;
+    expect[6] = 0x10;
+    expect[7] = 0xf4;
+    expect[8] = 0xcb;
+    expect[9] = 0xcc;
     expect[10] = 0xb3;
     expect[11] = 0x5c;
     expect[12] = 0xfb;
@@ -546,13 +515,7 @@ int test_dtn_aes_key_wrap(){
     expect[39] = 0x21;
 
     len = 1024;
-    testrun(dtn_aes_key_wrap(
-        data,
-        32,
-        buffer,
-        &len,
-        key,
-        32));
+    testrun(dtn_aes_key_wrap(data, 32, buffer, &len, key, 32));
 
     testrun(len == 40);
     testrun(0 == memcmp(buffer, expect, 40));
@@ -562,19 +525,19 @@ int test_dtn_aes_key_wrap(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_aes_key_unwrap(){
-    
+int test_dtn_aes_key_unwrap() {
+
     uint8_t key[256] = {0};
-    key[0]  = 0x00;
-    key[1]  = 0x01;
-    key[2]  = 0x02;
-    key[3]  = 0x03;
-    key[4]  = 0x04;
-    key[5]  = 0x05;
-    key[6]  = 0x06;
-    key[7]  = 0x07;
-    key[8]  = 0x08;
-    key[9]  = 0x09;
+    key[0] = 0x00;
+    key[1] = 0x01;
+    key[2] = 0x02;
+    key[3] = 0x03;
+    key[4] = 0x04;
+    key[5] = 0x05;
+    key[6] = 0x06;
+    key[7] = 0x07;
+    key[8] = 0x08;
+    key[9] = 0x09;
     key[10] = 0x0A;
     key[11] = 0x0B;
     key[12] = 0x0C;
@@ -584,16 +547,16 @@ int test_dtn_aes_key_unwrap(){
 
     uint8_t data[256] = {0};
 
-    data[0]  = 0x00;
-    data[1]  = 0x11;
-    data[2]  = 0x22;
-    data[3]  = 0x33;
-    data[4]  = 0x44;
-    data[5]  = 0x55;
-    data[6]  = 0x66;
-    data[7]  = 0x77;
-    data[8]  = 0x88;
-    data[9]  = 0x99;
+    data[0] = 0x00;
+    data[1] = 0x11;
+    data[2] = 0x22;
+    data[3] = 0x33;
+    data[4] = 0x44;
+    data[5] = 0x55;
+    data[6] = 0x66;
+    data[7] = 0x77;
+    data[8] = 0x88;
+    data[9] = 0x99;
     data[10] = 0xAA;
     data[11] = 0xBB;
     data[12] = 0xCC;
@@ -602,16 +565,16 @@ int test_dtn_aes_key_unwrap(){
     data[15] = 0xFF;
 
     uint8_t expect[256] = {0};
-    expect[0]  = 0x1F;
-    expect[1]  = 0xA6;
-    expect[2]  = 0x8B;
-    expect[3]  = 0x0A;
-    expect[4]  = 0x81;
-    expect[5]  = 0x12;
-    expect[6]  = 0xB4;
-    expect[7]  = 0x47;
-    expect[8]  = 0xAE;
-    expect[9]  = 0xF3;
+    expect[0] = 0x1F;
+    expect[1] = 0xA6;
+    expect[2] = 0x8B;
+    expect[3] = 0x0A;
+    expect[4] = 0x81;
+    expect[5] = 0x12;
+    expect[6] = 0xB4;
+    expect[7] = 0x47;
+    expect[8] = 0xAE;
+    expect[9] = 0xF3;
     expect[10] = 0x4B;
     expect[11] = 0xD8;
     expect[12] = 0xFB;
@@ -631,33 +594,27 @@ int test_dtn_aes_key_unwrap(){
     expect[26] = 0x00;
     expect[27] = 0x00;
 
-    uint8_t buffer[1024] = { 0 };
+    uint8_t buffer[1024] = {0};
     size_t len = 1024;
 
-    testrun(dtn_aes_key_unwrap(
-        expect,
-        24,
-        buffer,
-        &len,
-        key,
-        16));
+    testrun(dtn_aes_key_unwrap(expect, 24, buffer, &len, key, 16));
 
     testrun(len == 16);
-    //dtn_dump_binary_as_hex(stdout, buffer, 24);
+    // dtn_dump_binary_as_hex(stdout, buffer, 24);
 
     testrun(0 == memcmp(buffer, data, len));
 
     memset(key, 0, 256);
-    key[0]  = 0x00;
-    key[1]  = 0x01;
-    key[2]  = 0x02;
-    key[3]  = 0x03;
-    key[4]  = 0x04;
-    key[5]  = 0x05;
-    key[6]  = 0x06;
-    key[7]  = 0x07;
-    key[8]  = 0x08;
-    key[9]  = 0x09;
+    key[0] = 0x00;
+    key[1] = 0x01;
+    key[2] = 0x02;
+    key[3] = 0x03;
+    key[4] = 0x04;
+    key[5] = 0x05;
+    key[6] = 0x06;
+    key[7] = 0x07;
+    key[8] = 0x08;
+    key[9] = 0x09;
     key[10] = 0x0A;
     key[11] = 0x0B;
     key[12] = 0x0C;
@@ -676,16 +633,16 @@ int test_dtn_aes_key_unwrap(){
 
     memset(buffer, 0, 1024);
 
-    expect[0]  = 0x96;
-    expect[1]  = 0x77;
-    expect[2]  = 0x8B;
-    expect[3]  = 0x25;
-    expect[4]  = 0xAE;
-    expect[5]  = 0x6C;
-    expect[6]  = 0xa4;
-    expect[7]  = 0x35;
-    expect[8]  = 0xF9;
-    expect[9]  = 0x2B;
+    expect[0] = 0x96;
+    expect[1] = 0x77;
+    expect[2] = 0x8B;
+    expect[3] = 0x25;
+    expect[4] = 0xAE;
+    expect[5] = 0x6C;
+    expect[6] = 0xa4;
+    expect[7] = 0x35;
+    expect[8] = 0xF9;
+    expect[9] = 0x2B;
     expect[10] = 0x5b;
     expect[11] = 0x97;
     expect[12] = 0xc0;
@@ -706,20 +663,12 @@ int test_dtn_aes_key_unwrap(){
     expect[27] = 0x00;
 
     len = 1024;
-    testrun(dtn_aes_key_unwrap(
-        expect,
-        24,
-        buffer,
-        &len,
-        key,
-        24));
+    testrun(dtn_aes_key_unwrap(expect, 24, buffer, &len, key, 24));
 
     testrun(len == 16);
-    //dtn_dump_binary_as_hex(stdout, buffer, 24);
+    // dtn_dump_binary_as_hex(stdout, buffer, 24);
 
     testrun(0 == memcmp(buffer, data, len));
-
-
 
     return testrun_log_success();
 }

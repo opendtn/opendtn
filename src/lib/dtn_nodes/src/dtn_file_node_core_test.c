@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_file_node_core.c"
+#include <dtn_base/testrun.h>
 
 #include <dtn_base/dtn_random.h>
 
@@ -44,8 +44,8 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_file_node_core_create(){
-    
+int test_dtn_file_node_core_create() {
+
     dtn_event_loop_config loop_config = (dtn_event_loop_config){
         .max.sockets = dtn_socket_get_max_supported_runtime_sockets(0),
         .max.timers = dtn_socket_get_max_supported_runtime_sockets(0)};
@@ -53,10 +53,8 @@ int test_dtn_file_node_core_create(){
     dtn_event_loop *loop = dtn_event_loop_default(loop_config);
     testrun(loop);
 
-    dtn_file_node_core *core = dtn_file_node_core_create(
-        (dtn_file_node_core_config){
-            .loop = loop
-        });
+    dtn_file_node_core *core =
+        dtn_file_node_core_create((dtn_file_node_core_config){.loop = loop});
 
     testrun(core);
     testrun(dtn_file_node_core_cast(core));
@@ -72,8 +70,8 @@ int test_dtn_file_node_core_create(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_file_node_core_enable_ip_interfaces(){
-    
+int test_dtn_file_node_core_enable_ip_interfaces() {
+
     dtn_event_loop_config loop_config = (dtn_event_loop_config){
         .max.sockets = dtn_socket_get_max_supported_runtime_sockets(0),
         .max.timers = dtn_socket_get_max_supported_runtime_sockets(0)};
@@ -81,14 +79,13 @@ int test_dtn_file_node_core_enable_ip_interfaces(){
     dtn_event_loop *loop = dtn_event_loop_default(loop_config);
     testrun(loop);
 
-    dtn_file_node_core *core = dtn_file_node_core_create(
-        (dtn_file_node_core_config){
-            .loop = loop
-        });
+    dtn_file_node_core *core =
+        dtn_file_node_core_create((dtn_file_node_core_config){.loop = loop});
 
     testrun(core);
 
-    dtn_item *conf = dtn_item_json_read_file(DTN_TEST_RESOURCE_DIR"/config/default_config.json");
+    dtn_item *conf = dtn_item_json_read_file(DTN_TEST_RESOURCE_DIR
+                                             "/config/default_config.json");
     testrun(dtn_file_node_core_enable_ip_interfaces(core, conf));
     testrun(1 == dtn_dict_count(core->interfaces.ip));
 
@@ -100,7 +97,6 @@ int test_dtn_file_node_core_enable_ip_interfaces(){
 }
 
 /*----------------------------------------------------------------------------*/
-
 
 /*
  *      ------------------------------------------------------------------------
@@ -128,4 +124,3 @@ int all_tests() {
  */
 
 testrun_run(all_tests);
-

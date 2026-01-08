@@ -62,62 +62,62 @@ typedef struct dtn_list_config dtn_list_config;
 
 struct dtn_list_config {
 
-  dtn_data_function item;
+    dtn_data_function item;
 };
 
 /*---------------------------------------------------------------------------*/
 
 struct dtn_list {
 
-  uint16_t magic_byte;
-  uint16_t type;
+    uint16_t magic_byte;
+    uint16_t type;
 
-  dtn_list_config config;
+    dtn_list_config config;
 
-  bool (*is_empty)(const dtn_list *self);
+    bool (*is_empty)(const dtn_list *self);
 
-  bool (*clear)(dtn_list *self);
-  /* Returns self on ERROR, NULL on SUCCESS */
-  dtn_list *(*free)(dtn_list *self);
+    bool (*clear)(dtn_list *self);
+    /* Returns self on ERROR, NULL on SUCCESS */
+    dtn_list *(*free)(dtn_list *self);
 
-  /* Returns pointer to destination on success, NULL otherwise */
-  dtn_list *(*copy)(const dtn_list *self, dtn_list *destination);
+    /* Returns pointer to destination on success, NULL otherwise */
+    dtn_list *(*copy)(const dtn_list *self, dtn_list *destination);
 
-  /* GET position of item within list, returns 0 on error */
-  size_t (*get_pos)(const dtn_list *self, const void *item);
+    /* GET position of item within list, returns 0 on error */
+    size_t (*get_pos)(const dtn_list *self, const void *item);
 
-  /* GET returns list item at pos FIRST item is at pos 1*/
-  void *(*get)(dtn_list *self, size_t pos);
-  /* SET returns any previously set old_item over the replaced pointer */
-  bool (*set)(dtn_list *self, size_t pos, void *item, void **replaced);
+    /* GET returns list item at pos FIRST item is at pos 1*/
+    void *(*get)(dtn_list *self, size_t pos);
+    /* SET returns any previously set old_item over the replaced pointer */
+    bool (*set)(dtn_list *self, size_t pos, void *item, void **replaced);
 
-  /* INSERT will move all following items to pos + 1 */
-  bool (*insert)(dtn_list *self, size_t pos, void *item);
-  /* REMOVE will return a removed element, NULL on error, all following
-   * will move pos - 1*/
-  void *(*remove)(dtn_list *self, size_t pos);
+    /* INSERT will move all following items to pos + 1 */
+    bool (*insert)(dtn_list *self, size_t pos, void *item);
+    /* REMOVE will return a removed element, NULL on error, all following
+     * will move pos - 1*/
+    void *(*remove)(dtn_list *self, size_t pos);
 
-  bool (*push)(dtn_list *self, void *item);
-  void *(*pop)(dtn_list *self);
+    bool (*push)(dtn_list *self, void *item);
+    void *(*pop)(dtn_list *self);
 
-  size_t (*count)(const dtn_list *self);
+    size_t (*count)(const dtn_list *self);
 
-  bool (*for_each)(dtn_list *self, void *data,
-                   bool (*function)(void *item, void *data));
+    bool (*for_each)(dtn_list *self, void *data,
+                     bool (*function)(void *item, void *data));
 
-  /**
-   * @return an iterator pointing at the front of the list. To be used
-   * with next. Becomes invalid if list is modified.
-   */
-  void *(*iter)(dtn_list *self);
+    /**
+     * @return an iterator pointing at the front of the list. To be used
+     * with next. Becomes invalid if list is modified.
+     */
+    void *(*iter)(dtn_list *self);
 
-  /**
-   * @param iter an iterator retrieved with e.g. dtn_llist->iter.
-   * @param element receives a pointer to the element iter currently
-   * points at
-   * @return updated iterator
-   */
-  void *(*next)(dtn_list *self, void *iter, void **element);
+    /**
+     * @param iter an iterator retrieved with e.g. dtn_llist->iter.
+     * @param element receives a pointer to the element iter currently
+     * points at
+     * @return updated iterator
+     */
+    void *(*next)(dtn_list *self, void *iter, void **element);
 };
 
 /*
@@ -178,7 +178,7 @@ void *dtn_list_pop(dtn_list *list);
 
 size_t dtn_list_count(const dtn_list *list);
 bool dtn_list_for_each(dtn_list *list, void *data,
-                      bool (*function)(void *item, void *data));
+                       bool (*function)(void *item, void *data));
 
 /******************************************************************************
  *    Implementation independent default versions of some member functions
@@ -188,7 +188,7 @@ dtn_list *dtn_list_set_magic_bytes(dtn_list *list);
 
 typedef struct dtn_list_default_implementations {
 
-  dtn_list *(*copy)(const dtn_list *self, dtn_list *destination);
+    dtn_list *(*copy)(const dtn_list *self, dtn_list *destination);
 
 } dtn_list_default_implementations;
 

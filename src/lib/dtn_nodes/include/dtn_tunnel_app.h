@@ -30,12 +30,11 @@
 #ifndef dtn_tunnel_app_h
 #define dtn_tunnel_app_h
 
-
+#include <dtn/dtn_security_config.h>
 #include <dtn_base/dtn_event_loop.h>
 #include <dtn_core/dtn_io.h>
-#include <dtn_core/dtn_webserver.h>
 #include <dtn_core/dtn_password.h>
-#include <dtn/dtn_security_config.h>
+#include <dtn_core/dtn_webserver.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -76,7 +75,7 @@ typedef struct dtn_tunnel_app_config {
             uint64_t array_size;
             uint64_t undef_length_array;
             uint64_t map_size;
-            uint64_t undef_length_map; 
+            uint64_t undef_length_map;
 
         } cbor;
 
@@ -106,17 +105,15 @@ dtn_tunnel_app *dtn_tunnel_app_cast(const void *ptr);
  *      ------------------------------------------------------------------------
  */
 
-dtn_tunnel_app_config dtn_tunnel_app_config_from_item(
-        const dtn_item *config);
+dtn_tunnel_app_config dtn_tunnel_app_config_from_item(const dtn_item *config);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_tunnel_app_enable_ip_interfaces(
-        dtn_tunnel_app *self, const dtn_item *config);
+bool dtn_tunnel_app_enable_ip_interfaces(dtn_tunnel_app *self,
+                                         const dtn_item *config);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_tunnel_app_enable_routes(
-        dtn_tunnel_app *self, const char *path);
+bool dtn_tunnel_app_enable_routes(dtn_tunnel_app *self, const char *path);
 
 #endif /* dtn_tunnel_app_h */

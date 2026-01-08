@@ -53,13 +53,13 @@
 
 typedef enum {
 
-  NETWORK_TRANSPORT_TYPE_ERROR = 0,
-  TCP,
-  UDP,
-  TLS,
-  DTLS,
-  LOCAL,
-  NETWORK_TRANSPORT_TYPE_OOB
+    NETWORK_TRANSPORT_TYPE_ERROR = 0,
+    TCP,
+    UDP,
+    TLS,
+    DTLS,
+    LOCAL,
+    NETWORK_TRANSPORT_TYPE_OOB
 
 } dtn_socket_transport;
 
@@ -67,10 +67,10 @@ typedef enum {
 
 typedef struct {
 
-  char host[DTN_HOST_NAME_MAX];
-  uint16_t port;
+    char host[DTN_HOST_NAME_MAX];
+    uint16_t port;
 
-  dtn_socket_transport type;
+    dtn_socket_transport type;
 
 } dtn_socket_configuration;
 
@@ -78,8 +78,8 @@ typedef struct {
 
 typedef struct {
 
-  int gai; // carry gai_error
-  int err; // carry errno
+    int gai; // carry gai_error
+    int err; // carry errno
 
 } dtn_socket_error;
 
@@ -91,10 +91,10 @@ typedef struct {
 */
 typedef struct {
 
-  struct sockaddr_storage sa;
+    struct sockaddr_storage sa;
 
-  char host[DTN_HOST_NAME_MAX]; // parsed host from sa
-  uint16_t port;               // parsed port from sa
+    char host[DTN_HOST_NAME_MAX]; // parsed host from sa
+    uint16_t port;                // parsed port from sa
 
 } dtn_socket_data;
 
@@ -120,7 +120,7 @@ typedef struct {
                                 on error -1
 */
 int dtn_socket_create(dtn_socket_configuration config, bool as_client,
-                     dtn_socket_error *err_return);
+                      dtn_socket_error *err_return);
 
 /*
  *      ------------------------------------------------------------------------
@@ -159,8 +159,8 @@ int dtn_socket_get_recv_buffer_size(int socket);
         dtn_socket_config.
 */
 bool dtn_socket_config_from_sockaddr_storage(const struct sockaddr_storage *sa,
-                                            dtn_socket_configuration *config,
-                                            dtn_socket_error *err_return);
+                                             dtn_socket_configuration *config,
+                                             dtn_socket_error *err_return);
 
 /*---------------------------------------------------------------------------*/
 
@@ -176,8 +176,8 @@ bool dtn_socket_config_from_sockaddr_storage(const struct sockaddr_storage *sa,
         @returns                true if provided configs was filled
 */
 bool dtn_socket_get_config(int socket_fd, dtn_socket_configuration *local,
-                          dtn_socket_configuration *remote,
-                          dtn_socket_error *err_return);
+                           dtn_socket_configuration *remote,
+                           dtn_socket_error *err_return);
 
 /*---------------------------------------------------------------------------*/
 
@@ -194,8 +194,8 @@ bool dtn_socket_get_config(int socket_fd, dtn_socket_configuration *local,
 */
 
 bool dtn_socket_get_sockaddr_storage(int fd, struct sockaddr_storage *local,
-                                    struct sockaddr_storage *remote,
-                                    dtn_socket_error *err_return);
+                                     struct sockaddr_storage *remote,
+                                     dtn_socket_error *err_return);
 
 /*
  *      ------------------------------------------------------------------------
@@ -216,8 +216,8 @@ bool dtn_socket_get_sockaddr_storage(int fd, struct sockaddr_storage *local,
                         "host" : "localhost"
                 }
 */
-dtn_socket_configuration dtn_socket_configuration_from_item(
-                                const dtn_item *object);
+dtn_socket_configuration
+dtn_socket_configuration_from_item(const dtn_item *object);
 
 /*---------------------------------------------------------------------------*/
 
@@ -242,12 +242,12 @@ dtn_socket_configuration dtn_socket_configuration_from_item(
                         or to NULL (CREATE MODE)
  */
 bool dtn_socket_configuration_to_item(const dtn_socket_configuration config,
-                                     dtn_item **object);
+                                      dtn_item **object);
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_socket_configuration_equals(dtn_socket_configuration cfg1,
-                                    dtn_socket_configuration cfg2);
+                                     dtn_socket_configuration cfg2);
 
 /*---------------------------------------------------------------------------*/
 
@@ -260,7 +260,7 @@ dtn_socket_data dtn_socket_data_from_json(const dtn_item *value);
 /*----------------------------------------------------------------------------*/
 
 bool dtn_socket_data_to_string(char *target, size_t target_max_len_bytes,
-                              dtn_socket_data const *sd);
+                               dtn_socket_data const *sd);
 
 /*
  *      ------------------------------------------------------------------------
@@ -279,7 +279,7 @@ bool dtn_socket_data_to_string(char *target, size_t target_max_len_bytes,
         @param port     pointer to port
  */
 bool dtn_socket_parse_sockaddr_storage(const struct sockaddr_storage *sa,
-                                      char *ip, size_t ip_len, uint16_t *port);
+                                       char *ip, size_t ip_len, uint16_t *port);
 
 /*----------------------------------------------------------------------------*/
 
@@ -297,7 +297,7 @@ dtn_socket_data_from_sockaddr_storage(const struct sockaddr_storage *sa);
         sockaddr_storage
  */
 bool dtn_socket_get_data(int socket, dtn_socket_data *local,
-                        dtn_socket_data *remote);
+                         dtn_socket_data *remote);
 
 /*----------------------------------------------------------------------------*/
 
@@ -311,8 +311,8 @@ bool dtn_socket_get_data(int socket, dtn_socket_data *local,
         @return         true if the sockaddr_storage was filled with data
  */
 bool dtn_socket_fill_sockaddr_storage(struct sockaddr_storage *sa,
-                                     sa_family_t family, const char *ip,
-                                     uint16_t port);
+                                      sa_family_t family, const char *ip,
+                                      uint16_t port);
 
 /*
  *      ------------------------------------------------------------------------
@@ -344,12 +344,12 @@ const char *dtn_socket_transport_to_string(dtn_socket_transport type);
 const char *dtn_socket_transport_to_string_lower(dtn_socket_transport type);
 dtn_socket_transport dtn_socket_transport_from_string(const char *string);
 dtn_socket_transport dtn_socket_transport_parse_string(const char *string,
-                                                     size_t length);
+                                                       size_t length);
 
 /*---------------------------------------------------------------------------*/
 
 bool dtn_socket_log_error_with_config(dtn_socket_configuration config,
-                                     dtn_socket_error err);
+                                      dtn_socket_error err);
 
 /*---------------------------------------------------------------------------*/
 
@@ -377,7 +377,7 @@ dtn_list *dtn_socket_configuration_list();
                                 @see dtn_socket_data_from_sockaddr_storage
 */
 bool dtn_socket_generate_5tuple(char **dest, size_t *dest_len, int socket,
-                               const dtn_socket_data *remote);
+                                const dtn_socket_data *remote);
 
 /*---------------------------------------------------------------------------*/
 
@@ -484,8 +484,8 @@ uint32_t dtn_socket_get_max_supported_runtime_sockets(uint32_t sockets);
 /*----------------------------------------------------------------------------*/
 
 bool dtn_socket_configuration_to_sockaddr(const dtn_socket_configuration in,
-                                         struct sockaddr_storage *sockaddr,
-                                         socklen_t *sockaddr_len);
+                                          struct sockaddr_storage *sockaddr,
+                                          socklen_t *sockaddr_len);
 
 /*----------------------------------------------------------------------------*/
 
@@ -496,9 +496,9 @@ dtn_socket_configuration_to_socket_data(const dtn_socket_configuration in);
 
 typedef struct {
 
-  dtn_socket_configuration peer;
-  dtn_socket_configuration local;
-  bool connected;
+    dtn_socket_configuration peer;
+    dtn_socket_configuration local;
+    bool connected;
 
 } dtn_socket_state;
 

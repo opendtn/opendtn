@@ -39,23 +39,23 @@
 
 static dtn_thread_message *free_message(dtn_thread_message *message) {
 
-  if (0 == message)
-    goto error;
+    if (0 == message)
+        goto error;
 
-  if (!DTN_THREAD_MESSAGE_VALID(message))
-    goto error;
+    if (!DTN_THREAD_MESSAGE_VALID(message))
+        goto error;
 
-  dtn_item *json = message->message;
+    dtn_item *json = message->message;
 
-  json = dtn_item_free(json);
-  DTN_ASSERT(0 == json);
+    json = dtn_item_free(json);
+    DTN_ASSERT(0 == json);
 
-  free(message);
-  message = 0;
+    free(message);
+    message = 0;
 
 error:
 
-  return message;
+    return message;
 }
 
 /******************************************************************************
@@ -66,64 +66,64 @@ error:
 
 dtn_thread_message *
 dtn_thread_message_standard_create(dtn_thread_message_type type,
-                                  dtn_item *item) {
+                                   dtn_item *item) {
 
-  dtn_thread_message *message = 0;
+    dtn_thread_message *message = 0;
 
-  switch (type) {
+    switch (type) {
 
-  case DTN_THREAD_MESSAGE_TYPE_ENSURE_SIGNED_INT_TYPE:
+    case DTN_THREAD_MESSAGE_TYPE_ENSURE_SIGNED_INT_TYPE:
 
-    /* THIS SHOULD NEVER HAPPEN !!! */
-    return 0;
+        /* THIS SHOULD NEVER HAPPEN !!! */
+        return 0;
 
-  case DTN_GENERIC_MESSAGE:
-  default:
+    case DTN_GENERIC_MESSAGE:
+    default:
 
-    message = calloc(1, sizeof(dtn_thread_message));
-    message->free = free_message;
+        message = calloc(1, sizeof(dtn_thread_message));
+        message->free = free_message;
 
-    break;
-  };
+        break;
+    };
 
-  if (0 != item) {
-    message->message = item;
-  }
+    if (0 != item) {
+        message->message = item;
+    }
 
-  message->type = type;
-  message->magic_bytes = DTN_THREAD_MESSAGE_MAGIC_BYTES;
+    message->type = type;
+    message->magic_bytes = DTN_THREAD_MESSAGE_MAGIC_BYTES;
 
-  return message;
+    return message;
 }
 
 /*----------------------------------------------------------------------------*/
 
 dtn_thread_message *dtn_thread_message_cast(void *vptr) {
 
-  if (0 == vptr)
-    return 0;
+    if (0 == vptr)
+        return 0;
 
-  dtn_thread_message *msg = vptr;
+    dtn_thread_message *msg = vptr;
 
-  if (!DTN_THREAD_MESSAGE_VALID(msg))
-    return 0;
+    if (!DTN_THREAD_MESSAGE_VALID(msg))
+        return 0;
 
-  return msg;
+    return msg;
 }
 
 /*---------------------------------------------------------------------------*/
 
 dtn_thread_message *dtn_thread_message_free(dtn_thread_message *msg) {
 
-  if ((0 == msg) || (0 == msg->free)) {
-    goto error;
-  }
+    if ((0 == msg) || (0 == msg->free)) {
+        goto error;
+    }
 
-  return msg->free(msg);
+    return msg->free(msg);
 
 error:
 
-  return msg;
+    return msg;
 }
 
 /*----------------------------------------------------------------------------*/

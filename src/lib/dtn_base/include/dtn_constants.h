@@ -84,8 +84,8 @@
 /* RFC  1122 requires a MINIMUM of 576 octets for the EMTU_R.
  * 576 minus the UDP header is the MINIMUM supported payload size.
  * However, DTNer ethernet, the MTU is up to 1500 (dep. on the flavor),
- * thus DTNer ethernet, we might encounter UDP datagrams of of up to 1500 octets.
- * Let's play it safe and assume 2k = 2048
+ * thus DTNer ethernet, we might encounter UDP datagrams of of up to 1500
+ * octets. Let's play it safe and assume 2k = 2048
  */
 #define DTN_UDP_PAYLOAD_OCTETS 2048
 
@@ -480,29 +480,29 @@
 
 #define DTN_DEFAULT_LOCK_TIMEOUT_USECS (1000 * DTN_DEFAULT_LOCK_TIMEOUT_MSECS)
 
-#define DTN_DEFAULT_LOG_LEVEL                                                   \
-  DTN_log_level_from_string(DTN_DEFAULT_LOG_LEVEL_STRING)
+#define DTN_DEFAULT_LOG_LEVEL                                                  \
+    DTN_log_level_from_string(DTN_DEFAULT_LOG_LEVEL_STRING)
 
 /*----------------------------------------------------------------------------*/
 
-#define DTN_MAX_FRAME_LENGTH_SAMPLES                                            \
-  (DTN_MAX_SAMPLERATE_HZ * DTN_MAX_FRAME_LENGTH_MS / 1000)
+#define DTN_MAX_FRAME_LENGTH_SAMPLES                                           \
+    (DTN_MAX_SAMPLERATE_HZ * DTN_MAX_FRAME_LENGTH_MS / 1000)
 
-#define DTN_MAX_FRAME_LENGTH_BYTES                                              \
-  (DTN_MAX_FRAME_LENGTH_SAMPLES * sizeof(int16_t))
+#define DTN_MAX_FRAME_LENGTH_BYTES                                             \
+    (DTN_MAX_FRAME_LENGTH_SAMPLES * sizeof(int16_t))
 
-#define DTN_DEFAULT_FRAME_LENGTH_SAMPLES                                        \
-  (DTN_DEFAULT_SAMPLERATE * DTN_DEFAULT_FRAME_LENGTH_MS / 1000)
+#define DTN_DEFAULT_FRAME_LENGTH_SAMPLES                                       \
+    (DTN_DEFAULT_SAMPLERATE * DTN_DEFAULT_FRAME_LENGTH_MS / 1000)
 
 /*----------------------------------------------------------------------------*/
 
-#define DTN_INTERNAL_CODEC                                                      \
-  "{"                                                                          \
-  "\"sample_rate_hz\": " TO_STR(DTN_DEFAULT_SAMPLERATE) ","                     \
-                                                       "\"codec\": "           \
-                                                       "\"" DTN_DEFAULT_CODEC   \
-                                                       "\""                    \
-                                                       "}"
+#define DTN_INTERNAL_CODEC                                                     \
+    "{"                                                                        \
+    "\"sample_rate_hz\": " TO_STR(                                             \
+        DTN_DEFAULT_SAMPLERATE) ","                                            \
+                                "\"codec\": "                                  \
+                                "\"" DTN_DEFAULT_CODEC "\""                    \
+                                "}"
 
 /*----------------------------------------------------------------------------*/
 #endif

@@ -49,14 +49,13 @@
 #define DTN_EVENT_ERROR_CODE_SEND 2001
 #define DTN_EVENT_ERROR_DESC_SEND "send error"
 
-
 #define ETN_EVENT_ERROR_NO_ERROR 0
 
 /*----------------------------------------------------------------------------*/
 
-#include <stdbool.h>
-#include <inttypes.h>
 #include <dtn_base/dtn_item.h>
+#include <inttypes.h>
+#include <stdbool.h>
 
 dtn_item *dtn_event_message_create(const char *uuid, const char *event);
 dtn_item *dtn_event_message_create_response(const dtn_item *message);
@@ -65,7 +64,7 @@ bool dtn_event_is(const dtn_item *msg, const char *name);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_event_set_error(dtn_item *message, uint64_t code, const char* desc);
+bool dtn_event_set_error(dtn_item *message, uint64_t code, const char *desc);
 
 uint64_t dtn_event_get_error_code(const dtn_item *message);
 const char *dtn_event_get_error_desc(const dtn_item *message);
@@ -81,6 +80,5 @@ const char *dtn_event_get_uuid(const dtn_item *message);
 dtn_item *dtn_event_get_paramenter(dtn_item *message);
 dtn_item *dtn_event_get_request(dtn_item *message);
 dtn_item *dtn_event_get_response(dtn_item *message);
-
 
 #endif /* dtn_event_api_h */

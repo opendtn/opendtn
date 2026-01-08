@@ -194,11 +194,11 @@
 
 typedef enum {
 
-  DTN_HTTP_PARSER_ABSENT = -3,  // not present e.g. when searching a key
-  DTN_HTTP_PARSER_OOB = -2,     // Out of Bound e.g. for array
-  DTN_HTTP_PARSER_ERROR = -1,   // processing error or mismatch
-  DTN_HTTP_PARSER_PROGRESS = 0, // still matching, need more input data
-  DTN_HTTP_PARSER_SUCCESS = 1   // content match
+    DTN_HTTP_PARSER_ABSENT = -3,  // not present e.g. when searching a key
+    DTN_HTTP_PARSER_OOB = -2,     // Out of Bound e.g. for array
+    DTN_HTTP_PARSER_ERROR = -1,   // processing error or mismatch
+    DTN_HTTP_PARSER_PROGRESS = 0, // still matching, need more input data
+    DTN_HTTP_PARSER_SUCCESS = 1   // content match
 
 } dtn_http_parser_state;
 
@@ -206,8 +206,8 @@ typedef enum {
 
 typedef struct {
 
-  uint8_t major;
-  uint8_t minor;
+    uint8_t major;
+    uint8_t minor;
 
 } dtn_http_version;
 
@@ -215,9 +215,9 @@ typedef struct {
 
 typedef struct {
 
-  uint32_t code;
+    uint32_t code;
 
-  dtn_memory_pointer phrase;
+    dtn_memory_pointer phrase;
 
 } dtn_http_status;
 
@@ -225,8 +225,8 @@ typedef struct {
 
 typedef struct {
 
-  dtn_memory_pointer method;
-  dtn_memory_pointer uri;
+    dtn_memory_pointer method;
+    dtn_memory_pointer uri;
 
 } dtn_http_request;
 
@@ -234,8 +234,8 @@ typedef struct {
 
 typedef struct {
 
-  dtn_memory_pointer name;
-  dtn_memory_pointer value;
+    dtn_memory_pointer name;
+    dtn_memory_pointer value;
 
 } dtn_http_header;
 
@@ -243,32 +243,32 @@ typedef struct {
 
 typedef struct dtn_http_message_config {
 
-  struct {
+    struct {
 
-    size_t capacity;              // amount of headers supported
-    size_t max_bytes_method_name; // max bytes of a method name
-    size_t max_bytes_line;        // max bytes of a header line
+        size_t capacity;              // amount of headers supported
+        size_t max_bytes_method_name; // max bytes of a method name
+        size_t max_bytes_line;        // max bytes of a header line
 
-  } header;
+    } header;
 
-  struct {
+    struct {
 
-    size_t default_size;      // default buffer size
-    size_t max_bytes_recache; // max buffer size to recache
+        size_t default_size;      // default buffer size
+        size_t max_bytes_recache; // max buffer size to recache
 
-  } buffer;
+    } buffer;
 
-  struct {
+    struct {
 
-    size_t max; // max transfer encodings allowed
+        size_t max; // max transfer encodings allowed
 
-  } transfer;
+    } transfer;
 
-  struct {
+    struct {
 
-    size_t max_bytes; // max chunk size allowed
+        size_t max_bytes; // max chunk size allowed
 
-  } chunk;
+    } chunk;
 
 } dtn_http_message_config;
 
@@ -276,29 +276,29 @@ typedef struct dtn_http_message_config {
 
 typedef struct {
 
-  uint16_t magic_byte;
-  dtn_http_message_config config;
+    uint16_t magic_byte;
+    dtn_http_message_config config;
 
-  dtn_buffer *buffer;
+    dtn_buffer *buffer;
 
-  dtn_memory_pointer body;
+    dtn_memory_pointer body;
 
-  /* Chunk will be set in case chunked transfer is used. */
-  dtn_memory_pointer chunk;
+    /* Chunk will be set in case chunked transfer is used. */
+    dtn_memory_pointer chunk;
 
-  /*  Startline entires.
-   *
-   *      quick request/status check will be
-   *      if (0 == msg.status.code) -> request
-   */
+    /*  Startline entires.
+     *
+     *      quick request/status check will be
+     *      if (0 == msg.status.code) -> request
+     */
 
-  dtn_http_version version;
-  dtn_http_request request;
-  dtn_http_status status;
+    dtn_http_version version;
+    dtn_http_request request;
+    dtn_http_status status;
 
-  /*  Array of header field pointers in order of reception of configred size
-   */
-  dtn_http_header header[];
+    /*  Array of header field pointers in order of reception of configred size
+     */
+    dtn_http_header header[];
 
 } dtn_http_message;
 
@@ -354,7 +354,7 @@ dtn_http_message_config_init(dtn_http_message_config config);
     estimation, as long as the buffer content is in line with the HTTP grammar.
 */
 dtn_http_parser_state dtn_http_pointer_parse_message(dtn_http_message *message,
-                                                   uint8_t **next);
+                                                     uint8_t **next);
 
 /*----------------------------------------------------------------------------*/
 
@@ -366,7 +366,7 @@ dtn_http_parser_state dtn_http_pointer_parse_message(dtn_http_message *message,
     @param capacity required open capacity to set
 */
 bool dtn_http_message_ensure_open_capacity(dtn_http_message *message,
-                                          size_t capacity);
+                                           size_t capacity);
 
 /*----------------------------------------------------------------------------*/
 
@@ -378,8 +378,8 @@ bool dtn_http_message_ensure_open_capacity(dtn_http_message *message,
     @param status   status to set
 */
 dtn_http_message *dtn_http_create_status(dtn_http_message_config config,
-                                       dtn_http_version version,
-                                       dtn_http_status status);
+                                         dtn_http_version version,
+                                         dtn_http_status status);
 
 /*----------------------------------------------------------------------------*/
 
@@ -392,9 +392,9 @@ dtn_http_message *dtn_http_create_status(dtn_http_message_config config,
     @param phrase   phrase to set
 */
 dtn_http_message *dtn_http_create_status_string(dtn_http_message_config config,
-                                              dtn_http_version version,
-                                              uint16_t code,
-                                              const char *phrase);
+                                                dtn_http_version version,
+                                                uint16_t code,
+                                                const char *phrase);
 
 /*----------------------------------------------------------------------------*/
 
@@ -414,8 +414,8 @@ dtn_http_message *dtn_http_status_forbidden(const dtn_http_message *source);
     msg->config.header.max_bytes_method_name
 */
 dtn_http_message *dtn_http_create_request(dtn_http_message_config config,
-                                        dtn_http_version version,
-                                        dtn_http_request request);
+                                          dtn_http_version version,
+                                          dtn_http_request request);
 
 /*----------------------------------------------------------------------------*/
 
@@ -433,9 +433,9 @@ dtn_http_message *dtn_http_create_request(dtn_http_message_config config,
     @NOTE returns NULL if strlen(uri) > PATH_MAX
 */
 dtn_http_message *dtn_http_create_request_string(dtn_http_message_config config,
-                                               dtn_http_version version,
-                                               const char *method,
-                                               const char *uri);
+                                                 dtn_http_version version,
+                                                 const char *method,
+                                                 const char *uri);
 
 /*----------------------------------------------------------------------------*/
 
@@ -476,7 +476,7 @@ bool dtn_http_message_add_header(dtn_http_message *msg, dtn_http_header header);
     @NOTE MUST be used before dtn_http_message_close_header
 */
 bool dtn_http_message_add_header_string(dtn_http_message *msg, const char *key,
-                                       const char *val);
+                                        const char *val);
 
 /*----------------------------------------------------------------------------*/
 
@@ -488,7 +488,7 @@ bool dtn_http_message_add_header_string(dtn_http_message *msg, const char *key,
     @param charset  (optional) charset to be used
 */
 bool dtn_http_message_add_content_type(dtn_http_message *msg, const char *mine,
-                                      const char *charset);
+                                       const char *charset);
 
 /*----------------------------------------------------------------------------*/
 
@@ -515,7 +515,7 @@ bool dtn_http_message_add_transfer_encodings(dtn_http_message *msg,
 bool dtn_http_message_set_date(dtn_http_message *msg);
 bool dtn_http_message_set_content_length(dtn_http_message *msg, size_t length);
 bool dtn_http_message_set_content_range(dtn_http_message *msg, size_t length,
-                                       size_t start, size_t end);
+                                        size_t start, size_t end);
 
 /*----------------------------------------------------------------------------*/
 
@@ -579,8 +579,8 @@ bool dtn_http_message_add_body_string(dtn_http_message *msg, const char *body);
     if no traling bytes are contained in source
 */
 bool dtn_http_message_shift_trailing_bytes(dtn_http_message *source,
-                                          uint8_t *next,
-                                          dtn_http_message **dest);
+                                           uint8_t *next,
+                                           dtn_http_message **dest);
 
 /*----------------------------------------------------------------------------*/
 
@@ -596,8 +596,8 @@ bool dtn_http_message_shift_trailing_bytes(dtn_http_message *source,
     on dtn_HTTP_PARSER_SUCCESS version->major and version->minor will be set
 */
 dtn_http_parser_state dtn_http_pointer_parse_version(const uint8_t *buffer,
-                                                   size_t length,
-                                                   dtn_http_version *version);
+                                                     size_t length,
+                                                     dtn_http_version *version);
 
 /*----------------------------------------------------------------------------*/
 
@@ -616,11 +616,10 @@ dtn_http_parser_state dtn_http_pointer_parse_version(const uint8_t *buffer,
 
     @NOTE will parse with AND without lineend
 */
-dtn_http_parser_state dtn_http_pointer_parse_status_line(const uint8_t *buffer,
-                                                       size_t length,
-                                                       dtn_http_status *status,
-                                                       dtn_http_version *version,
-                                                       uint8_t **next);
+dtn_http_parser_state
+dtn_http_pointer_parse_status_line(const uint8_t *buffer, size_t length,
+                                   dtn_http_status *status,
+                                   dtn_http_version *version, uint8_t **next);
 
 /*----------------------------------------------------------------------------*/
 
@@ -661,10 +660,10 @@ dtn_http_parser_state dtn_http_pointer_parse_request_line(
     @NOTE will parse success ONLY with lineend
 */
 dtn_http_parser_state dtn_http_pointer_parse_header_line(const uint8_t *buffer,
-                                                       size_t length,
-                                                       dtn_http_header *line,
-                                                       uint32_t max,
-                                                       uint8_t **next);
+                                                         size_t length,
+                                                         dtn_http_header *line,
+                                                         uint32_t max,
+                                                         uint8_t **next);
 
 /*----------------------------------------------------------------------------*/
 
@@ -685,8 +684,8 @@ dtn_http_parser_state dtn_http_pointer_parse_header_line(const uint8_t *buffer,
 */
 dtn_http_parser_state
 dtn_http_pointer_parse_header(const uint8_t *buffer, size_t length,
-                             dtn_http_header *array, size_t size,
-                             uint32_t max_header_line_length, uint8_t **next);
+                              dtn_http_header *array, size_t size,
+                              uint32_t max_header_line_length, uint8_t **next);
 
 /*----------------------------------------------------------------------------*/
 
@@ -713,8 +712,8 @@ dtn_http_pointer_parse_header(const uint8_t *buffer, size_t length,
     if no comma is contained, next will become NULL
 */
 bool dtn_http_pointer_parse_comma_list_item(const uint8_t *start, size_t length,
-                                           uint8_t **item, size_t *item_len,
-                                           uint8_t **next);
+                                            uint8_t **item, size_t *item_len,
+                                            uint8_t **next);
 
 /*----------------------------------------------------------------------------*/
 
@@ -740,10 +739,10 @@ bool dtn_http_pointer_parse_comma_list_item(const uint8_t *start, size_t length,
     the comma.
 */
 const uint8_t *dtn_http_pointer_find_item_in_comma_list(const uint8_t *start,
-                                                       size_t length,
-                                                       const uint8_t *buffer,
-                                                       size_t len,
-                                                       bool case_ignore);
+                                                        size_t length,
+                                                        const uint8_t *buffer,
+                                                        size_t len,
+                                                        bool case_ignore);
 
 /*----------------------------------------------------------------------------*/
 
@@ -757,7 +756,7 @@ const uint8_t *dtn_http_pointer_find_item_in_comma_list(const uint8_t *start,
     @returns first occurance of the name within the array
 */
 const dtn_http_header *dtn_http_header_get(const dtn_http_header *array,
-                                         size_t size, const char *name);
+                                           size_t size, const char *name);
 
 /*----------------------------------------------------------------------------*/
 
@@ -773,7 +772,8 @@ const dtn_http_header *dtn_http_header_get(const dtn_http_header *array,
     @returns first occurance of the name within the array
 */
 const dtn_http_header *dtn_http_header_get_unique(const dtn_http_header *array,
-                                                size_t size, const char *name);
+                                                  size_t size,
+                                                  const char *name);
 
 /*----------------------------------------------------------------------------*/
 
@@ -789,8 +789,8 @@ const dtn_http_header *dtn_http_header_get_unique(const dtn_http_header *array,
     will forward index to the the returned header if found
 */
 const dtn_http_header *dtn_http_header_get_next(const dtn_http_header *array,
-                                              size_t size, size_t *index,
-                                              const char *name);
+                                                size_t size, size_t *index,
+                                                const char *name);
 
 /*----------------------------------------------------------------------------*/
 
@@ -813,14 +813,13 @@ const dtn_http_header *dtn_http_header_get_next(const dtn_http_header *array,
     dtn_HTTP_PARSER_ERROR on any other error
     dtn_HTTP_PARSER_SUCCESS on success
 */
-dtn_http_parser_state
-dtn_http_pointer_parse_transfer_encodings(const dtn_http_message *message,
-                                         dtn_memory_pointer *array, size_t size);
+dtn_http_parser_state dtn_http_pointer_parse_transfer_encodings(
+    const dtn_http_message *message, dtn_memory_pointer *array, size_t size);
 
 /*----------------------------------------------------------------------------*/
 
 dtn_http_message *dtn_http_message_pop(dtn_buffer **buffer,
-                                     const dtn_http_message_config *config,
-                                     dtn_http_parser_state *state);
+                                       const dtn_http_message_config *config,
+                                       dtn_http_parser_state *state);
 
 #endif /* dtn_http_pointer_h */

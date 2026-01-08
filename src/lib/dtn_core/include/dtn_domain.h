@@ -32,9 +32,9 @@
 #ifndef dtn_domain_h
 #define dtn_domain_h
 
-#include <limits.h>
 #include <dtn_base/dtn_dict.h>
 #include <dtn_base/dtn_item.h>
+#include <limits.h>
 
 #include <openssl/conf.h>
 #include <openssl/ssl.h>
@@ -48,54 +48,53 @@ typedef struct dtn_domain_config dtn_domain_config;
 
 struct dtn_domain_config {
 
-  /* Support UTF8 here for non ASCCI names */
-
-  struct {
-
-    uint8_t start[PATH_MAX];
-    size_t length;
-
-  } name;
-
-  /* Default MAY be set in exactly of the domains,
-   * of some domain configuration,
-   * to allow IP based HTTPs access instead of SNI. */
-  bool is_default;
-
-  /* Certificate settings */
-
-  struct {
-
-    char cert[PATH_MAX];
-    char key[PATH_MAX];
+    /* Support UTF8 here for non ASCCI names */
 
     struct {
 
-      char file[PATH_MAX]; // path to CA verify file
-      char path[PATH_MAX]; // path to CAs to use
+        uint8_t start[PATH_MAX];
+        size_t length;
 
-    } ca;
+    } name;
 
-  } certificate;
+    /* Default MAY be set in exactly of the domains,
+     * of some domain configuration,
+     * to allow IP based HTTPs access instead of SNI. */
+    bool is_default;
 
-  /* Document root path */
+    /* Certificate settings */
 
-  char path[PATH_MAX];
+    struct {
+
+        char cert[PATH_MAX];
+        char key[PATH_MAX];
+
+        struct {
+
+            char file[PATH_MAX]; // path to CA verify file
+            char path[PATH_MAX]; // path to CAs to use
+
+        } ca;
+
+    } certificate;
+
+    /* Document root path */
+
+    char path[PATH_MAX];
 };
 
 /*----------------------------------------------------------------------------*/
 
 struct dtn_domain {
 
-  const uint16_t magic_byte;
-  dtn_domain_config config;
+    const uint16_t magic_byte;
+    dtn_domain_config config;
 
-  struct {
+    struct {
 
-    SSL_CTX *tls;
+        SSL_CTX *tls;
 
-  } context;
-
+    } context;
 };
 
 /*

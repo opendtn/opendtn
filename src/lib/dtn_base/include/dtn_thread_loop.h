@@ -35,9 +35,8 @@
 #define dtn_thread_loop_h
 
 #include "dtn_event_loop.h"
-#include "dtn_thread_message.h"
 #include "dtn_item.h"
-
+#include "dtn_thread_message.h"
 
 /******************************************************************************
  *                                  TYPEDEFS
@@ -45,9 +44,9 @@
 
 typedef enum {
 
-  RESERVED_DTN_RECEIVER_ENSURE_SIGNED_INT = INT_MIN,
-  DTN_RECEIVER_EVENT_LOOP = 0,
-  DTN_RECEIVER_THREAD
+    RESERVED_DTN_RECEIVER_ENSURE_SIGNED_INT = INT_MIN,
+    DTN_RECEIVER_EVENT_LOOP = 0,
+    DTN_RECEIVER_THREAD
 
 } dtn_thread_receiver;
 
@@ -61,26 +60,26 @@ typedef struct dtn_thread_loop dtn_thread_loop;
  */
 typedef struct {
 
-  /**
-   * If true, no queue will be used to send messages (from the threads) to
-   * the event loop.
-   * Using a queue incurs some performance penalty, (using the queue,
-   * having to lock down on mutex in EL -> 2 additional context
-   * switches).
-   * On the other hand, if no queue is used, messages that are lost cause
-   * mem leaks.
-   * Thus if there is no chance that the EL might be too slow to process
-   * all the messages from the threads, it might be useful to switch
-   * using the queue off.
-   * If in doubt, use the queue.
-   */
-  bool disable_to_loop_queue;
+    /**
+     * If true, no queue will be used to send messages (from the threads) to
+     * the event loop.
+     * Using a queue incurs some performance penalty, (using the queue,
+     * having to lock down on mutex in EL -> 2 additional context
+     * switches).
+     * On the other hand, if no queue is used, messages that are lost cause
+     * mem leaks.
+     * Thus if there is no chance that the EL might be too slow to process
+     * all the messages from the threads, it might be useful to switch
+     * using the queue off.
+     * If in doubt, use the queue.
+     */
+    bool disable_to_loop_queue;
 
-  uint64_t message_queue_capacity;
+    uint64_t message_queue_capacity;
 
-  uint64_t lock_timeout_usecs;
+    uint64_t lock_timeout_usecs;
 
-  size_t num_threads;
+    size_t num_threads;
 
 } dtn_thread_loop_config;
 
@@ -93,18 +92,18 @@ typedef struct {
  */
 typedef struct {
 
-  /**
-   * Executed in the threads.
-   * Do the processing.
-   * Avoid I/O here.
-   */
-  bool (*handle_message_in_thread)(dtn_thread_loop *, dtn_thread_message *);
+    /**
+     * Executed in the threads.
+     * Do the processing.
+     * Avoid I/O here.
+     */
+    bool (*handle_message_in_thread)(dtn_thread_loop *, dtn_thread_message *);
 
-  /** Executed in the loop thread - called by the loop.
-   * Avoid processing.
-   * Do I/O here.
-   */
-  bool (*handle_message_in_loop)(dtn_thread_loop *, dtn_thread_message *);
+    /** Executed in the loop thread - called by the loop.
+     * Avoid processing.
+     * Do I/O here.
+     */
+    bool (*handle_message_in_loop)(dtn_thread_loop *, dtn_thread_message *);
 
 } dtn_thread_loop_callbacks;
 
@@ -124,8 +123,8 @@ typedef struct {
  * in the handlers via dtn_thread_loop_get_data()
  */
 dtn_thread_loop *dtn_thread_loop_create(dtn_event_loop *event_loop,
-                                      dtn_thread_loop_callbacks callbacks,
-                                      void *thread_pool_process_data);
+                                        dtn_thread_loop_callbacks callbacks,
+                                        void *thread_pool_process_data);
 
 /*----------------------------------------------------------------------------*/
 
@@ -145,7 +144,7 @@ void *dtn_thread_loop_get_data(dtn_thread_loop *self);
 /*----------------------------------------------------------------------------*/
 
 bool dtn_thread_loop_reconfigure(dtn_thread_loop *self,
-                                dtn_thread_loop_config config);
+                                 dtn_thread_loop_config config);
 
 /*----------------------------------------------------------------------------*/
 
@@ -157,8 +156,8 @@ bool dtn_thread_loop_reconfigure(dtn_thread_loop *self,
  * @return true on success, false else
  */
 bool dtn_thread_loop_send_message(dtn_thread_loop *self,
-                                 dtn_thread_message *message,
-                                 dtn_thread_receiver receiver);
+                                  dtn_thread_message *message,
+                                  dtn_thread_receiver receiver);
 
 /*----------------------------------------------------------------------------*/
 
@@ -180,7 +179,7 @@ bool dtn_thread_loop_stop_threads(dtn_thread_loop *self);
  * @target Target JSON object. If null, a new JSON object will be created.
  */
 dtn_item *dtn_thread_loop_config_to_json(const dtn_thread_loop_config config,
-                                             dtn_item *target);
+                                         dtn_item *target);
 
 /*----------------------------------------------------------------------------*/
 

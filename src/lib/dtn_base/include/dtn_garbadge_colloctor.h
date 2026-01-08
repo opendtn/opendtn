@@ -90,20 +90,17 @@ typedef struct dtn_garbadge_colloctor_config {
  *      ------------------------------------------------------------------------
  */
 
-dtn_garbadge_colloctor *dtn_garbadge_colloctor_create(
-    dtn_garbadge_colloctor_config config);
+dtn_garbadge_colloctor *
+dtn_garbadge_colloctor_create(dtn_garbadge_colloctor_config config);
 
 /*------------------------------------------------------------------*/
 
-dtn_garbadge_colloctor *dtn_garbadge_colloctor_free(
-    dtn_garbadge_colloctor *self);
+dtn_garbadge_colloctor *
+dtn_garbadge_colloctor_free(dtn_garbadge_colloctor *self);
 
 /*------------------------------------------------------------------*/
 
-bool dtn_garbadge_colloctor_push(
-    dtn_garbadge_colloctor *self,
-    void *data,
-    void *(*free_data)(void *data));
-
+bool dtn_garbadge_colloctor_push(dtn_garbadge_colloctor *self, void *data,
+                                 void *(*free_data)(void *data));
 
 #endif /* dtn_garbadge_colloctor_h */

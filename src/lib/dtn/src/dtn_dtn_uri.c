@@ -29,14 +29,14 @@
 */
 #include "../include/dtn_dtn_uri.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <dtn_base/dtn_string.h>
 #include <dtn_base/dtn_data_function.h>
 #include <dtn_base/dtn_memory_pointer.h>
+#include <dtn_base/dtn_string.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <string.h>
 
-dtn_dtn_uri *dtn_dtn_uri_create(){
+dtn_dtn_uri *dtn_dtn_uri_create() {
 
     dtn_dtn_uri *self = calloc(1, sizeof(dtn_dtn_uri));
     return self;
@@ -44,12 +44,14 @@ dtn_dtn_uri *dtn_dtn_uri_create(){
 
 /*----------------------------------------------------------------------------*/
 
-void *dtn_dtn_uri_free(void *self){
+void *dtn_dtn_uri_free(void *self) {
 
-    if (!self) return self;
+    if (!self)
+        return self;
 
-    dtn_dtn_uri *uri = (dtn_dtn_uri*) self;
-    if (!dtn_dtn_uri_clear(uri)) goto error;
+    dtn_dtn_uri *uri = (dtn_dtn_uri *)self;
+    if (!dtn_dtn_uri_clear(uri))
+        goto error;
 
     uri = dtn_data_pointer_free(uri);
     return NULL;
@@ -59,10 +61,11 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_dtn_uri_clear(void *self){
+bool dtn_dtn_uri_clear(void *self) {
 
-    if (!self) return false;
-    dtn_dtn_uri *uri = (dtn_dtn_uri*) self;
+    if (!self)
+        return false;
+    dtn_dtn_uri *uri = (dtn_dtn_uri *)self;
     uri->scheme = dtn_data_pointer_free(uri->scheme);
     uri->name = dtn_data_pointer_free(uri->name);
     uri->demux = dtn_data_pointer_free(uri->demux);
@@ -71,11 +74,12 @@ bool dtn_dtn_uri_clear(void *self){
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_dtn_uri_dump(FILE *stream, void *self){
+bool dtn_dtn_uri_dump(FILE *stream, void *self) {
 
-    if (!stream || !self) return false;
+    if (!stream || !self)
+        return false;
 
-    dtn_dtn_uri *uri = (dtn_dtn_uri*) self;
+    dtn_dtn_uri *uri = (dtn_dtn_uri *)self;
     char *string = dtn_dtn_uri_encode(uri);
     fprintf(stream, "%s", string);
     string = dtn_data_pointer_free(string);
@@ -84,13 +88,15 @@ bool dtn_dtn_uri_dump(FILE *stream, void *self){
 
 /*----------------------------------------------------------------------------*/
 
-void *dtn_dtn_uri_copy(void** destination, void *source){
+void *dtn_dtn_uri_copy(void **destination, void *source) {
 
-    if (!destination || !source) goto error;
-    if (*destination) goto error;
+    if (!destination || !source)
+        goto error;
+    if (*destination)
+        goto error;
 
     dtn_dtn_uri *copy = dtn_dtn_uri_create();
-    dtn_dtn_uri *self = (dtn_dtn_uri*) source;
+    dtn_dtn_uri *self = (dtn_dtn_uri *)source;
 
     copy->scheme = dtn_string_dup(self->scheme);
     copy->name = dtn_string_dup(self->name);
@@ -104,14 +110,16 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-static bool check_string(const char *string, size_t size){
+static bool check_string(const char *string, size_t size) {
 
-    char *ptr = (char*) string;
+    char *ptr = (char *)string;
 
-    while((intptr_t)size > (ptr - string)){
+    while ((intptr_t)size > (ptr - string)) {
 
-        if (ptr[0] < 0x23) goto error;
-        if (ptr[0] > 0x7E) goto error;
+        if (ptr[0] < 0x23)
+            goto error;
+        if (ptr[0] > 0x7E)
+            goto error;
 
         ptr++;
     }
@@ -122,62 +130,72 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-dtn_dtn_uri *dtn_dtn_uri_decode(const char *string){
+dtn_dtn_uri *dtn_dtn_uri_decode(const char *string) {
 
     dtn_dtn_uri *self = NULL;
-    if (!string) goto error;
+    if (!string)
+        goto error;
 
     size_t size = strlen(string);
 
-    if (!check_string(string, size)) goto error;
+    if (!check_string(string, size))
+        goto error;
 
     self = dtn_dtn_uri_create();
 
     char *scheme_delimiter = memchr(string, ':', size);
-    if (!scheme_delimiter) goto error;
+    if (!scheme_delimiter)
+        goto error;
 
     self->scheme = calloc(scheme_delimiter - string + 1, sizeof(char));
-    if (!self->scheme) goto error;
+    if (!self->scheme)
+        goto error;
     strncpy(self->scheme, string, scheme_delimiter - string);
 
-    if ((int64_t) size < scheme_delimiter - string + 3) goto error;
-    if (scheme_delimiter[1] != '/'){
+    if ((int64_t)size < scheme_delimiter - string + 3)
+        goto error;
+    if (scheme_delimiter[1] != '/') {
 
-        if (0 != strncmp(scheme_delimiter + 1, "none", 
-            size -(scheme_delimiter - string - 1)))
+        if (0 != strncmp(scheme_delimiter + 1, "none",
+                         size - (scheme_delimiter - string - 1)))
             goto error;
 
         self->name = dtn_string_dup("none");
         goto done;
     }
 
-    if (scheme_delimiter[1] != '/') goto error;
-    if (scheme_delimiter[2] != '/') goto error;
+    if (scheme_delimiter[1] != '/')
+        goto error;
+    if (scheme_delimiter[2] != '/')
+        goto error;
 
     char *ptr = scheme_delimiter + 3;
     char *delimiter = memchr(ptr, '/', size - (ptr - string));
 
-    if (!delimiter){
+    if (!delimiter) {
 
-        self->name = calloc(size - (scheme_delimiter-string) +1 , sizeof(char));
-        if (!self->name) goto error;
+        self->name =
+            calloc(size - (scheme_delimiter - string) + 1, sizeof(char));
+        if (!self->name)
+            goto error;
 
-        strncpy(self->name, scheme_delimiter + 3, 
-            size - (scheme_delimiter - string) - 1);
-        
+        strncpy(self->name, scheme_delimiter + 3,
+                size - (scheme_delimiter - string) - 1);
+
         goto done;
     }
 
-    self->name = calloc(size - (delimiter-scheme_delimiter) +1 , sizeof(char));
+    self->name =
+        calloc(size - (delimiter - scheme_delimiter) + 1, sizeof(char));
     self->demux = calloc(size - (delimiter - string) + 1, sizeof(char));
-    if (!self->name) goto error;
-    if (!self->demux) goto error;
-    
-    strncpy(self->name, scheme_delimiter + 3, 
-            delimiter - scheme_delimiter - 3);
+    if (!self->name)
+        goto error;
+    if (!self->demux)
+        goto error;
 
-    strncpy(self->demux, delimiter + 1, 
-            size - (delimiter - string) -1);
+    strncpy(self->name, scheme_delimiter + 3, delimiter - scheme_delimiter - 3);
+
+    strncpy(self->demux, delimiter + 1, size - (delimiter - string) - 1);
 
 done:
     return self;
@@ -188,37 +206,34 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-char *dtn_dtn_uri_encode(const dtn_dtn_uri *self){
+char *dtn_dtn_uri_encode(const dtn_dtn_uri *self) {
 
-    if (!self) return NULL;
+    if (!self)
+        return NULL;
 
-    size_t size = 2*PATH_MAX;
+    size_t size = 2 * PATH_MAX;
 
     char *string = calloc(size, sizeof(char));
-    if (!string) goto error;
+    if (!string)
+        goto error;
 
-    if (!self->name){
+    if (!self->name) {
 
-         snprintf(string, size, "%s:none",
-            self->scheme);
+        snprintf(string, size, "%s:none", self->scheme);
 
     } else {
 
-        if (self->demux){
+        if (self->demux) {
 
-            snprintf(string, size, "%s://%s/%s",
-            self->scheme,
-            self->name,
-            self->demux);
+            snprintf(string, size, "%s://%s/%s", self->scheme, self->name,
+                     self->demux);
 
         } else {
 
-            snprintf(string, size, "%s://%s/",
-            self->scheme,
-            self->name);
-        }        
+            snprintf(string, size, "%s://%s/", self->scheme, self->name);
+        }
     }
-    
+
     return string;
 error:
     return NULL;
@@ -226,9 +241,10 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_dtn_uri_is_singleton(const dtn_dtn_uri *self){
+bool dtn_dtn_uri_is_singleton(const dtn_dtn_uri *self) {
 
-    if (!self || !self->demux) return false;
+    if (!self || !self->demux)
+        return false;
 
     if (self->demux[0] == '~')
         return false;
@@ -240,122 +256,122 @@ bool dtn_dtn_uri_is_singleton(const dtn_dtn_uri *self){
 
 bool dtn_dtn_uri_path_remove_dot_segments(const char *in, char *out) {
 
-  if (!in || !out)
-    goto error;
+    if (!in || !out)
+        goto error;
 
-  size_t len = 0;
-  size_t size = strlen(in);
-  if (size == 0)
-    goto error;
+    size_t len = 0;
+    size_t size = strlen(in);
+    if (size == 0)
+        goto error;
 
-  dtn_memory_pointer curr = {0};
+    dtn_memory_pointer curr = {0};
 
-  char *wptr = (char *)out;
-  char *ptr = (char *)in;
-  char *del = memchr(in, '/', size - (ptr - in));
+    char *wptr = (char *)out;
+    char *ptr = (char *)in;
+    char *del = memchr(in, '/', size - (ptr - in));
 
-  if (del == ptr) {
-    *wptr = '/';
-    wptr++;
-    ptr++;
-    del = memchr(ptr, '/', size - (ptr - in));
-  }
-
-  size_t level = 0;
-
-  while (del) {
-
-    /* Check current segment */
-
-    curr.start = (uint8_t *)ptr;
-    curr.length = del - ptr;
-
-    /* Ignore empty path e.g. // */
-
-    if (curr.length == 0) {
-      ptr = del + 1;
-      del = memchr(ptr, '/', size - (ptr - in));
-      continue;
+    if (del == ptr) {
+        *wptr = '/';
+        wptr++;
+        ptr++;
+        del = memchr(ptr, '/', size - (ptr - in));
     }
 
-    switch (curr.length) {
+    size_t level = 0;
 
-    case 1:
+    while (del) {
 
-      /* Ignore ./ */
+        /* Check current segment */
 
-      if (curr.start[0] == '.') {
-        ptr = del + 1;
-        del = memchr(ptr, '/', size - (ptr - in));
-        continue;
-      }
+        curr.start = (uint8_t *)ptr;
+        curr.length = del - ptr;
 
-      break;
+        /* Ignore empty path e.g. // */
 
-    case 2:
-
-      if ((curr.start[0] == '.') && (curr.start[1] == '.')) {
-
-        if (level == 0)
-          goto error;
-
-        /* remove prev */
-
-        len = wptr - out;
-        size_t i = len;
-
-        for (i = len; i > 0; i--) {
-
-          if (out[i] == '/') {
-            out[i] = 0;
-            wptr = out + i - 1;
-            break;
-          }
+        if (curr.length == 0) {
+            ptr = del + 1;
+            del = memchr(ptr, '/', size - (ptr - in));
+            continue;
         }
 
-        if (i == 0)
-          wptr = out;
+        switch (curr.length) {
 
-        level--;
+        case 1:
+
+            /* Ignore ./ */
+
+            if (curr.start[0] == '.') {
+                ptr = del + 1;
+                del = memchr(ptr, '/', size - (ptr - in));
+                continue;
+            }
+
+            break;
+
+        case 2:
+
+            if ((curr.start[0] == '.') && (curr.start[1] == '.')) {
+
+                if (level == 0)
+                    goto error;
+
+                /* remove prev */
+
+                len = wptr - out;
+                size_t i = len;
+
+                for (i = len; i > 0; i--) {
+
+                    if (out[i] == '/') {
+                        out[i] = 0;
+                        wptr = out + i - 1;
+                        break;
+                    }
+                }
+
+                if (i == 0)
+                    wptr = out;
+
+                level--;
+
+                ptr = del + 1;
+                del = memchr(ptr, '/', size - (ptr - in));
+                continue;
+            }
+
+            break;
+
+        default:
+            break;
+        }
+
+        len = del - ptr;
+
+        if (!strncpy(wptr, (char *)ptr, len))
+            goto error;
+
+        wptr += len;
+
+        /* add delimiter to out */
+
+        *wptr = '/';
+        wptr++;
+
+        level++;
 
         ptr = del + 1;
         del = memchr(ptr, '/', size - (ptr - in));
-        continue;
-      }
-
-      break;
-
-    default:
-      break;
     }
 
-    len = del - ptr;
+    /* add last to out e.g. index.html */
 
-    if (!strncpy(wptr, (char *)ptr, len))
-      goto error;
+    if (!strncpy(wptr, ptr, size - (ptr - in)))
+        goto error;
 
-    wptr += len;
-
-    /* add delimiter to out */
-
-    *wptr = '/';
-    wptr++;
-
-    level++;
-
-    ptr = del + 1;
-    del = memchr(ptr, '/', size - (ptr - in));
-  }
-
-  /* add last to out e.g. index.html */
-
-  if (!strncpy(wptr, ptr, size - (ptr - in)))
-    goto error;
-
-  // fprintf(stdout, "IN : %s\nOUT: %s\n", in, out);
-  return true;
+    // fprintf(stdout, "IN : %s\nOUT: %s\n", in, out);
+    return true;
 error:
-  if (out)
-    memset(out, 0, PATH_MAX);
-  return false;
+    if (out)
+        memset(out, 0, PATH_MAX);
+    return false;
 }

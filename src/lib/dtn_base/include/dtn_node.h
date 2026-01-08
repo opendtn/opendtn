@@ -62,10 +62,10 @@ typedef struct dtn_node dtn_node;
 
 struct dtn_node {
 
-  uint16_t type; /* free slot for custom type casts */
+    uint16_t type; /* free slot for custom type casts */
 
-  dtn_node *next;
-  dtn_node *prev;
+    dtn_node *next;
+    dtn_node *prev;
 };
 
 /*

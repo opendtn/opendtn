@@ -31,9 +31,9 @@
 #ifndef dtn_bundle_buffer_h
 #define dtn_bundle_buffer_h
 
-#include <dtn_base/dtn_event_loop.h>
-#include <dtn_base/dtn_buffer.h>
 #include "dtn_bundle.h"
+#include <dtn_base/dtn_buffer.h>
+#include <dtn_base/dtn_event_loop.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -58,11 +58,8 @@ typedef struct dtn_bundle_buffer_config {
 
         void *userdata;
 
-        void (*payload) (void *userdata,
-                         const uint8_t *payload,
-                         size_t size,
-                         const char *source_uri,
-                         const char *destination_uri);
+        void (*payload)(void *userdata, const uint8_t *payload, size_t size,
+                        const char *source_uri, const char *destination_uri);
 
         dtn_key_store *(*get_keys)(void *userdata);
 

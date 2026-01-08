@@ -33,10 +33,10 @@
 #ifndef dtn_webserver_h
 #define dtn_webserver_h
 
-#include <dtn_base/dtn_event_loop.h>
-#include "dtn_io.h"
 #include "dtn_http_pointer.h"
+#include "dtn_io.h"
 #include "dtn_websocket_pointer.h"
+#include <dtn_base/dtn_event_loop.h>
 
 /*----------------------------------------------------------------------------*/
 
@@ -44,7 +44,7 @@ typedef struct dtn_webserver dtn_webserver;
 
 /*----------------------------------------------------------------------------*/
 
-typedef struct dtn_webserver_config{
+typedef struct dtn_webserver_config {
 
     dtn_event_loop *loop;
     dtn_io *io;
@@ -75,11 +75,10 @@ bool dtn_webserver_set_debug(dtn_webserver *self, bool on);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_webserver_enable_callback(
-        dtn_webserver *self,
-        const char *domain,
-        void *userdata,
-        void (*callback)(void *userdata, int socket, dtn_item *msg));
+bool dtn_webserver_enable_callback(dtn_webserver *self, const char *domain,
+                                   void *userdata,
+                                   void (*callback)(void *userdata, int socket,
+                                                    dtn_item *msg));
 
 /*----------------------------------------------------------------------------*/
 
@@ -99,7 +98,7 @@ dtn_event_loop *dtn_webserver_get_eventloop(const dtn_webserver *self);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_webserver_register_close(dtn_webserver *self, void *userdata, 
-        void (callback)(void *userdata, int socket));
+bool dtn_webserver_register_close(dtn_webserver *self, void *userdata,
+                                  void(callback)(void *userdata, int socket));
 
 #endif /* dtn_webserver_h */

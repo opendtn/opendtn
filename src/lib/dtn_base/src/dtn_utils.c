@@ -44,138 +44,139 @@ double dtn_utils_db_to_factor(double dB) { return pow(10, dB / 10.0); }
 
 void *dtn_free(void *vptr) {
 
-  if (0 != vptr) {
-    free(vptr);
-  }
+    if (0 != vptr) {
+        free(vptr);
+    }
 
-  return 0;
+    return 0;
 }
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_utils_init_random_generator() {
 
-  time_t t;
-  srandom(time(&t));
-  return true;
+    time_t t;
+    srandom(time(&t));
+    return true;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static ssize_t get_empty_array_entry(void **array, size_t array_length) {
 
-  if (0 == array)
-    goto error;
-  if (1 > array_length)
-    goto error;
+    if (0 == array)
+        goto error;
+    if (1 > array_length)
+        goto error;
 
-  for (size_t index = 0; array_length > index; ++index) {
-    if (0 == array[index])
-      return index;
-  }
+    for (size_t index = 0; array_length > index; ++index) {
+        if (0 == array[index])
+            return index;
+    }
 
 error:
 
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_utils_add_to_array(void *array, size_t capacity, void *pointer_to_add) {
+bool dtn_utils_add_to_array(void *array, size_t capacity,
+                            void *pointer_to_add) {
 
-  void **my_array = array;
+    void **my_array = array;
 
-  ssize_t i = get_empty_array_entry(my_array, capacity);
+    ssize_t i = get_empty_array_entry(my_array, capacity);
 
-  if (0 > i)
-    return false;
+    if (0 > i)
+        return false;
 
-  my_array[i] = pointer_to_add;
+    my_array[i] = pointer_to_add;
 
-  return true;
+    return true;
 }
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_utils_del_from_array(void *array, size_t array_length,
-                             void *pointer_to_remove) {
+                              void *pointer_to_remove) {
 
-  if (0 == array)
-    goto error;
-  if (1 > array_length)
-    goto error;
+    if (0 == array)
+        goto error;
+    if (1 > array_length)
+        goto error;
 
-  void **my_array = array;
+    void **my_array = array;
 
-  for (size_t i = 0; i < array_length; ++i) {
+    for (size_t i = 0; i < array_length; ++i) {
 
-    if (pointer_to_remove == my_array[i]) {
-      my_array[i] = 0;
-      return true;
+        if (pointer_to_remove == my_array[i]) {
+            my_array[i] = 0;
+            return true;
+        }
     }
-  }
 
 error:
 
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_utils_is_in_array(void const *array, size_t array_length,
-                          void const *pointer) {
+                           void const *pointer) {
 
-  if (0 == array) {
-    return false;
-  } else if (1 > array_length) {
-    return false;
-  } else {
+    if (0 == array) {
+        return false;
+    } else if (1 > array_length) {
+        return false;
+    } else {
 
-    void const *const *my_array = array;
+        void const *const *my_array = array;
 
-    for (size_t i = 0; i < array_length; ++i) {
+        for (size_t i = 0; i < array_length; ++i) {
 
-      if (pointer == my_array[i]) {
-        return true;
-      }
+            if (pointer == my_array[i]) {
+                return true;
+            }
+        }
+
+        return false;
     }
-
-    return false;
-  }
 }
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_cond_valid_internal(char const *file, dtn_log_level loglevel,
-                            char const *function, size_t line,
-                            struct dtn_result *result, bool condition,
-                            uint64_t error_code, char const *msg) {
+                             char const *function, size_t line,
+                             struct dtn_result *result, bool condition,
+                             uint64_t error_code, char const *msg) {
 
-  if (!condition) {
+    if (!condition) {
 
-    dtn_log_ng(loglevel, file, function, line, msg);
-    dtn_result_set(result, error_code, msg);
-  }
+        dtn_log_ng(loglevel, file, function, line, msg);
+        dtn_result_set(result, error_code, msg);
+    }
 
-  return condition;
+    return condition;
 }
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_ptr_valid_internal(char const *file, dtn_log_level loglevel,
-                           char const *function, size_t line,
-                           struct dtn_result *result, void const *ptr,
-                           uint64_t error_code, char const *msg) {
+                            char const *function, size_t line,
+                            struct dtn_result *result, void const *ptr,
+                            uint64_t error_code, char const *msg) {
 
-  if (0 == ptr) {
+    if (0 == ptr) {
 
-    dtn_log_ng(loglevel, file, function, line, "%s: 0 pointer", msg);
-    dtn_result_set(result, error_code, msg);
+        dtn_log_ng(loglevel, file, function, line, "%s: 0 pointer", msg);
+        dtn_result_set(result, error_code, msg);
 
-    return false;
+        return false;
 
-  } else {
+    } else {
 
-    return true;
-  }
+        return true;
+    }
 }

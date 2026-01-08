@@ -77,10 +77,10 @@ typedef bool (*dtn_DATA_DUMP)(FILE *stream, const void *source);
 
 struct dtn_data_function {
 
-  dtn_DATA_FREE free;   // terminate struct  and content
-  dtn_DATA_CLEAR clear; // terminate content of a struct
-  dtn_DATA_COPY copy;   // copy a struct including content
-  dtn_DATA_DUMP dump;   // default dump a struct (e.g. debug)
+    dtn_DATA_FREE free;   // terminate struct  and content
+    dtn_DATA_CLEAR clear; // terminate content of a struct
+    dtn_DATA_COPY copy;   // copy a struct including content
+    dtn_DATA_DUMP dump;   // default dump a struct (e.g. debug)
 };
 
 /*
@@ -123,7 +123,7 @@ dtn_data_function *dtn_data_function_free(dtn_data_function *func);
         Copy a dtn_data_function structure.
 */
 dtn_data_function *dtn_data_function_copy(dtn_data_function **destination,
-                                        const dtn_data_function *source);
+                                          const dtn_data_function *source);
 
 /*----------------------------------------------------------------------------*/
 
@@ -146,7 +146,8 @@ void *dtn_data_string_copy(void **destination, const void *string);
 bool dtn_data_string_dump(FILE *stream, const void *string);
 
 dtn_data_function dtn_data_string_data_functions();
-bool dtn_data_string_data_functions_are_valid(const dtn_data_function *functions);
+bool dtn_data_string_data_functions_are_valid(
+    const dtn_data_function *functions);
 
 /*
  *      ------------------------------------------------------------------------

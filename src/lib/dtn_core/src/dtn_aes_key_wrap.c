@@ -29,78 +29,62 @@
 */
 #include "../include/dtn_aes_key_wrap.h"
 
-#include <string.h>
 #include <arpa/inet.h>
-#include <openssl/evp.h>
 #include <openssl/err.h>
+#include <openssl/evp.h>
+#include <string.h>
 
-static const unsigned char iv[8] = { 0xa6, 
-                                     0xa6, 
-                                     0xa6, 
-                                     0xa6,
-                                     0xa6, 
-                                     0xa6, 
-                                     0xa6, 
-                                     0xa6
-};
+static const unsigned char iv[8] = {0xa6, 0xa6, 0xa6, 0xa6,
+                                    0xa6, 0xa6, 0xa6, 0xa6};
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_aes_key_wrap(
-    uint8_t *plaintext, 
-    size_t plaintext_size, 
-    uint8_t *out,
-    size_t *out_size,
-    uint8_t *key, 
-    size_t key_size){
+bool dtn_aes_key_wrap(uint8_t *plaintext, size_t plaintext_size, uint8_t *out,
+                      size_t *out_size, uint8_t *key, size_t key_size) {
 
-    EVP_CIPHER_CTX *ctx = NULL;   
-    const EVP_CIPHER *cipher = NULL;    
+    EVP_CIPHER_CTX *ctx = NULL;
+    const EVP_CIPHER *cipher = NULL;
 
-    if (!plaintext || !out || !key) goto error;
+    if (!plaintext || !out || !key)
+        goto error;
 
     size_t keysize = key_size * 8;
 
-    switch(keysize)
-    {
-        case 128:
-            cipher = EVP_aes_128_wrap();
-            break;
-        case 192:
-            cipher = EVP_aes_192_wrap();
-            break;
-        case 256:
-            cipher = EVP_aes_256_wrap();
-            break;
-        default:
-            goto error;
+    switch (keysize) {
+    case 128:
+        cipher = EVP_aes_128_wrap();
+        break;
+    case 192:
+        cipher = EVP_aes_192_wrap();
+        break;
+    case 256:
+        cipher = EVP_aes_256_wrap();
+        break;
+    default:
+        goto error;
     }
 
     int len = *out_size;
 
-    if (!(ctx = EVP_CIPHER_CTX_new())) goto error;
+    if (!(ctx = EVP_CIPHER_CTX_new()))
+        goto error;
 
-    if (!EVP_EncryptInit_ex(ctx, cipher, NULL, key, iv)){
+    if (!EVP_EncryptInit_ex(ctx, cipher, NULL, key, iv)) {
         EVP_CIPHER_CTX_free(ctx);
         goto error;
     }
 
     EVP_CIPHER_CTX_set_padding(ctx, 0);
 
-    if (!EVP_EncryptUpdate(ctx,
-                           (unsigned char*) out,
-                           &len,
-                           plaintext,
-                           plaintext_size)){
+    if (!EVP_EncryptUpdate(ctx, (unsigned char *)out, &len, plaintext,
+                           plaintext_size)) {
         EVP_CIPHER_CTX_free(ctx);
         goto error;
     }
 
     *out_size = len;
 
-    if (!EVP_EncryptFinal_ex(ctx,
-                             out,
-                             &len)){
+    if (!EVP_EncryptFinal_ex(ctx, out, &len)) {
         EVP_CIPHER_CTX_free(ctx);
         goto error;
     }
@@ -114,61 +98,52 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_aes_key_unwrap(
-    uint8_t *plaintext, 
-    size_t plaintext_size, 
-    uint8_t *out,
-    size_t *out_size,
-    uint8_t *key, 
-    size_t key_size){
+bool dtn_aes_key_unwrap(uint8_t *plaintext, size_t plaintext_size, uint8_t *out,
+                        size_t *out_size, uint8_t *key, size_t key_size) {
 
-    EVP_CIPHER_CTX *ctx = NULL;   
-    const EVP_CIPHER *cipher = NULL;    
+    EVP_CIPHER_CTX *ctx = NULL;
+    const EVP_CIPHER *cipher = NULL;
 
-    if (!plaintext || !out || !key) goto error;
+    if (!plaintext || !out || !key)
+        goto error;
 
     size_t keysize = key_size * 8;
 
-    switch(keysize)
-    {
-        case 128:
-            cipher = EVP_aes_128_wrap();
-            break;
-        case 192:
-            cipher = EVP_aes_192_wrap();
-            break;
-        case 256:
-            cipher = EVP_aes_256_wrap();
-            break;
-        default:
-            goto error;
+    switch (keysize) {
+    case 128:
+        cipher = EVP_aes_128_wrap();
+        break;
+    case 192:
+        cipher = EVP_aes_192_wrap();
+        break;
+    case 256:
+        cipher = EVP_aes_256_wrap();
+        break;
+    default:
+        goto error;
     }
 
     int len = *out_size;
 
-    if (!(ctx = EVP_CIPHER_CTX_new())) goto error;
+    if (!(ctx = EVP_CIPHER_CTX_new()))
+        goto error;
 
-    if (!EVP_DecryptInit_ex(ctx, cipher, NULL, key, iv)){
+    if (!EVP_DecryptInit_ex(ctx, cipher, NULL, key, iv)) {
         EVP_CIPHER_CTX_free(ctx);
         goto error;
     }
 
     EVP_CIPHER_CTX_set_padding(ctx, 0);
 
-    if (!EVP_DecryptUpdate(ctx,
-                           (unsigned char*) out,
-                           &len,
-                           plaintext,
-                           plaintext_size)){
+    if (!EVP_DecryptUpdate(ctx, (unsigned char *)out, &len, plaintext,
+                           plaintext_size)) {
         EVP_CIPHER_CTX_free(ctx);
         goto error;
     }
 
     *out_size = len;
 
-    if (!EVP_DecryptFinal_ex(ctx,
-                             out,
-                             &len)){
+    if (!EVP_DecryptFinal_ex(ctx, out, &len)) {
         EVP_CIPHER_CTX_free(ctx);
         goto error;
     }

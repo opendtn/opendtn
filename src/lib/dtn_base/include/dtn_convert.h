@@ -50,16 +50,16 @@
  * Give number of samples within a particular number of milli seconds.
  * Requires a samplerate obviously.
  */
-#define dtn_convert_msecs_to_samples(msecs, samplerate_hz)                      \
-  ((msecs * samplerate_hz) / 1000)
+#define dtn_convert_msecs_to_samples(msecs, samplerate_hz)                     \
+    ((msecs * samplerate_hz) / 1000)
 
 /**
  * Give time span in msecs formed by a number of samples.
  * Requires a samplerate obviously.
  * Returns 0 in case of the samplerate being 0.
  */
-#define dtn_convert_samples_to_msecs(samples, samplerate_hz)                    \
-  (0 == samplerate_hz ? 0 : ((samples * 1000) / samplerate_hz))
+#define dtn_convert_samples_to_msecs(samples, samplerate_hz)                   \
+    (0 == samplerate_hz ? 0 : ((samples * 1000) / samplerate_hz))
 
 /*
  *      ------------------------------------------------------------------------
@@ -75,22 +75,22 @@
  */
 
 bool dtn_convert_string_to_uint(const char *string, uint64_t size,
-                               uint64_t *number, uint64_t max);
+                                uint64_t *number, uint64_t max);
 
 bool dtn_convert_string_to_uint64(const char *string, uint64_t size,
-                                 uint64_t *number);
+                                  uint64_t *number);
 
 bool dtn_convert_string_to_uint32(const char *string, uint64_t size,
-                                 uint32_t *number);
+                                  uint32_t *number);
 
 bool dtn_convert_string_to_uint16(const char *string, uint64_t size,
-                                 uint16_t *number);
+                                  uint16_t *number);
 
 bool dtn_convert_string_to_int64(const char *string, uint64_t size,
-                                int64_t *number);
+                                 int64_t *number);
 
 bool dtn_convert_string_to_double(const char *string, uint64_t size,
-                                 double *number);
+                                  double *number);
 
 /*
  *      ------------------------------------------------------------------------
@@ -148,7 +148,7 @@ bool dtn_convert_uint32_to_string(uint32_t number, char **string, size_t *size);
         value.
 */
 bool dtn_convert_hex_string_to_uint64(const char *string, size_t size,
-                                     uint64_t *number);
+                                      uint64_t *number);
 
 /*
  *      ------------------------------------------------------------------------
@@ -169,16 +169,16 @@ bool dtn_convert_hex_string_to_uint64(const char *string, size_t size,
  */
 
 bool dtn_convert_binary_to_hex(const uint8_t *binary, size_t binary_length,
-                              uint8_t **out, size_t *out_length);
+                               uint8_t **out, size_t *out_length);
 
 bool dtn_convert_hex_to_binary(const uint8_t *hex, size_t hex_length,
-                              uint8_t **out, size_t *out_length);
+                               uint8_t **out, size_t *out_length);
 
 double dtn_convert_from_db(double db);
 
 uint8_t dtn_convert_from_vol_percent(uint8_t percent,
-                                    uint8_t db_drop_per_decade);
+                                     uint8_t db_drop_per_decade);
 uint8_t dtn_convert_to_vol_percent(uint8_t multiplier,
-                                  uint8_t db_drop_per_decade);
+                                   uint8_t db_drop_per_decade);
 
 #endif /* dtn_convert_h */

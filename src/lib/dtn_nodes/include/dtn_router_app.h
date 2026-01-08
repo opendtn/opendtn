@@ -32,8 +32,8 @@
 
 #include <dtn_base/dtn_event_loop.h>
 #include <dtn_core/dtn_io.h>
-#include <dtn_core/dtn_webserver.h>
 #include <dtn_core/dtn_password.h>
+#include <dtn_core/dtn_webserver.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -79,18 +79,16 @@ dtn_router_app *dtn_router_app_cast(const void *data);
 
 /*---------------------------------------------------------------------------*/
 
-dtn_router_app_config dtn_router_app_config_from_item(
-    const dtn_item *config);
+dtn_router_app_config dtn_router_app_config_from_item(const dtn_item *config);
 
 /*---------------------------------------------------------------------------*/
 
-void dtn_router_app_websocket_callback(
-    void *userdata, int socket, dtn_item *item);
+void dtn_router_app_websocket_callback(void *userdata, int socket,
+                                       dtn_item *item);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_router_enable_ip_interfaces(
-    dtn_router_app *self, const dtn_item *config);
-
+bool dtn_router_enable_ip_interfaces(dtn_router_app *self,
+                                     const dtn_item *config);
 
 #endif /* dtn_router_app_h */

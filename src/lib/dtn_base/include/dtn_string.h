@@ -52,8 +52,8 @@
 #define dtn_STRING_DEFAULT_SIZE 255
 #define dtn_DEFAULT_LINEBREAK "\n"
 
-const char *dtn_string_find(const char *source, size_t sc_len, const char *delim,
-                           size_t dm_len);
+const char *dtn_string_find(const char *source, size_t sc_len,
+                            const char *delim, size_t dm_len);
 
 /*
  *      ------------------------------------------------------------------------
@@ -90,8 +90,8 @@ const char *dtn_string_find(const char *source, size_t sc_len, const char *delim
         @param  delim   delimiter to use
         @param  dm_len  length of the delimiter (at most)
 */
-dtn_list *dtn_string_pointer(const char *source, size_t sc_len, const char *delim,
-                           size_t dm_len);
+dtn_list *dtn_string_pointer(const char *source, size_t sc_len,
+                             const char *delim, size_t dm_len);
 
 /*----------------------------------------------------------------------------*/
 
@@ -121,7 +121,7 @@ dtn_list *dtn_string_pointer(const char *source, size_t sc_len, const char *deli
         @param  copy_delimiter  if true, the chunks will contain the delimiter
 */
 dtn_list *dtn_string_split(const char *source, size_t sc_len, const char *delim,
-                         size_t dm_len, bool copy_delimiter);
+                           size_t dm_len, bool copy_delimiter);
 
 /*
  *      ------------------------------------------------------------------------
@@ -203,7 +203,7 @@ bool dtn_string_to_double(const char *string, uint64_t size, double *number);
         actually 0
  */
 int64_t dtn_string_parse_hex_digits(const char *start, uint64_t size,
-                                   char **next);
+                                    char **next);
 
 /*****************************************************************************
                           'Safer' std string functions
@@ -236,7 +236,7 @@ char const *dtn_string_chr(char const *str, char c);
  * zero-terminated!
  */
 char *dtn_string_copy(char *restrict target, char const *restrict source,
-                     size_t max_len);
+                      size_t max_len);
 
 /*----------------------------------------------------------------------------*/
 
@@ -321,7 +321,7 @@ char *dtn_string_rtrim(char *str, char const *chars_to_skip);
  * @param separator to split list into key-value pairs. Must not be zero.
  */
 dtn_buffer *dtn_string_value_for_key(char const *s, char const *key,
-                                   char assigner, char const *separator);
+                                     char assigner, char const *separator);
 
 /*****************************************************************************
                                 dtn_DATAFUNCTIONS
@@ -383,7 +383,7 @@ bool dtn_string_data_dump(FILE *stream, const void *string);
         @return         returns true on success,  false on error
  */
 bool dtn_string_append(char **dest, size_t *const size, const char *source,
-                      size_t len);
+                       size_t len);
 
 /*----------------------------------------------------------------------------*/
 
@@ -428,9 +428,10 @@ bool dtn_string_append(char **dest, size_t *const size, const char *source,
         @return         true on success, false on error
  */
 bool dtn_string_replace_all(char **result, size_t *const size,
-                           const char *source, size_t sc_len,
-                           const char *old_item, size_t old_len,
-                           const char *new_item, size_t new_len, bool set_last);
+                            const char *source, size_t sc_len,
+                            const char *old_item, size_t old_len,
+                            const char *new_item, size_t new_len,
+                            bool set_last);
 
 /*----------------------------------------------------------------------------*/
 

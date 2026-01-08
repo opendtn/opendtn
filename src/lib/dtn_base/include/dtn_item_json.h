@@ -38,7 +38,7 @@
 dtn_item *dtn_item_from_json(const char *string);
 char *dtn_item_to_json(const dtn_item *self);
 
-dtn_item *dtn_item_from_json_string(const char* string, size_t len);
+dtn_item *dtn_item_from_json_string(const char *string, size_t len);
 
 /*
  *      ------------------------------------------------------------------------
@@ -52,23 +52,23 @@ dtn_item *dtn_item_from_json_string(const char* string, size_t len);
 
 typedef struct dtn_item_config {
 
-  struct entry {
+    struct entry {
 
-    char *intro;  //      ... item intro e.g. space, quote
-    char *outro;  //      ... item intro e.g. space, quote
-    bool depth;   //      ... enable depth
-    char *indent; //      ... whitespace indent (e.g. tab)
-  } entry;
+        char *intro;  //      ... item intro e.g. space, quote
+        char *outro;  //      ... item intro e.g. space, quote
+        bool depth;   //      ... enable depth
+        char *indent; //      ... whitespace indent (e.g. tab)
+    } entry;
 
-  struct item {
+    struct item {
 
-    char *intro;     // {    ... intro after depth
-    char *out;       // \n   ... out before depth
-    char *outro;     // }    ... outro after depth
-    char *separator; // ,    ... separation of collection items
-    char *delimiter; // :    ... delimiter within object
+        char *intro;     // {    ... intro after depth
+        char *out;       // \n   ... out before depth
+        char *outro;     // }    ... outro after depth
+        char *separator; // ,    ... separation of collection items
+        char *delimiter; // :    ... delimiter within object
 
-  } item;
+    } item;
 
 } dtn_item_json_config;
 
@@ -76,15 +76,15 @@ typedef struct dtn_item_config {
 
 typedef struct dtn_item_json_stringify_config {
 
-  char *intro;
+    char *intro;
 
-  dtn_item_json_config literal;
-  dtn_item_json_config number;
-  dtn_item_json_config string;
-  dtn_item_json_config array;
-  dtn_item_json_config object;
+    dtn_item_json_config literal;
+    dtn_item_json_config number;
+    dtn_item_json_config string;
+    dtn_item_json_config array;
+    dtn_item_json_config object;
 
-  char *outro;
+    char *outro;
 
 } dtn_item_json_stringify_config;
 
@@ -96,7 +96,7 @@ dtn_item_json_stringify_config dtn_item_json_config_stringify_default();
 /*----------------------------------------------------------------------------*/
 
 char *dtn_item_to_json_with_config(const dtn_item *self,
-                                  dtn_item_json_stringify_config config);
+                                   dtn_item_json_stringify_config config);
 
 bool dtn_item_json_write_file(const char *path, const dtn_item *value);
 dtn_item *dtn_item_json_read_dir(const char *path, const char *extension);

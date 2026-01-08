@@ -28,111 +28,113 @@
         ------------------------------------------------------------------------
 */
 
-#include <dtn_core/dtn_aes_key.h>
+#include <dtn_base/dtn_dump.h>
 #include <dtn_base/dtn_file.h>
 #include <dtn_base/dtn_string.h>
-#include <dtn_base/dtn_dump.h>
+#include <dtn_core/dtn_aes_key.h>
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
 #include <getopt.h>
 #include <limits.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 /*---------------------------------------------------------------------------*/
 
 static void print_usage() {
 
-  fprintf(stdout, "\n");
-  fprintf(stdout,
-          "Generate a RANDOM buffer for some DTN AES KEY\n");
-  fprintf(stdout, "\n");
-  fprintf(stdout, "USAGE              [OPTIONS]...\n");
-  fprintf(stdout, "\n");
-  fprintf(stdout, "               -a,     --algorithm   any of (AES256, AES192, AES128)\n");
-  fprintf(stdout, "               -h,     --help        print this help\n");
-  fprintf(stdout, "               -f,     --file        create file with key\n");
-  fprintf(stdout, "\n");
-  fprintf(stdout, "\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "Generate a RANDOM buffer for some DTN AES KEY\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "USAGE              [OPTIONS]...\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "               -a,     --algorithm   any of (AES256, "
+                    "AES192, AES128)\n");
+    fprintf(stdout, "               -h,     --help        print this help\n");
+    fprintf(stdout,
+            "               -f,     --file        create file with key\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "\n");
 
-  return;
+    return;
 }
 
 /*---------------------------------------------------------------------------*/
 
-bool read_command_line_input(int argc, char *argv[], 
-    aes_key_gcm_algorithm *algorithm, const char **file) {
+bool read_command_line_input(int argc, char *argv[],
+                             aes_key_gcm_algorithm *algorithm,
+                             const char **file) {
 
-  int c = 0;
-  int option_index = 0;
+    int c = 0;
+    int option_index = 0;
 
-  while (1) {
+    while (1) {
 
-    static struct option long_options[] = {
+        static struct option long_options[] = {
 
-        /* These options don’t set a flag.
-           We distinguish them by their indices. */
-        {"algorithm", optional_argument, 0, 'a'},
-        {"help", optional_argument, 0, 'h'},
-        {"file", optional_argument, 0, 'f'},
-        {0, 0, 0, 0}};
+            /* These options don’t set a flag.
+               We distinguish them by their indices. */
+            {"algorithm", optional_argument, 0, 'a'},
+            {"help", optional_argument, 0, 'h'},
+            {"file", optional_argument, 0, 'f'},
+            {0, 0, 0, 0}};
 
-    /* getopt_long stores the option index here. */
+        /* getopt_long stores the option index here. */
 
-    c = getopt_long(argc, argv, "?ha:f:", long_options, &option_index);
+        c = getopt_long(argc, argv, "?ha:f:", long_options, &option_index);
 
-    /* Detect the end of the options. */
-    if (c == -1)
-      break;
+        /* Detect the end of the options. */
+        if (c == -1)
+            break;
 
-    switch (c) {
+        switch (c) {
 
-    case 'h':
-      print_usage();
-      goto error;
-      break;
+        case 'h':
+            print_usage();
+            goto error;
+            break;
 
-    case '?':
-      print_usage();
-      goto error;
-      break;
+        case '?':
+            print_usage();
+            goto error;
+            break;
 
-    case 'a':
-        if (optarg){
-            
-            if (0 == dtn_string_compare(optarg, "AES128")){
+        case 'a':
+            if (optarg) {
 
-                *algorithm = AES_128_GCM;
+                if (0 == dtn_string_compare(optarg, "AES128")) {
 
-            } else if (0 == dtn_string_compare(optarg, "AES192")){
+                    *algorithm = AES_128_GCM;
 
-                *algorithm = AES_192_GCM;
-            
-            } else {
+                } else if (0 == dtn_string_compare(optarg, "AES192")) {
 
-                *algorithm = AES_256_GCM;
+                    *algorithm = AES_192_GCM;
+
+                } else {
+
+                    *algorithm = AES_256_GCM;
+                }
             }
-        }
-      break;
+            break;
 
-    case 'f':
-        if (optarg){
-            *file = optarg;
-        }
-      break;
+        case 'f':
+            if (optarg) {
+                *file = optarg;
+            }
+            break;
 
-    default:
-      print_usage();
-      goto error;
+        default:
+            print_usage();
+            goto error;
+        }
     }
-  }
 
-  return true;
+    return true;
 error:
-  return false;
+    return false;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -146,28 +148,29 @@ int main(int argc, char **argv) {
     aes_key_gcm_algorithm algorithm = AES_256_GCM;
     const char *file = NULL;
 
-    if (!read_command_line_input(argc, argv, 
-        &algorithm, &file)) goto error;
+    if (!read_command_line_input(argc, argv, &algorithm, &file))
+        goto error;
 
     dtn_buffer *buffer = dtn_aes_key_generate(algorithm);
-    if (!buffer) goto error;
+    if (!buffer)
+        goto error;
 
-    if (file){
+    if (file) {
 
         getcwd(path, PATH_MAX);
         strcat(path, "/");
         strcat(path, file);
 
-        if (DTN_FILE_SUCCESS != dtn_file_write(path, 
-            buffer->start, buffer->length, "wr")) goto error;
+        if (DTN_FILE_SUCCESS !=
+            dtn_file_write(path, buffer->start, buffer->length, "wr"))
+            goto error;
 
-        dtn_log_info("Wrote AES KEY to file %s",path);
-    
+        dtn_log_info("Wrote AES KEY to file %s", path);
+
     } else {
 
         dtn_dump_binary_as_hex(stdout, buffer->start, buffer->length);
         fprintf(stdout, "\n");
-
     }
 
     retval = EXIT_SUCCESS;

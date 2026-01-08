@@ -34,16 +34,16 @@
 
 typedef enum {
 
-  DTN_LOG_EMERG = 0,
-  DTN_LOG_ALERT = 1,
-  DTN_LOG_CRIT,
-  DTN_LOG_ERR,
-  DTN_LOG_WARNING,
-  DTN_LOG_NOTICE,
-  DTN_LOG_INFO,
-  DTN_LOG_DEBUG,
-  DTN_LOG_DEV,
-  DTN_LOG_INVALID,
+    DTN_LOG_EMERG = 0,
+    DTN_LOG_ALERT = 1,
+    DTN_LOG_CRIT,
+    DTN_LOG_ERR,
+    DTN_LOG_WARNING,
+    DTN_LOG_NOTICE,
+    DTN_LOG_INFO,
+    DTN_LOG_DEBUG,
+    DTN_LOG_DEV,
+    DTN_LOG_INVALID,
 
 } dtn_log_level;
 
@@ -68,50 +68,50 @@ bool dtn_log_close();
 
 typedef enum {
 
-  DTN_LOG_FORMAT_INVALID = -1,
-  DTN_LOG_TEXT = 0, // Should be the default
-  DTN_LOG_JSON,
+    DTN_LOG_FORMAT_INVALID = -1,
+    DTN_LOG_TEXT = 0, // Should be the default
+    DTN_LOG_JSON,
 
 } dtn_log_format;
 
 typedef struct {
 
-  /* Flags that enable a particular logging facility or not */
-  struct {
-    bool systemd : 1;
-  } use;
+    /* Flags that enable a particular logging facility or not */
+    struct {
+        bool systemd : 1;
+    } use;
 
-  /* Optional: stream to log to */
-  int filehandle;
-  dtn_log_format format;
+    /* Optional: stream to log to */
+    int filehandle;
+    dtn_log_format format;
 
-  struct {
+    struct {
 
-    bool use;
-    size_t messages_per_file;
-    size_t max_num_files;
-    char *path;
+        bool use;
+        size_t messages_per_file;
+        size_t max_num_files;
+        char *path;
 
-  } log_rotation;
+    } log_rotation;
 
 } dtn_log_output;
 
 /*----------------------------------------------------------------------------*/
 
-#define dtn_log_configure(module, function, level, ...)                         \
-  dtn_log_set_output(module, function, level, (dtn_log_output){__VA_ARGS__})
+#define dtn_log_configure(module, function, level, ...)                        \
+    dtn_log_set_output(module, function, level, (dtn_log_output){__VA_ARGS__})
 
 /**
  * Set custom logger for a file or file/function
  * @return File handle if there was a file handle associated
  */
 int dtn_log_set_output(char const *module_name, char const *function_name,
-                      dtn_log_level level, const dtn_log_output output);
+                       dtn_log_level level, const dtn_log_output output);
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_log_ng(dtn_log_level level, char const *file, char const *function,
-               size_t line, char const *format, ...);
+                size_t line, char const *format, ...);
 
 /*----------------------------------------------------------------------------*/
 
@@ -140,31 +140,36 @@ void dtn_log_unmute();
 #undef dtn_log_alert
 #undef dtn_log_emergency
 
-#define dtn_log_dev(M, ...)                                                     \
-  dtn_log_ng(DTN_LOG_DEV, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
+#define dtn_log_dev(M, ...)                                                    \
+    dtn_log_ng(DTN_LOG_DEV, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
 
-#define dtn_log_debug(M, ...)                                                   \
-  dtn_log_ng(DTN_LOG_DEBUG, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
+#define dtn_log_debug(M, ...)                                                  \
+    dtn_log_ng(DTN_LOG_DEBUG, __FILE__, __FUNCTION__, __LINE__, M,             \
+               ##__VA_ARGS__)
 
-#define dtn_log_info(M, ...)                                                    \
-  dtn_log_ng(DTN_LOG_INFO, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
+#define dtn_log_info(M, ...)                                                   \
+    dtn_log_ng(DTN_LOG_INFO, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
 
-#define dtn_log_notice(M, ...)                                                  \
-  dtn_log_ng(DTN_LOG_NOTICE, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
+#define dtn_log_notice(M, ...)                                                 \
+    dtn_log_ng(DTN_LOG_NOTICE, __FILE__, __FUNCTION__, __LINE__, M,            \
+               ##__VA_ARGS__)
 
-#define dtn_log_warning(M, ...)                                                 \
-  dtn_log_ng(DTN_LOG_WARNING, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
+#define dtn_log_warning(M, ...)                                                \
+    dtn_log_ng(DTN_LOG_WARNING, __FILE__, __FUNCTION__, __LINE__, M,           \
+               ##__VA_ARGS__)
 
-#define dtn_log_error(M, ...)                                                   \
-  dtn_log_ng(DTN_LOG_ERR, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
+#define dtn_log_error(M, ...)                                                  \
+    dtn_log_ng(DTN_LOG_ERR, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
 
-#define dtn_log_critical(M, ...)                                                \
-  dtn_log_ng(DTN_LOG_CRIT, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
+#define dtn_log_critical(M, ...)                                               \
+    dtn_log_ng(DTN_LOG_CRIT, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
 
-#define dtn_log_alert(M, ...)                                                   \
-  dtn_log_ng(DTN_LOG_ALERT, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
+#define dtn_log_alert(M, ...)                                                  \
+    dtn_log_ng(DTN_LOG_ALERT, __FILE__, __FUNCTION__, __LINE__, M,             \
+               ##__VA_ARGS__)
 
-#define dtn_log_emergency(M, ...)                                               \
-  dtn_log_ng(DTN_LOG_EMERG, __FILE__, __FUNCTION__, __LINE__, M, ##__VA_ARGS__)
+#define dtn_log_emergency(M, ...)                                              \
+    dtn_log_ng(DTN_LOG_EMERG, __FILE__, __FUNCTION__, __LINE__, M,             \
+               ##__VA_ARGS__)
 
 #endif /* dtn_log_ng_h */

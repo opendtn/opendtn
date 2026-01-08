@@ -37,9 +37,9 @@
 #define DTN_BUNDLE_CRC16 "crc16"
 #define DTN_BUNDLE_CRC32 "crc32"
 
-#include <stdio.h>
-#include "dtn_cbor.h"
 #include "dtn_bpsec.h"
+#include "dtn_cbor.h"
+#include <stdio.h>
 
 #include <dtn_base/dtn_buffer.h>
 #include <dtn_core/dtn_key_store.h>
@@ -71,19 +71,13 @@ void *dtn_bundle_free_void(void *self);
  *      ------------------------------------------------------------------------
  */
 
-dtn_cbor_match dtn_bundle_decode(
-    const uint8_t *buffer, 
-    size_t size,
-    dtn_bundle **out, 
-    uint8_t **next);
+dtn_cbor_match dtn_bundle_decode(const uint8_t *buffer, size_t size,
+                                 dtn_bundle **out, uint8_t **next);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_bundle_encode(
-    dtn_bundle *self,
-    uint8_t *buffer, 
-    size_t size,
-    uint8_t **next);
+bool dtn_bundle_encode(dtn_bundle *self, uint8_t *buffer, size_t size,
+                       uint8_t **next);
 
 /*----------------------------------------------------------------------------*/
 
@@ -107,24 +101,17 @@ bool dtn_bundle_verify(dtn_bundle *self);
  *      ------------------------------------------------------------------------
  */
 
-/**     
- *      All in one to set a primary block. 
- * 
+/**
+ *      All in one to set a primary block.
+ *
  *      When in doubt about the order use this function to create the
- *      primary block and use getter for items later. 
+ *      primary block and use getter for items later.
  */
 dtn_cbor *dtn_bundle_add_primary_block(
-        dtn_bundle *self, 
-        uint64_t flags, 
-        uint64_t crc_type,
-        const char *destination,
-        const char *source,
-        const char *report_to,
-        uint64_t timestamp,
-        uint64_t sequence_number,
-        uint64_t lifetime,
-        uint64_t optional_fragment_offset,
-        uint64_t optional_total_data_length);
+    dtn_bundle *self, uint64_t flags, uint64_t crc_type,
+    const char *destination, const char *source, const char *report_to,
+    uint64_t timestamp, uint64_t sequence_number, uint64_t lifetime,
+    uint64_t optional_fragment_offset, uint64_t optional_total_data_length);
 
 /*----------------------------------------------------------------------------*/
 
@@ -158,10 +145,10 @@ bool dtn_bundle_primary_set_report(dtn_bundle *self, const char *value);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_bundle_primary_get_timestamp(const dtn_bundle *self, 
-        uint64_t *time, uint64_t *sequence_number);
-bool dtn_bundle_primary_set_timestamp(dtn_bundle *self, 
-        uint64_t time, uint64_t sequence_number);
+bool dtn_bundle_primary_get_timestamp(const dtn_bundle *self, uint64_t *time,
+                                      uint64_t *sequence_number);
+bool dtn_bundle_primary_set_timestamp(dtn_bundle *self, uint64_t time,
+                                      uint64_t sequence_number);
 
 /*----------------------------------------------------------------------------*/
 
@@ -186,19 +173,15 @@ bool dtn_bundle_primary_set_total_data_length(dtn_bundle *self, uint64_t type);
  *      ------------------------------------------------------------------------
  */
 
-/**     
- *      All in one to set a block. 
- * 
+/**
+ *      All in one to set a block.
+ *
  *      When in doubt about the order use this function to create the
- *      block and use getter for items later. 
+ *      block and use getter for items later.
  */
-dtn_cbor *dtn_bundle_add_block(
-        dtn_bundle *self, 
-        uint64_t code, 
-        uint64_t nbr,
-        uint64_t flags,
-        uint64_t crc_type,
-        dtn_cbor *payload);
+dtn_cbor *dtn_bundle_add_block(dtn_bundle *self, uint64_t code, uint64_t nbr,
+                               uint64_t flags, uint64_t crc_type,
+                               dtn_cbor *payload);
 
 /*----------------------------------------------------------------------------*/
 
@@ -238,14 +221,14 @@ bool dtn_bundle_set_data(dtn_cbor *self, dtn_cbor *data);
  */
 
 /**
- *      Get the "RAW" CBOR instantiation of the bundle. 
- */ 
+ *      Get the "RAW" CBOR instantiation of the bundle.
+ */
 dtn_cbor *dtn_bundle_get_raw(const dtn_bundle *self);
 
 /*----------------------------------------------------------------------------*/
 
 /**
- *      Set a "RAW" CBOR instantiation to the bundle. 
+ *      Set a "RAW" CBOR instantiation to the bundle.
  */
 bool dtn_bundle_set_raw(dtn_bundle *self, dtn_cbor *array);
 
@@ -257,22 +240,16 @@ bool dtn_bundle_set_raw(dtn_bundle *self, dtn_cbor *array);
  *      ------------------------------------------------------------------------
  */
 
-dtn_cbor *dtn_bundle_add_previous_node(
-        dtn_bundle *self, 
-        const char *node_id);
+dtn_cbor *dtn_bundle_add_previous_node(dtn_bundle *self, const char *node_id);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_bundle_add_bundle_age(
-        dtn_bundle *self, 
-        uint64_t age);
+dtn_cbor *dtn_bundle_add_bundle_age(dtn_bundle *self, uint64_t age);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_cbor *dtn_bundle_add_hop_count(
-        dtn_bundle *self, 
-        uint64_t count,
-        uint64_t limit);
+dtn_cbor *dtn_bundle_add_hop_count(dtn_bundle *self, uint64_t count,
+                                   uint64_t limit);
 
 /*
  *      ------------------------------------------------------------------------
@@ -282,15 +259,10 @@ dtn_cbor *dtn_bundle_add_hop_count(
  *      ------------------------------------------------------------------------
  */
 
-bool dtn_bundle_bib_protect(
-        dtn_bundle *self,
-        dtn_cbor *bib,
-        dtn_cbor *target,
-        const dtn_buffer *key,
-        uint8_t aad_flags,
-        dtn_bpsec_sha_variant sha,
-        dtn_dtn_uri *source,
-        bool add_new_key);
+bool dtn_bundle_bib_protect(dtn_bundle *self, dtn_cbor *bib, dtn_cbor *target,
+                            const dtn_buffer *key, uint8_t aad_flags,
+                            dtn_bpsec_sha_variant sha, dtn_dtn_uri *source,
+                            bool add_new_key);
 
 /*----------------------------------------------------------------------------*/
 
@@ -298,21 +270,14 @@ bool dtn_bundle_is_bib_protected(const dtn_bundle *self);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_bundle_bib_verify(
-        dtn_bundle *self,
-        dtn_key_store *store);
+bool dtn_bundle_bib_verify(dtn_bundle *self, dtn_key_store *store);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_bundle_bcb_protect(
-        dtn_bundle *self,
-        dtn_cbor *bcb,
-        dtn_cbor *target,
-        const dtn_buffer *key,
-        dtn_dtn_uri *source,
-        uint8_t aad_flags,
-        dtn_bpsec_aes_variant aes,
-        bool add_key_key);
+bool dtn_bundle_bcb_protect(dtn_bundle *self, dtn_cbor *bcb, dtn_cbor *target,
+                            const dtn_buffer *key, dtn_dtn_uri *source,
+                            uint8_t aad_flags, dtn_bpsec_aes_variant aes,
+                            bool add_key_key);
 
 /*----------------------------------------------------------------------------*/
 
@@ -320,9 +285,6 @@ bool dtn_bundle_is_bcb_protected(const dtn_bundle *self);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_bundle_bcb_unprotect(
-        dtn_bundle *self,
-        dtn_key_store *store);
-
+bool dtn_bundle_bcb_unprotect(dtn_bundle *self, dtn_key_store *store);
 
 #endif /* dtn_bundle_h */

@@ -29,15 +29,14 @@
 */
 #include "../include/dtn_item_json.h"
 
-#include "../include/dtn_list.h"
 #include "../include/dtn_data_function.h"
+#include "../include/dtn_list.h"
 #include <ctype.h>
-#include <errno.h>
-#include <math.h> 
-#include <sys/types.h>
 #include <dirent.h>
+#include <errno.h>
+#include <math.h>
+#include <sys/types.h>
 #include <unistd.h>
-
 
 #define ENCODING_STRING_NULL "null"
 #define ENCODING_STRING_TRUE "true"
@@ -47,13 +46,13 @@
 
 typedef struct {
 
-  dtn_item_json_stringify_config config; // write config
-  char *buffer;                         // buffer start
-  size_t size;                          // buffer size
-  size_t depth;                         // current item depth
-  size_t counter;                       // length counter
+    dtn_item_json_stringify_config config; // write config
+    char *buffer;                          // buffer start
+    size_t size;                           // buffer size
+    size_t depth;                          // current item depth
+    size_t counter;                        // length counter
 
-  bool (*collocate_keys)(const char *key, dtn_list *list);
+    bool (*collocate_keys)(const char *key, dtn_list *list);
 
 } EncodingParameter;
 
@@ -66,98 +65,98 @@ static int64_t json_decode(dtn_item **value, const char *buffer, size_t length);
 static int64_t json_number_decode(dtn_item **value, uint8_t *buffer,
                                   size_t size) {
 
-  bool created = false;
-  if (!value || !buffer || size < 1)
-    goto error;
+    bool created = false;
+    if (!value || !buffer || size < 1)
+        goto error;
 
-  char *ptr = NULL;
-  double number = 0;
+    char *ptr = NULL;
+    double number = 0;
 
-  /* number = [ minus ] int [ frac ] [ exp ] */
+    /* number = [ minus ] int [ frac ] [ exp ] */
 
-  /* CHECK start */
-  switch (buffer[0]) {
+    /* CHECK start */
+    switch (buffer[0]) {
 
-  case '-':
-  case '0':
-  case '1':
-  case '2':
-  case '3':
-  case '4':
-  case '5':
-  case '6':
-  case '7':
-  case '8':
-  case '9':
-    break;
+    case '-':
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+        break;
 
-  default:
-    goto error;
-  }
+    default:
+        goto error;
+    }
 
-  errno = 0;
-  number = strtod((char *)buffer, &ptr);
-  if (errno != 0)
-    goto error;
+    errno = 0;
+    number = strtod((char *)buffer, &ptr);
+    if (errno != 0)
+        goto error;
 
-  // testrun_log("\nNUMNER\t|\nSTART\t|%s\nEND\t%s\n", (char*) buffer,
-  // (char*) ptr);
+    // testrun_log("\nNUMNER\t|\nSTART\t|%s\nEND\t%s\n", (char*) buffer,
+    // (char*) ptr);
 
-  if (ptr == (char *)buffer)
-    goto error;
+    if (ptr == (char *)buffer)
+        goto error;
 
-  // check parsing beyond length
-  if ((uint64_t)((char *)ptr - (char *)buffer) > size)
-    goto error;
+    // check parsing beyond length
+    if ((uint64_t)((char *)ptr - (char *)buffer) > size)
+        goto error;
 
-  /* NOTE:    strtod breaks on space to check for wrong input
-   *          of the form below, the best way is to check if the last char
-   *          was a number. (positive exclusive check)
-   *
-   *          e.g     |0. 1|
-   *                  |1e+ 1|
-   *                  |1E |
-   *
-   *         last successfull parsed byte is either a digit, or any of
-   *         .+-eE, where anything else but a digit is a failed result.
-   */
+    /* NOTE:    strtod breaks on space to check for wrong input
+     *          of the form below, the best way is to check if the last char
+     *          was a number. (positive exclusive check)
+     *
+     *          e.g     |0. 1|
+     *                  |1e+ 1|
+     *                  |1E |
+     *
+     *         last successfull parsed byte is either a digit, or any of
+     *         .+-eE, where anything else but a digit is a failed result.
+     */
 
-  if (ptr[0] == ' ')
-    if (!isdigit(ptr[-1]))
-      goto error;
-  /*
-      // Check next (MUST be some JSON closing token or whitespace)
-      switch (ptr[0]) {
-          case ',':
-          case ']':
-          case '}':
-          case 0x20:
-          case 0x09:
-          case 0x0A:
-          case 0x0D:
-              break;
+    if (ptr[0] == ' ')
+        if (!isdigit(ptr[-1]))
+            goto error;
+    /*
+        // Check next (MUST be some JSON closing token or whitespace)
+        switch (ptr[0]) {
+            case ',':
+            case ']':
+            case '}':
+            case 0x20:
+            case 0x09:
+            case 0x0A:
+            case 0x0D:
+                break;
 
-          default:
-              goto error;
-      }
-  */
-  if (!*value) {
+            default:
+                goto error;
+        }
+    */
+    if (!*value) {
 
-    *value = dtn_item_number(number);
-    if (!*value)
-      goto error;
+        *value = dtn_item_number(number);
+        if (!*value)
+            goto error;
 
-    created = true;
-  }
+        created = true;
+    }
 
-  if (!dtn_item_set_number(*value, number))
-    goto error;
+    if (!dtn_item_set_number(*value, number))
+        goto error;
 
-  return (ptr - (char *)buffer);
+    return (ptr - (char *)buffer);
 error:
-  if (created)
-    *value = dtn_item_free(*value);
-  return -1;
+    if (created)
+        *value = dtn_item_free(*value);
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -165,56 +164,56 @@ error:
 static int64_t json_literal_decode(dtn_item **value, uint8_t *buffer,
                                    size_t size) {
 
-  bool created = false;
-  if (!value || !buffer || size < 4)
-    goto error;
+    bool created = false;
+    if (!value || !buffer || size < 4)
+        goto error;
 
-  if (*value)
-    goto error;
-  created = true;
+    if (*value)
+        goto error;
+    created = true;
 
-  switch (buffer[0]) {
+    switch (buffer[0]) {
 
-  case 'n':
+    case 'n':
 
-    if (strncmp((char *)buffer, "null", 4) != 0)
-      goto error;
-    *value = dtn_item_null();
-    return 4;
+        if (strncmp((char *)buffer, "null", 4) != 0)
+            goto error;
+        *value = dtn_item_null();
+        return 4;
 
-    break;
+        break;
 
-  case 't':
+    case 't':
 
-    if (strncmp((char *)buffer, "true", 4) != 0)
-      goto error;
+        if (strncmp((char *)buffer, "true", 4) != 0)
+            goto error;
 
-    *value = dtn_item_true();
-    return 4;
+        *value = dtn_item_true();
+        return 4;
 
-    break;
+        break;
 
-  case 'f':
+    case 'f':
 
-    if (size < 5)
-      goto error;
+        if (size < 5)
+            goto error;
 
-    if (strncmp((char *)buffer, "false", 5) != 0)
-      goto error;
+        if (strncmp((char *)buffer, "false", 5) != 0)
+            goto error;
 
-    *value = dtn_item_false();
-    return 5;
+        *value = dtn_item_false();
+        return 5;
 
-    break;
+        break;
 
-  default:
-    break;
-  }
+    default:
+        break;
+    }
 
 error:
-  if (created)
-    *value = dtn_item_free(*value);
-  return -1;
+    if (created)
+        *value = dtn_item_free(*value);
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -222,29 +221,29 @@ error:
 static int64_t json_string_decode(dtn_item **value, uint8_t *buffer,
                                   size_t size) {
 
-  if (!value || !buffer || size < 2)
-    return -1;
+    if (!value || !buffer || size < 2)
+        return -1;
 
-  if (*value)
-    return -1;
+    if (*value)
+        return -1;
 
-  if (buffer[0] != '"')
-    return -1;
+    if (buffer[0] != '"')
+        return -1;
 
-  uint8_t *start = (uint8_t *)buffer;
-  uint8_t *end = NULL;
+    uint8_t *start = (uint8_t *)buffer;
+    uint8_t *end = NULL;
 
-  if (!dtn_json_match_string(&start, &end, size))
-    return -1;
+    if (!dtn_json_match_string(&start, &end, size))
+        return -1;
 
-  char string[end - start + 2];
-  memset(string, 0, end - start + 2);
+    char string[end - start + 2];
+    memset(string, 0, end - start + 2);
 
-  strncpy(string, (char *)start, end - start + 1);
+    strncpy(string, (char *)start, end - start + 1);
 
-  *value = dtn_item_string(string);
+    *value = dtn_item_string(string);
 
-  return ((end - start) + 3);
+    return ((end - start) + 3);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -252,74 +251,74 @@ static int64_t json_string_decode(dtn_item **value, uint8_t *buffer,
 static int64_t json_array_decode(dtn_item **value, uint8_t *buffer,
                                  size_t size) {
 
-  bool created = false;
-  if (!value || !buffer || size < 2)
-    goto error;
+    bool created = false;
+    if (!value || !buffer || size < 2)
+        goto error;
 
-  uint8_t *start = (uint8_t *)buffer;
-  uint8_t *end = NULL;
+    uint8_t *start = (uint8_t *)buffer;
+    uint8_t *end = NULL;
 
-  if (*value)
-    goto error;
+    if (*value)
+        goto error;
 
-  if (!dtn_json_match_array(&start, &end, size))
-    goto error;
+    if (!dtn_json_match_array(&start, &end, size))
+        goto error;
 
-  *value = dtn_item_array();
-  if (!*value)
-    goto error;
-  created = true;
+    *value = dtn_item_array();
+    if (!*value)
+        goto error;
+    created = true;
 
-  dtn_item *child = NULL;
-  uint8_t *content = start;
+    dtn_item *child = NULL;
+    uint8_t *content = start;
 
-  int64_t len = 0;
+    int64_t len = 0;
 
-  /* NOTE need to include the terminating ] for number end evaluations */
-  size_t content_size = (end - start) + 2;
+    /* NOTE need to include the terminating ] for number end evaluations */
+    size_t content_size = (end - start) + 2;
 
-  // check whitespace only (empty array)
-  if (!dtn_json_clear_whitespace(&content, &content_size))
-    goto error;
+    // check whitespace only (empty array)
+    if (!dtn_json_clear_whitespace(&content, &content_size))
+        goto error;
 
-  while (content_size > 1) {
+    while (content_size > 1) {
 
-    child = NULL;
-    len = json_decode(&child, (char *)content, content_size);
-    if (len < 0)
-      goto error;
+        child = NULL;
+        len = json_decode(&child, (char *)content, content_size);
+        if (len < 0)
+            goto error;
 
-    if (!dtn_item_array_push(*value, child)) {
-      child = dtn_item_free(child);
-      goto error;
+        if (!dtn_item_array_push(*value, child)) {
+            child = dtn_item_free(child);
+            goto error;
+        }
+
+        child = NULL;
+        content_size -= len;
+        content += len;
+
+        // clear whitespace
+        if (!dtn_json_clear_whitespace(&content, &content_size))
+            goto error;
+
+        if (content_size == 1)
+            break;
+
+        if (content[0] != ',')
+            goto error;
+
+        content++;
+        content_size--;
+
+        if (!dtn_json_clear_whitespace(&content, &content_size))
+            goto error;
     }
 
-    child = NULL;
-    content_size -= len;
-    content += len;
-
-    // clear whitespace
-    if (!dtn_json_clear_whitespace(&content, &content_size))
-      goto error;
-
-    if (content_size == 1)
-      break;
-
-    if (content[0] != ',')
-      goto error;
-
-    content++;
-    content_size--;
-
-    if (!dtn_json_clear_whitespace(&content, &content_size))
-      goto error;
-  }
-
-  return ((end - buffer) + 2);
+    return ((end - buffer) + 2);
 error:
-  if (created)
-    *value = dtn_item_free(*value);
-  return -1;
+    if (created)
+        *value = dtn_item_free(*value);
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -327,18 +326,18 @@ error:
 static bool json_object_set_with_length(dtn_item *obj, const char *key,
                                         size_t length, dtn_item *value) {
 
-  if (!obj || !key || length < 1 || !value)
-    return false;
+    if (!obj || !key || length < 1 || !value)
+        return false;
 
-  char buffer[length + 1];
-  memset(buffer, 0, length + 1);
+    char buffer[length + 1];
+    memset(buffer, 0, length + 1);
 
-  if (!strncat(buffer, key, length))
-    goto error;
+    if (!strncat(buffer, key, length))
+        goto error;
 
-  return dtn_item_object_set(obj, buffer, value);
+    return dtn_item_object_set(obj, buffer, value);
 error:
-  return NULL;
+    return NULL;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -346,286 +345,287 @@ error:
 static int64_t json_object_decode(dtn_item **value, uint8_t *buffer,
                                   size_t size) {
 
-  bool created = false;
-  if (!value || !buffer || size < 2)
-    goto error;
+    bool created = false;
+    if (!value || !buffer || size < 2)
+        goto error;
 
-  uint8_t *start = (uint8_t *)buffer;
-  uint8_t *end = NULL;
+    uint8_t *start = (uint8_t *)buffer;
+    uint8_t *end = NULL;
 
-  if (*value)
-    goto error;
+    if (*value)
+        goto error;
 
-  if (!dtn_json_match_object(&start, &end, size))
-    goto error;
+    if (!dtn_json_match_object(&start, &end, size))
+        goto error;
 
-  // testrun_log("\nOBJECT\t|%s\nSTART\t|%s\nEND\t%s\n", (char*) buffer,
-  // (char*) start, (char*) end);
+    // testrun_log("\nOBJECT\t|%s\nSTART\t|%s\nEND\t%s\n", (char*) buffer,
+    // (char*) start, (char*) end);
 
-  // matched JSON object
-  *value = dtn_item_object();
-  if (!*value)
-    goto error;
-  created = true;
+    // matched JSON object
+    *value = dtn_item_object();
+    if (!*value)
+        goto error;
+    created = true;
 
-  dtn_item *child = NULL;
-  uint8_t *ptr = NULL;
-  uint8_t *key = NULL;
-  uint8_t *content = start;
+    dtn_item *child = NULL;
+    uint8_t *ptr = NULL;
+    uint8_t *key = NULL;
+    uint8_t *content = start;
 
-  uint64_t key_len = 0;
+    uint64_t key_len = 0;
 
-  int64_t len = 0;
+    int64_t len = 0;
 
-  /* NOTE need to include the terminating } */
-  size_t content_size = (end - start) + 2;
+    /* NOTE need to include the terminating } */
+    size_t content_size = (end - start) + 2;
 
-  // check whitespace only (empty object)
-  if (!dtn_json_clear_whitespace(&content, &content_size))
-    goto error;
-
-  while (content_size > 1) {
-
-    /* parse a key */
-    key = content;
-
-    if (!dtn_json_match_string(&key, &ptr, content_size))
-      goto error;
-
-    key_len = (ptr - key) + 1;
-
-    // point to buffer behind \"
-    content_size -= (ptr - content) + 1;
-    content = key + key_len + 1;
-
+    // check whitespace only (empty object)
     if (!dtn_json_clear_whitespace(&content, &content_size))
-      goto error;
+        goto error;
 
-    if (content[0] != ':')
-      goto error;
+    while (content_size > 1) {
 
-    content++;
-    content_size--;
+        /* parse a key */
+        key = content;
 
-    if (!dtn_json_clear_whitespace(&content, &content_size))
-      goto error;
+        if (!dtn_json_match_string(&key, &ptr, content_size))
+            goto error;
 
-    /* parse a value */
-    child = NULL;
-    len = json_decode(&child, (char *)content, content_size);
-    if (len < 0)
-      goto error;
+        key_len = (ptr - key) + 1;
 
-    content_size -= len;
-    content += len;
+        // point to buffer behind \"
+        content_size -= (ptr - content) + 1;
+        content = key + key_len + 1;
 
-    // testrun_log("CHILD next %jd |%s\n", content_size, content);
+        if (!dtn_json_clear_whitespace(&content, &content_size))
+            goto error;
 
-    /* add key/value pair as member to object */
+        if (content[0] != ':')
+            goto error;
 
-    /* Set new pair */
-    if (!json_object_set_with_length(*value, (char *)key, key_len, child)) {
-      child = dtn_item_free(child);
-      goto error;
+        content++;
+        content_size--;
+
+        if (!dtn_json_clear_whitespace(&content, &content_size))
+            goto error;
+
+        /* parse a value */
+        child = NULL;
+        len = json_decode(&child, (char *)content, content_size);
+        if (len < 0)
+            goto error;
+
+        content_size -= len;
+        content += len;
+
+        // testrun_log("CHILD next %jd |%s\n", content_size, content);
+
+        /* add key/value pair as member to object */
+
+        /* Set new pair */
+        if (!json_object_set_with_length(*value, (char *)key, key_len, child)) {
+            child = dtn_item_free(child);
+            goto error;
+        }
+
+        key = NULL;
+        child = NULL;
+
+        if (!dtn_json_clear_whitespace(&content, &content_size))
+            goto error;
+
+        if (content[0] == '}')
+            break;
+
+        if (content[0] != ',')
+            goto error;
+
+        content += 1;
+        content_size -= 1;
     }
 
-    key = NULL;
-    child = NULL;
+    // content MUST point to closing bracket
+    if (*content != '}')
+        goto error;
 
-    if (!dtn_json_clear_whitespace(&content, &content_size))
-      goto error;
-
-    if (content[0] == '}')
-      break;
-
-    if (content[0] != ',')
-      goto error;
-
-    content += 1;
-    content_size -= 1;
-  }
-
-  // content MUST point to closing bracket
-  if (*content != '}')
-    goto error;
-
-  return ((end - buffer) + 2);
+    return ((end - buffer) + 2);
 error:
-  if (created)
-    *value = dtn_item_free(*value);
-  return -1;
+    if (created)
+        *value = dtn_item_free(*value);
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
 
-static int64_t json_decode(dtn_item **value, const char *buffer, size_t length) {
+static int64_t json_decode(dtn_item **value, const char *buffer,
+                           size_t length) {
 
-  bool created = false;
-  if (!value || !buffer || length < 1)
-    goto error;
+    bool created = false;
+    if (!value || !buffer || length < 1)
+        goto error;
 
-  size_t size = length;
-  int64_t len = -1;
+    size_t size = length;
+    int64_t len = -1;
 
-  uint8_t *ptr = (uint8_t *)buffer;
+    uint8_t *ptr = (uint8_t *)buffer;
 
-  if (!dtn_json_clear_whitespace(&ptr, &size))
-    goto error;
+    if (!dtn_json_clear_whitespace(&ptr, &size))
+        goto error;
 
-  switch (ptr[0]) {
+    switch (ptr[0]) {
 
-  case 0x7B: // ={ need to parse an object
+    case 0x7B: // ={ need to parse an object
 
-    len = json_object_decode(value, ptr, size);
-    break;
+        len = json_object_decode(value, ptr, size);
+        break;
 
-  case 0x5B: // =[ need to parse an array
+    case 0x5B: // =[ need to parse an array
 
-    len = json_array_decode(value, ptr, size);
-    break;
+        len = json_array_decode(value, ptr, size);
+        break;
 
-  case 0x22: // ="  need to parse for string
+    case 0x22: // ="  need to parse for string
 
-    len = json_string_decode(value, ptr, size);
-    break;
+        len = json_string_decode(value, ptr, size);
+        break;
 
-  case 0x6E: // =n need to parse for "null"
-  case 0x66: // =f need to parse for "false"
-  case 0x74: // =t need to parse for "true"
+    case 0x6E: // =n need to parse for "null"
+    case 0x66: // =f need to parse for "false"
+    case 0x74: // =t need to parse for "true"
 
-    len = json_literal_decode(value, ptr, size);
-    break;
+        len = json_literal_decode(value, ptr, size);
+        break;
 
-    // number
+        // number
 
-  case '1':
-  case '2':
-  case '3':
-  case '4':
-  case '5':
-  case '6':
-  case '7':
-  case '8':
-  case '9':
-  case '0':
-  case '-':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+    case '0':
+    case '-':
 
-    len = json_number_decode(value, ptr, size);
-    break;
-  default:
-    goto error;
-    break;
-  }
+        len = json_number_decode(value, ptr, size);
+        break;
+    default:
+        goto error;
+        break;
+    }
 
-  if (len < 0)
-    goto error;
+    if (len < 0)
+        goto error;
 
-  return ((char *)ptr - (char *)buffer) + len;
+    return ((char *)ptr - (char *)buffer) + len;
 error:
-  if (created)
-    *value = dtn_item_free(*value);
+    if (created)
+        *value = dtn_item_free(*value);
 
-  return -1;
+    return -1;
 }
 
 /*---------------------------------------------------------------------------*/
 
 dtn_item *dtn_item_from_json(const char *string) {
 
-  dtn_item *self = NULL;
-  if (!string)
-    goto error;
+    dtn_item *self = NULL;
+    if (!string)
+        goto error;
 
-  size_t len = strlen(string);
+    size_t len = strlen(string);
 
-  int64_t result = json_decode(&self, string, len);
-  if (-1 == result)
-    goto error;
+    int64_t result = json_decode(&self, string, len);
+    if (-1 == result)
+        goto error;
 
-  if (len != (size_t)result)
-    goto error;
+    if (len != (size_t)result)
+        goto error;
 
-  return self;
+    return self;
 
 error:
-  dtn_item_free(self);
-  return NULL;
+    dtn_item_free(self);
+    return NULL;
 }
 
 /*---------------------------------------------------------------------------*/
 
 dtn_item_json_stringify_config dtn_item_json_config_stringify_minimal() {
 
-  /*      JSON with minimal config like (minimum JSON string)
-   *
-   *      {"key1":"value","key2":["string",null,false,true,5]}
-   *
-   */
+    /*      JSON with minimal config like (minimum JSON string)
+     *
+     *      {"key1":"value","key2":["string",null,false,true,5]}
+     *
+     */
 
-  dtn_item_json_stringify_config config = {
+    dtn_item_json_stringify_config config = {
 
-      .string = {.item =
-                     {
-                         .intro = "\"",
-                         .outro = "\"",
-                     }},
+        .string = {.item =
+                       {
+                           .intro = "\"",
+                           .outro = "\"",
+                       }},
 
-      .array = {.item =
-                    {
-                        .intro = "[",
-                        .outro = "]",
-                        .separator = ",",
-                    }},
+        .array = {.item =
+                      {
+                          .intro = "[",
+                          .outro = "]",
+                          .separator = ",",
+                      }},
 
-      .object = {.item = {
-                     .intro = "{",
-                     .outro = "}",
-                     .separator = ",",
-                     .delimiter = ":",
-                 }}};
+        .object = {.item = {
+                       .intro = "{",
+                       .outro = "}",
+                       .separator = ",",
+                       .delimiter = ":",
+                   }}};
 
-  return config;
+    return config;
 }
 
 /*----------------------------------------------------------------------------*/
 
 dtn_item_json_stringify_config dtn_item_json_config_stringify_default() {
 
-  /*      JSON with default config like
-   *      @Note indent depth must be applied in stringify
-   *
-   *      {
-   *              "key1":"value",
-   *              "key2":
-   *              [
-   *                      "string",
-   *                      null,
-   *                      false,
-   *                      true,
-   *                      5
-   *              ]
-   *      }
-   *
-   */
+    /*      JSON with default config like
+     *      @Note indent depth must be applied in stringify
+     *
+     *      {
+     *              "key1":"value",
+     *              "key2":
+     *              [
+     *                      "string",
+     *                      null,
+     *                      false,
+     *                      true,
+     *                      5
+     *              ]
+     *      }
+     *
+     */
 
-  dtn_item_json_stringify_config config = {
+    dtn_item_json_stringify_config config = {
 
-      .string = {.item = {.intro = "\"", .outro = "\""}},
+        .string = {.item = {.intro = "\"", .outro = "\""}},
 
-      .array = {.item = {.intro = "[\n",
-                         .out = "\n",
-                         .outro = "]",
-                         .separator = ",\n"},
-                .entry = {.depth = true, .indent = "\t"}},
+        .array = {.item = {.intro = "[\n",
+                           .out = "\n",
+                           .outro = "]",
+                           .separator = ",\n"},
+                  .entry = {.depth = true, .indent = "\t"}},
 
-      .object = {.item = {.intro = "{\n",
-                          .out = "\n",
-                          .outro = "}",
-                          .separator = ",\n",
-                          .delimiter = ":"},
-                 .entry = {.depth = true, .indent = "\t"}}};
+        .object = {.item = {.intro = "{\n",
+                            .out = "\n",
+                            .outro = "}",
+                            .separator = ",\n",
+                            .delimiter = ":"},
+                   .entry = {.depth = true, .indent = "\t"}}};
 
-  return config;
+    return config;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -638,22 +638,22 @@ static int64_t parser_calculate_value(const dtn_item *value,
 static int64_t parser_calculate_null(const dtn_item *value,
                                      EncodingParameter *parameter) {
 
-  if (!value || !parameter)
-    goto error;
+    if (!value || !parameter)
+        goto error;
 
-  int64_t length = 0;
+    int64_t length = 0;
 
-  length = 4;
+    length = 4;
 
-  if (parameter->config.literal.item.intro)
-    length += strlen(parameter->config.literal.item.intro);
+    if (parameter->config.literal.item.intro)
+        length += strlen(parameter->config.literal.item.intro);
 
-  if (parameter->config.literal.item.outro)
-    length += strlen(parameter->config.literal.item.outro);
+    if (parameter->config.literal.item.outro)
+        length += strlen(parameter->config.literal.item.outro);
 
-  return length;
+    return length;
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -661,22 +661,22 @@ error:
 static int64_t parser_calculate_true(const dtn_item *value,
                                      EncodingParameter *parameter) {
 
-  if (!value || !parameter)
-    goto error;
+    if (!value || !parameter)
+        goto error;
 
-  int64_t length = 0;
+    int64_t length = 0;
 
-  length = 4;
+    length = 4;
 
-  if (parameter->config.literal.item.intro)
-    length += strlen(parameter->config.literal.item.intro);
+    if (parameter->config.literal.item.intro)
+        length += strlen(parameter->config.literal.item.intro);
 
-  if (parameter->config.literal.item.outro)
-    length += strlen(parameter->config.literal.item.outro);
+    if (parameter->config.literal.item.outro)
+        length += strlen(parameter->config.literal.item.outro);
 
-  return length;
+    return length;
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -684,22 +684,22 @@ error:
 static int64_t parser_calculate_false(const dtn_item *value,
                                       EncodingParameter *parameter) {
 
-  if (!value || !parameter)
-    goto error;
+    if (!value || !parameter)
+        goto error;
 
-  int64_t length = 0;
+    int64_t length = 0;
 
-  length = 5;
+    length = 5;
 
-  if (parameter->config.literal.item.intro)
-    length += strlen(parameter->config.literal.item.intro);
+    if (parameter->config.literal.item.intro)
+        length += strlen(parameter->config.literal.item.intro);
 
-  if (parameter->config.literal.item.outro)
-    length += strlen(parameter->config.literal.item.outro);
+    if (parameter->config.literal.item.outro)
+        length += strlen(parameter->config.literal.item.outro);
 
-  return length;
+    return length;
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -707,51 +707,51 @@ error:
 static int64_t parser_calculate_string(const dtn_item *value,
                                        EncodingParameter *parameter) {
 
-  if (!value || !parameter)
-    goto error;
+    if (!value || !parameter)
+        goto error;
 
-  const char *content = dtn_item_get_string((dtn_item *)value);
-  if (!content)
-    goto error;
+    const char *content = dtn_item_get_string((dtn_item *)value);
+    if (!content)
+        goto error;
 
-  size_t length = strlen(content);
+    size_t length = strlen(content);
 
-  if (parameter->config.string.item.intro)
-    length += strlen(parameter->config.string.item.intro);
+    if (parameter->config.string.item.intro)
+        length += strlen(parameter->config.string.item.intro);
 
-  if (parameter->config.string.item.outro)
-    length += strlen(parameter->config.string.item.outro);
+    if (parameter->config.string.item.outro)
+        length += strlen(parameter->config.string.item.outro);
 
-  return length;
+    return length;
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static bool json_number_fill_string(const dtn_item *self, char *string) {
 
-  if (!self || !string)
-    goto error;
+    if (!self || !string)
+        goto error;
 
-  double number = dtn_item_get_number((dtn_item *)self);
-  size_t length = 0;
+    double number = dtn_item_get_number((dtn_item *)self);
+    size_t length = 0;
 
-  if (number == floor(number)) {
+    if (number == floor(number)) {
 
-    length = sprintf(string, "%" PRIi64, (int64_t)number);
+        length = sprintf(string, "%" PRIi64, (int64_t)number);
 
-  } else {
+    } else {
 
-    length = sprintf(string, "%.15g", number);
-  }
+        length = sprintf(string, "%.15g", number);
+    }
 
-  if (length == 0)
-    goto error;
+    if (length == 0)
+        goto error;
 
-  return true;
+    return true;
 error:
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -759,26 +759,26 @@ error:
 static int64_t parser_calculate_number(const dtn_item *value,
                                        EncodingParameter *parameter) {
 
-  char string[25] = {};
+    char string[25] = {};
 
-  if (!value || !parameter)
-    goto error;
+    if (!value || !parameter)
+        goto error;
 
-  if (!json_number_fill_string(value, string))
-    goto error;
+    if (!json_number_fill_string(value, string))
+        goto error;
 
-  size_t length = strlen(string);
+    size_t length = strlen(string);
 
-  if (parameter->config.number.item.intro)
-    length += strlen(parameter->config.number.item.intro);
+    if (parameter->config.number.item.intro)
+        length += strlen(parameter->config.number.item.intro);
 
-  if (parameter->config.number.item.outro)
-    length += strlen(parameter->config.number.item.outro);
+    if (parameter->config.number.item.outro)
+        length += strlen(parameter->config.number.item.outro);
 
-  return length;
+    return length;
 
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -786,89 +786,89 @@ error:
 static int64_t parser_calculate_array(const dtn_item *value,
                                       EncodingParameter *p) {
 
-  if (!value || !p)
-    goto error;
+    if (!value || !p)
+        goto error;
 
-  size_t length = 0;
-  size_t items = dtn_item_count((dtn_item *)value);
-  if (items == 0)
-    return 2;
+    size_t length = 0;
+    size_t items = dtn_item_count((dtn_item *)value);
+    if (items == 0)
+        return 2;
 
-  size_t indent = 0;
-  size_t separator = strlen(p->config.array.item.separator);
+    size_t indent = 0;
+    size_t separator = strlen(p->config.array.item.separator);
 
-  if (p->config.array.entry.depth) {
+    if (p->config.array.entry.depth) {
 
-    if (p->config.array.entry.indent)
-      indent = strlen(p->config.array.entry.indent);
-  }
-
-  // intro length
-  length += (p->depth * indent) + strlen(p->config.array.item.intro);
-  // outro length
-  length += (p->depth * indent) + strlen(p->config.array.item.outro);
-  // out length
-  if (p->config.array.item.out)
-    length += strlen(p->config.array.item.out);
-
-  dtn_item *child = NULL;
-
-  p->depth++;
-
-  for (size_t i = 1; i <= items; i++) {
-
-    child = dtn_item_array_get((dtn_item *)value, i);
-    if (!child)
-      goto error;
-
-    if (dtn_item_is_array(child)) {
-
-      if (dtn_item_is_empty(child))
-        length += (p->depth * indent);
-
-      length += parser_calculate_value(child, p);
-
-    } else if (dtn_item_is_object(child)) {
-
-      if (dtn_item_is_empty(child))
-        length += (p->depth * indent);
-
-      length += parser_calculate_value(child, p);
-
-    } else {
-
-      length += (p->depth * indent);
-      length += parser_calculate_value(child, p);
+        if (p->config.array.entry.indent)
+            indent = strlen(p->config.array.entry.indent);
     }
 
-    if (i < items)
-      length += separator;
-  }
+    // intro length
+    length += (p->depth * indent) + strlen(p->config.array.item.intro);
+    // outro length
+    length += (p->depth * indent) + strlen(p->config.array.item.outro);
+    // out length
+    if (p->config.array.item.out)
+        length += strlen(p->config.array.item.out);
 
-  p->depth--;
-  return length;
+    dtn_item *child = NULL;
+
+    p->depth++;
+
+    for (size_t i = 1; i <= items; i++) {
+
+        child = dtn_item_array_get((dtn_item *)value, i);
+        if (!child)
+            goto error;
+
+        if (dtn_item_is_array(child)) {
+
+            if (dtn_item_is_empty(child))
+                length += (p->depth * indent);
+
+            length += parser_calculate_value(child, p);
+
+        } else if (dtn_item_is_object(child)) {
+
+            if (dtn_item_is_empty(child))
+                length += (p->depth * indent);
+
+            length += parser_calculate_value(child, p);
+
+        } else {
+
+            length += (p->depth * indent);
+            length += parser_calculate_value(child, p);
+        }
+
+        if (i < items)
+            length += separator;
+    }
+
+    p->depth--;
+    return length;
 
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static size_t json_object_calculate_indent(EncodingParameter *parameter) {
 
-  if (!parameter)
-    goto error;
+    if (!parameter)
+        goto error;
 
-  bool enabled = parameter->config.object.entry.depth;
-  char *indent = parameter->config.object.entry.indent;
+    bool enabled = parameter->config.object.entry.depth;
+    char *indent = parameter->config.object.entry.indent;
 
-  if (!enabled || !indent)
-    goto error;
+    if (!enabled || !indent)
+        goto error;
 
-  return strlen(indent) * parameter->depth;
+    return strlen(indent) * parameter->depth;
 
 error:
-  return 0;
+    return 0;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -876,49 +876,49 @@ error:
 static bool add_encoding_size(const char *key, const dtn_item *value,
                               void *data) {
 
-  if (!key && !value)
-    return true;
+    if (!key && !value)
+        return true;
 
-  if (!key || !value || !data)
-    goto error;
+    if (!key || !value || !data)
+        goto error;
 
-  dtn_item *val = dtn_item_cast(value);
-  if (!val)
-    goto error;
+    dtn_item *val = dtn_item_cast(value);
+    if (!val)
+        goto error;
 
-  EncodingParameter *p = (EncodingParameter *)data;
+    EncodingParameter *p = (EncodingParameter *)data;
 
-  size_t length = p->counter;
+    size_t length = p->counter;
 
-  length = length + json_object_calculate_indent(p);
-  length = length + strlen(key) + 2;
-  length = length + strlen(p->config.object.item.delimiter);
+    length = length + json_object_calculate_indent(p);
+    length = length + strlen(key) + 2;
+    length = length + strlen(p->config.object.item.delimiter);
 
-  if (p->config.object.entry.depth) {
+    if (p->config.object.entry.depth) {
 
-    if (dtn_item_is_array(val)) {
+        if (dtn_item_is_array(val)) {
 
-      if (!dtn_item_is_empty(val))
-        length = length + 1;
+            if (!dtn_item_is_empty(val))
+                length = length + 1;
 
-    } else if (dtn_item_is_object(val)) {
+        } else if (dtn_item_is_object(val)) {
 
-      if (!dtn_item_is_empty(val))
-        length = length + 1;
+            if (!dtn_item_is_empty(val))
+                length = length + 1;
+        }
     }
-  }
 
-  size_t vlen = parser_calculate_value(value, p);
-  if (vlen < 1)
-    goto error;
+    size_t vlen = parser_calculate_value(value, p);
+    if (vlen < 1)
+        goto error;
 
-  length = length + vlen;
-  length = length + strlen(p->config.object.item.separator);
+    length = length + vlen;
+    length = length + strlen(p->config.object.item.separator);
 
-  p->counter = length;
-  return true;
+    p->counter = length;
+    return true;
 error:
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -926,38 +926,38 @@ error:
 static int64_t parser_calculate_object(const dtn_item *value,
                                        EncodingParameter *p) {
 
-  if (!value || !p)
-    goto error;
+    if (!value || !p)
+        goto error;
 
-  size_t length = 0;
-  if (dtn_item_is_empty((dtn_item *)value))
-    return 2;
+    size_t length = 0;
+    if (dtn_item_is_empty((dtn_item *)value))
+        return 2;
 
-  size_t indent = json_object_calculate_indent(p);
+    size_t indent = json_object_calculate_indent(p);
 
-  // intro length {\n
-  length += indent + strlen(p->config.object.item.intro);
-  // outro length }
-  length += indent + strlen(p->config.object.item.outro);
-  // out length \n
-  if (p->config.object.item.out)
-    length += strlen(p->config.object.item.out);
+    // intro length {\n
+    length += indent + strlen(p->config.object.item.intro);
+    // outro length }
+    length += indent + strlen(p->config.object.item.outro);
+    // out length \n
+    if (p->config.object.item.out)
+        length += strlen(p->config.object.item.out);
 
-  p->counter = length;
-  p->depth++;
+    p->counter = length;
+    p->depth++;
 
-  if (!dtn_item_object_for_each((dtn_item *)value, add_encoding_size, p))
-    goto error;
+    if (!dtn_item_object_for_each((dtn_item *)value, add_encoding_size, p))
+        goto error;
 
-  p->depth--;
+    p->depth--;
 
-  length = p->counter;
-  length -= strlen(p->config.object.item.separator);
+    length = p->counter;
+    length -= strlen(p->config.object.item.separator);
 
-  return length;
+    return length;
 
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -965,40 +965,40 @@ error:
 static int64_t parser_calculate_value(const dtn_item *value,
                                       EncodingParameter *parameter) {
 
-  if (!value || !parameter)
-    goto error;
+    if (!value || !parameter)
+        goto error;
 
-  if (dtn_item_is_null((dtn_item *)value)) {
+    if (dtn_item_is_null((dtn_item *)value)) {
 
-    return parser_calculate_null(value, parameter);
+        return parser_calculate_null(value, parameter);
 
-  } else if (dtn_item_is_false((dtn_item *)value)) {
+    } else if (dtn_item_is_false((dtn_item *)value)) {
 
-    return parser_calculate_false(value, parameter);
+        return parser_calculate_false(value, parameter);
 
-  } else if (dtn_item_is_true((dtn_item *)value)) {
+    } else if (dtn_item_is_true((dtn_item *)value)) {
 
-    return parser_calculate_true(value, parameter);
+        return parser_calculate_true(value, parameter);
 
-  } else if (dtn_item_is_string((dtn_item *)value)) {
+    } else if (dtn_item_is_string((dtn_item *)value)) {
 
-    return parser_calculate_string(value, parameter);
+        return parser_calculate_string(value, parameter);
 
-  } else if (dtn_item_is_number((dtn_item *)value)) {
+    } else if (dtn_item_is_number((dtn_item *)value)) {
 
-    return parser_calculate_number(value, parameter);
+        return parser_calculate_number(value, parameter);
 
-  } else if (dtn_item_is_array((dtn_item *)value)) {
+    } else if (dtn_item_is_array((dtn_item *)value)) {
 
-    return parser_calculate_array(value, parameter);
+        return parser_calculate_array(value, parameter);
 
-  } else if (dtn_item_is_object((dtn_item *)value)) {
+    } else if (dtn_item_is_object((dtn_item *)value)) {
 
-    return parser_calculate_object(value, parameter);
-  }
+        return parser_calculate_object(value, parameter);
+    }
 
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1006,34 +1006,34 @@ error:
 static int64_t parser_calculate(const dtn_item *value,
                                 const dtn_item_json_stringify_config *conf) {
 
-  if (!value)
-    goto error;
+    if (!value)
+        goto error;
 
-  EncodingParameter parameter;
-  memset(&parameter, 0, sizeof(EncodingParameter));
+    EncodingParameter parameter;
+    memset(&parameter, 0, sizeof(EncodingParameter));
 
-  if (conf) {
+    if (conf) {
 
-    parameter.config = *conf;
+        parameter.config = *conf;
 
-  } else {
+    } else {
 
-    parameter.config = dtn_item_json_config_stringify_minimal();
-  }
+        parameter.config = dtn_item_json_config_stringify_minimal();
+    }
 
-  int64_t result = parser_calculate_value(value, &parameter);
-  if (result < 0)
-    goto error;
+    int64_t result = parser_calculate_value(value, &parameter);
+    if (result < 0)
+        goto error;
 
-  if (NULL != parameter.config.intro)
-    result += strlen(parameter.config.intro);
+    if (NULL != parameter.config.intro)
+        result += strlen(parameter.config.intro);
 
-  if (NULL != parameter.config.outro)
-    result += strlen(parameter.config.outro);
+    if (NULL != parameter.config.outro)
+        result += strlen(parameter.config.outro);
 
-  return result;
+    return result;
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1041,27 +1041,27 @@ error:
 static bool json_parser_write_if_not_null(const char *content, char **next,
                                           size_t *open) {
 
-  if (!content)
+    if (!content)
+        return true;
+
+    if (!next || !open)
+        return false;
+
+    size_t length = strlen(content);
+
+    if (*open < length)
+        return false;
+
+    char *p = (char *)*next;
+
+    p = strncpy(p, content, length);
+    if (!p)
+        return false;
+
+    *next += length;
+    *open -= length;
+
     return true;
-
-  if (!next || !open)
-    return false;
-
-  size_t length = strlen(content);
-
-  if (*open < length)
-    return false;
-
-  char *p = (char *)*next;
-
-  p = strncpy(p, content, length);
-  if (!p)
-    return false;
-
-  *next += length;
-  *open -= length;
-
-  return true;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1070,19 +1070,19 @@ static bool json_literal_encode_pack(const dtn_item_json_config *config,
                                      const char *content, char **next,
                                      size_t *open) {
 
-  if (!config)
-    return false;
+    if (!config)
+        return false;
 
-  if (!json_parser_write_if_not_null(config->item.intro, next, open))
-    return false;
+    if (!json_parser_write_if_not_null(config->item.intro, next, open))
+        return false;
 
-  if (!json_parser_write_if_not_null(content, next, open))
-    return false;
+    if (!json_parser_write_if_not_null(content, next, open))
+        return false;
 
-  if (!json_parser_write_if_not_null(config->item.outro, next, open))
-    return false;
+    if (!json_parser_write_if_not_null(config->item.outro, next, open))
+        return false;
 
-  return true;
+    return true;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1090,20 +1090,20 @@ static bool json_literal_encode_pack(const dtn_item_json_config *config,
 static int64_t parser_encode_null(const dtn_item *self,
                                   EncodingParameter *parameter) {
 
-  if (!self || !parameter || parameter->size < 4)
-    goto error;
+    if (!self || !parameter || parameter->size < 4)
+        goto error;
 
-  char *start = parameter->buffer;
+    char *start = parameter->buffer;
 
-  if (!json_literal_encode_pack(&parameter->config.literal,
-                                ENCODING_STRING_NULL, &parameter->buffer,
-                                &parameter->size))
-    goto error;
+    if (!json_literal_encode_pack(&parameter->config.literal,
+                                  ENCODING_STRING_NULL, &parameter->buffer,
+                                  &parameter->size))
+        goto error;
 
-  return (parameter->buffer - start);
+    return (parameter->buffer - start);
 
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1111,20 +1111,20 @@ error:
 static int64_t parser_encode_true(const dtn_item *self,
                                   EncodingParameter *parameter) {
 
-  if (!self || !parameter || parameter->size < 4)
-    goto error;
+    if (!self || !parameter || parameter->size < 4)
+        goto error;
 
-  char *start = parameter->buffer;
+    char *start = parameter->buffer;
 
-  if (!json_literal_encode_pack(&parameter->config.literal,
-                                ENCODING_STRING_TRUE, &parameter->buffer,
-                                &parameter->size))
-    goto error;
+    if (!json_literal_encode_pack(&parameter->config.literal,
+                                  ENCODING_STRING_TRUE, &parameter->buffer,
+                                  &parameter->size))
+        goto error;
 
-  return (parameter->buffer - start);
+    return (parameter->buffer - start);
 
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1132,20 +1132,20 @@ error:
 static int64_t parser_encode_false(const dtn_item *self,
                                    EncodingParameter *parameter) {
 
-  if (!self || !parameter || parameter->size < 5)
-    goto error;
+    if (!self || !parameter || parameter->size < 5)
+        goto error;
 
-  char *start = parameter->buffer;
+    char *start = parameter->buffer;
 
-  if (!json_literal_encode_pack(&parameter->config.literal,
-                                ENCODING_STRING_FALSE, &parameter->buffer,
-                                &parameter->size))
-    goto error;
+    if (!json_literal_encode_pack(&parameter->config.literal,
+                                  ENCODING_STRING_FALSE, &parameter->buffer,
+                                  &parameter->size))
+        goto error;
 
-  return (parameter->buffer - start);
+    return (parameter->buffer - start);
 
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1153,33 +1153,33 @@ error:
 static int64_t parser_encode_string(dtn_item *value,
                                     EncodingParameter *parameter) {
 
-  if (!value || !parameter)
-    goto error;
+    if (!value || !parameter)
+        goto error;
 
-  char *start = parameter->buffer;
+    char *start = parameter->buffer;
 
-  const char *string = dtn_item_get_string(value);
-  if (!string)
-    goto error;
+    const char *string = dtn_item_get_string(value);
+    if (!string)
+        goto error;
 
-  if (parameter->size < (strlen(string) + 2))
-    goto error;
+    if (parameter->size < (strlen(string) + 2))
+        goto error;
 
-  if (!json_parser_write_if_not_null(parameter->config.string.item.intro,
-                                     &parameter->buffer, &parameter->size))
-    goto error;
+    if (!json_parser_write_if_not_null(parameter->config.string.item.intro,
+                                       &parameter->buffer, &parameter->size))
+        goto error;
 
-  if (!json_parser_write_if_not_null(string, &parameter->buffer,
-                                     &parameter->size))
-    goto error;
+    if (!json_parser_write_if_not_null(string, &parameter->buffer,
+                                       &parameter->size))
+        goto error;
 
-  if (!json_parser_write_if_not_null(parameter->config.string.item.outro,
-                                     &parameter->buffer, &parameter->size))
-    goto error;
+    if (!json_parser_write_if_not_null(parameter->config.string.item.outro,
+                                       &parameter->buffer, &parameter->size))
+        goto error;
 
-  return (parameter->buffer - start);
+    return (parameter->buffer - start);
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1187,118 +1187,118 @@ error:
 static int64_t parser_encode_number(const dtn_item *self,
                                     EncodingParameter *parameter) {
 
-  char string[25] = {0};
+    char string[25] = {0};
 
-  if (!self || !parameter)
-    goto error;
+    if (!self || !parameter)
+        goto error;
 
-  char *start = parameter->buffer;
+    char *start = parameter->buffer;
 
-  if (!json_number_fill_string(self, string))
-    goto error;
+    if (!json_number_fill_string(self, string))
+        goto error;
 
-  if (parameter->size < strlen(string))
-    goto error;
+    if (parameter->size < strlen(string))
+        goto error;
 
-  if (!json_parser_write_if_not_null(parameter->config.number.item.intro,
-                                     &parameter->buffer, &parameter->size))
-    goto error;
+    if (!json_parser_write_if_not_null(parameter->config.number.item.intro,
+                                       &parameter->buffer, &parameter->size))
+        goto error;
 
-  if (!json_parser_write_if_not_null(string, &parameter->buffer,
-                                     &parameter->size))
-    goto error;
+    if (!json_parser_write_if_not_null(string, &parameter->buffer,
+                                       &parameter->size))
+        goto error;
 
-  if (!json_parser_write_if_not_null(parameter->config.number.item.outro,
-                                     &parameter->buffer, &parameter->size))
-    goto error;
+    if (!json_parser_write_if_not_null(parameter->config.number.item.outro,
+                                       &parameter->buffer, &parameter->size))
+        goto error;
 
-  return (parameter->buffer - start);
+    return (parameter->buffer - start);
 
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static bool object_write_indent(EncodingParameter *parameter) {
 
-  if (!parameter)
-    goto error;
+    if (!parameter)
+        goto error;
 
-  bool enabled = parameter->config.object.entry.depth;
-  char *indent = parameter->config.object.entry.indent;
+    bool enabled = parameter->config.object.entry.depth;
+    char *indent = parameter->config.object.entry.indent;
 
-  size_t len = 0;
+    size_t len = 0;
 
-  if (!enabled || !indent)
+    if (!enabled || !indent)
+        return true;
+
+    len = strlen(indent);
+
+    if (parameter->size < parameter->depth * len)
+        goto error;
+
+    for (size_t i = 0; i < parameter->depth; i++) {
+
+        if (parameter->size <= len)
+            goto error;
+
+        if (!memcpy(parameter->buffer, indent, len))
+            goto error;
+
+        parameter->buffer += len;
+        parameter->size -= len;
+    }
+
     return true;
-
-  len = strlen(indent);
-
-  if (parameter->size < parameter->depth * len)
-    goto error;
-
-  for (size_t i = 0; i < parameter->depth; i++) {
-
-    if (parameter->size <= len)
-      goto error;
-
-    if (!memcpy(parameter->buffer, indent, len))
-      goto error;
-
-    parameter->buffer += len;
-    parameter->size -= len;
-  }
-
-  return true;
 error:
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static bool object_write_intro(EncodingParameter *parameter) {
 
-  if (!parameter || !parameter->config.object.item.intro)
-    goto error;
+    if (!parameter || !parameter->config.object.item.intro)
+        goto error;
 
-  if (!object_write_indent(parameter))
-    goto error;
+    if (!object_write_indent(parameter))
+        goto error;
 
-  return json_parser_write_if_not_null(parameter->config.object.item.intro,
-                                       &parameter->buffer, &parameter->size);
+    return json_parser_write_if_not_null(parameter->config.object.item.intro,
+                                         &parameter->buffer, &parameter->size);
 
 error:
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static bool object_write_outro(EncodingParameter *parameter) {
 
-  if (!parameter || !parameter->config.object.item.intro)
-    goto error;
+    if (!parameter || !parameter->config.object.item.intro)
+        goto error;
 
-  if (!parameter->config.object.item.outro)
-    goto error;
+    if (!parameter->config.object.item.outro)
+        goto error;
 
-  // write out e.g. \n
-  if (!json_parser_write_if_not_null(parameter->config.object.item.out,
-                                     &parameter->buffer, &parameter->size))
-    goto error;
+    // write out e.g. \n
+    if (!json_parser_write_if_not_null(parameter->config.object.item.out,
+                                       &parameter->buffer, &parameter->size))
+        goto error;
 
-  // write outro indent e.g. \t
+    // write outro indent e.g. \t
 
-  if (!object_write_indent(parameter))
-    goto error;
+    if (!object_write_indent(parameter))
+        goto error;
 
-  // write outro e.g. }
+    // write outro e.g. }
 
-  return json_parser_write_if_not_null(parameter->config.object.item.outro,
-                                       &parameter->buffer, &parameter->size);
+    return json_parser_write_if_not_null(parameter->config.object.item.outro,
+                                         &parameter->buffer, &parameter->size);
 
 error:
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1310,119 +1310,119 @@ static int64_t json_value_encode(dtn_item *value, EncodingParameter *parameter);
 static bool object_write_entry(const char *key_in, const dtn_item *value,
                                void *parameter) {
 
-  if (!key_in)
-    return true;
+    if (!key_in)
+        return true;
 
-  if (!key_in || !value || !parameter)
-    return false;
+    if (!key_in || !value || !parameter)
+        return false;
 
-  dtn_item *val = dtn_item_cast(value);
-  if (!val)
-    goto error;
+    dtn_item *val = dtn_item_cast(value);
+    if (!val)
+        goto error;
 
-  char *key = (char *)key_in;
-  size_t key_len = strlen(key);
-  EncodingParameter *para = (EncodingParameter *)parameter;
+    char *key = (char *)key_in;
+    size_t key_len = strlen(key);
+    EncodingParameter *para = (EncodingParameter *)parameter;
 
-  if (!object_write_indent(parameter))
-    goto error;
+    if (!object_write_indent(parameter))
+        goto error;
 
-  if (para->size < (strlen(key) + 2))
-    goto error;
+    if (para->size < (strlen(key) + 2))
+        goto error;
 
-  // write key
+    // write key
 
-  *para->buffer = '"';
-  para->buffer++;
+    *para->buffer = '"';
+    para->buffer++;
 
-  if (!memcpy(para->buffer, key, key_len))
-    goto error;
+    if (!memcpy(para->buffer, key, key_len))
+        goto error;
 
-  para->buffer += key_len;
+    para->buffer += key_len;
 
-  *para->buffer = '"';
-  para->buffer++;
+    *para->buffer = '"';
+    para->buffer++;
 
-  para->size -= key_len + 2;
+    para->size -= key_len + 2;
 
-  if (!json_parser_write_if_not_null(para->config.object.item.delimiter,
-                                     &para->buffer, &para->size))
-    goto error;
+    if (!json_parser_write_if_not_null(para->config.object.item.delimiter,
+                                       &para->buffer, &para->size))
+        goto error;
 
-  if (para->size < 2)
-    goto error;
+    if (para->size < 2)
+        goto error;
 
-  if (para->config.object.entry.depth) {
+    if (para->config.object.entry.depth) {
 
-    if (dtn_item_is_array(val)) {
+        if (dtn_item_is_array(val)) {
 
-      if (!dtn_item_is_empty(val)) {
+            if (!dtn_item_is_empty(val)) {
 
-        para->buffer[0] = '\n';
-        para->buffer++;
-        para->size--;
-      }
+                para->buffer[0] = '\n';
+                para->buffer++;
+                para->size--;
+            }
 
-    } else if (dtn_item_is_object(val)) {
+        } else if (dtn_item_is_object(val)) {
 
-      if (!dtn_item_is_empty(val)) {
+            if (!dtn_item_is_empty(val)) {
 
-        para->buffer[0] = '\n';
-        para->buffer++;
-        para->size--;
-      }
+                para->buffer[0] = '\n';
+                para->buffer++;
+                para->size--;
+            }
+        }
     }
-  }
 
-  if (json_value_encode(val, parameter) < 1)
-    goto error;
+    if (json_value_encode(val, parameter) < 1)
+        goto error;
 
-  if (!json_parser_write_if_not_null(para->config.object.item.separator,
-                                     &para->buffer, &para->size))
-    goto error;
+    if (!json_parser_write_if_not_null(para->config.object.item.separator,
+                                       &para->buffer, &para->size))
+        goto error;
 
-  return true;
+    return true;
 error:
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
 
 struct container1 {
 
-  dtn_item *object;
-  EncodingParameter *parameter;
+    dtn_item *object;
+    EncodingParameter *parameter;
 };
 
 /*----------------------------------------------------------------------------*/
 
 static bool object_write_ordered(void *item, void *data) {
 
-  if (!item || !data)
-    goto error;
+    if (!item || !data)
+        goto error;
 
-  struct container1 *container = (struct container1 *)data;
+    struct container1 *container = (struct container1 *)data;
 
-  if (!container->object || !container->parameter)
-    goto error;
+    if (!container->object || !container->parameter)
+        goto error;
 
-  dtn_item *value = dtn_item_object_get(container->object, (char *)item);
+    dtn_item *value = dtn_item_object_get(container->object, (char *)item);
 
-  if (!value)
-    goto error;
+    if (!value)
+        goto error;
 
-  return object_write_entry(item, value, container->parameter);
+    return object_write_entry(item, value, container->parameter);
 
 error:
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
 
 struct parameter_order {
 
-  dtn_list *list;
-  bool (*collocate_key)(const char *key, dtn_list *list);
+    dtn_list *list;
+    bool (*collocate_key)(const char *key, dtn_list *list);
 };
 
 /*----------------------------------------------------------------------------*/
@@ -1430,48 +1430,48 @@ struct parameter_order {
 static bool add_key_collocated(const char *key, const dtn_item *value,
                                void *data) {
 
-  if (!key)
-    return true;
+    if (!key)
+        return true;
 
-  if (!value || !data)
-    return false;
+    if (!value || !data)
+        return false;
 
-  struct parameter_order *d = (struct parameter_order *)data;
-  if (!d->list || !d->collocate_key)
-    goto error;
+    struct parameter_order *d = (struct parameter_order *)data;
+    if (!d->list || !d->collocate_key)
+        goto error;
 
-  return d->collocate_key((char *)key, d->list);
+    return d->collocate_key((char *)key, d->list);
 error:
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static dtn_list *collocate_object_keys(const dtn_item *value,
-                                      bool (*function)(const char *key,
-                                                       dtn_list *list)) {
+                                       bool (*function)(const char *key,
+                                                        dtn_list *list)) {
 
-  dtn_list *list = NULL;
+    dtn_list *list = NULL;
 
-  if (!value || !function)
-    goto error;
+    if (!value || !function)
+        goto error;
 
-  list = dtn_list_create((dtn_list_config){0});
+    list = dtn_list_create((dtn_list_config){0});
 
-  struct parameter_order data = {
+    struct parameter_order data = {
 
-      .list = list,
-      .collocate_key = function,
-  };
+        .list = list,
+        .collocate_key = function,
+    };
 
-  if (!dtn_item_object_for_each((dtn_item *)value, add_key_collocated, &data))
-    goto error;
+    if (!dtn_item_object_for_each((dtn_item *)value, add_key_collocated, &data))
+        goto error;
 
-  return list;
+    return list;
 error:
-  if (list)
-    list->free(list);
-  return NULL;
+    if (list)
+        list->free(list);
+    return NULL;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1479,157 +1479,157 @@ error:
 static int64_t parser_encode_object(dtn_item *value,
                                     EncodingParameter *parameter) {
 
-  dtn_list *list = NULL;
+    dtn_list *list = NULL;
 
-  if (!value || !parameter)
-    goto error;
+    if (!value || !parameter)
+        goto error;
 
-  char *start = parameter->buffer;
-  size_t items = dtn_item_count(value);
+    char *start = parameter->buffer;
+    size_t items = dtn_item_count(value);
 
-  if (items == 0) {
+    if (items == 0) {
 
-    if (parameter->size < 2)
-      goto error;
+        if (parameter->size < 2)
+            goto error;
 
-    if (!memcpy(parameter->buffer, "{}", 2))
-      goto error;
+        if (!memcpy(parameter->buffer, "{}", 2))
+            goto error;
 
-    parameter->buffer += 2;
-    parameter->size -= 2;
-    goto done;
-  }
+        parameter->buffer += 2;
+        parameter->size -= 2;
+        goto done;
+    }
 
-  // not empty
+    // not empty
 
-  if (!object_write_intro(parameter))
-    goto error;
+    if (!object_write_intro(parameter))
+        goto error;
 
-  // write childs with depth +1
-  parameter->depth++;
+    // write childs with depth +1
+    parameter->depth++;
 
-  if (parameter->collocate_keys) {
+    if (parameter->collocate_keys) {
 
-    // write ordered
-    list = collocate_object_keys(value, parameter->collocate_keys);
-    if (!list)
-      goto error;
+        // write ordered
+        list = collocate_object_keys(value, parameter->collocate_keys);
+        if (!list)
+            goto error;
 
-    struct container1 container = {
+        struct container1 container = {
 
-        .object = (dtn_item *)value, .parameter = parameter};
+            .object = (dtn_item *)value, .parameter = parameter};
 
-    if (!dtn_list_for_each(list, &container, object_write_ordered))
-      goto error;
+        if (!dtn_list_for_each(list, &container, object_write_ordered))
+            goto error;
 
-  } else {
+    } else {
 
-    // unordered
-    if (!dtn_item_object_for_each(value, object_write_entry, parameter))
-      goto error;
+        // unordered
+        if (!dtn_item_object_for_each(value, object_write_entry, parameter))
+            goto error;
 
-    goto error;
-  }
+        goto error;
+    }
 
-  parameter->depth--;
+    parameter->depth--;
 
-  // offset last separator
-  size_t len = strlen(parameter->config.object.item.separator);
-  parameter->buffer -= len;
-  parameter->size += len;
+    // offset last separator
+    size_t len = strlen(parameter->config.object.item.separator);
+    parameter->buffer -= len;
+    parameter->size += len;
 
-  if (!object_write_outro(parameter))
-    goto error;
+    if (!object_write_outro(parameter))
+        goto error;
 done:
-  list = dtn_list_free(list);
-  return (parameter->buffer - start);
+    list = dtn_list_free(list);
+    return (parameter->buffer - start);
 
 error:
-  list = dtn_list_free(list);
-  return -1;
+    list = dtn_list_free(list);
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static bool array_write_indent(EncodingParameter *parameter) {
 
-  if (!parameter)
-    goto error;
+    if (!parameter)
+        goto error;
 
-  bool enabled = parameter->config.array.entry.depth;
-  char *indent = parameter->config.array.entry.indent;
+    bool enabled = parameter->config.array.entry.depth;
+    char *indent = parameter->config.array.entry.indent;
 
-  size_t len = 0;
+    size_t len = 0;
 
-  if (!enabled || !indent)
+    if (!enabled || !indent)
+        return true;
+
+    len = strlen(indent);
+
+    if (parameter->size < parameter->depth * len)
+        goto error;
+
+    for (size_t i = 0; i < parameter->depth; i++) {
+
+        if (parameter->size <= len)
+            goto error;
+
+        if (!memcpy(parameter->buffer, indent, len))
+            goto error;
+
+        parameter->buffer += len;
+        parameter->size -= len;
+    }
+
     return true;
-
-  len = strlen(indent);
-
-  if (parameter->size < parameter->depth * len)
-    goto error;
-
-  for (size_t i = 0; i < parameter->depth; i++) {
-
-    if (parameter->size <= len)
-      goto error;
-
-    if (!memcpy(parameter->buffer, indent, len))
-      goto error;
-
-    parameter->buffer += len;
-    parameter->size -= len;
-  }
-
-  return true;
 error:
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static bool array_write_intro(EncodingParameter *parameter) {
 
-  if (!parameter || !parameter->config.array.item.intro)
-    goto error;
+    if (!parameter || !parameter->config.array.item.intro)
+        goto error;
 
-  if (!array_write_indent(parameter))
-    goto error;
+    if (!array_write_indent(parameter))
+        goto error;
 
-  return json_parser_write_if_not_null(parameter->config.array.item.intro,
-                                       &parameter->buffer, &parameter->size);
+    return json_parser_write_if_not_null(parameter->config.array.item.intro,
+                                         &parameter->buffer, &parameter->size);
 
 error:
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static bool array_write_outro(EncodingParameter *parameter) {
 
-  if (!parameter || !parameter->config.array.item.intro)
-    goto error;
+    if (!parameter || !parameter->config.array.item.intro)
+        goto error;
 
-  if (!parameter->config.array.item.outro)
-    goto error;
+    if (!parameter->config.array.item.outro)
+        goto error;
 
-  // write out e.g. \n
-  if (!json_parser_write_if_not_null(parameter->config.array.item.out,
-                                     &parameter->buffer, &parameter->size))
-    goto error;
+    // write out e.g. \n
+    if (!json_parser_write_if_not_null(parameter->config.array.item.out,
+                                       &parameter->buffer, &parameter->size))
+        goto error;
 
-  // write outro indent e.g. \t
+    // write outro indent e.g. \t
 
-  if (!array_write_indent(parameter))
-    goto error;
+    if (!array_write_indent(parameter))
+        goto error;
 
-  // write outro e.g. ]
+    // write outro e.g. ]
 
-  return json_parser_write_if_not_null(parameter->config.array.item.outro,
-                                       &parameter->buffer, &parameter->size);
+    return json_parser_write_if_not_null(parameter->config.array.item.outro,
+                                         &parameter->buffer, &parameter->size);
 
 error:
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1637,167 +1637,170 @@ error:
 static int64_t parser_encode_array(dtn_item *value,
                                    EncodingParameter *parameter) {
 
-  if (!value || !parameter)
-    goto error;
-
-  char *start = parameter->buffer;
-
-  // empty (always without indent!)
-  size_t items = dtn_item_count(value);
-
-  if (items == 0) {
-
-    if (!memcpy(parameter->buffer, "[]", 2))
-      goto error;
-
-    parameter->buffer += 2;
-    parameter->size -= 2;
-    goto done;
-  }
-
-  // non empty (use of configured indent)
-
-  if (!array_write_intro(parameter))
-    goto error;
-
-  dtn_item *child = NULL;
-
-  // write childs with depth +1
-  parameter->depth++;
-
-  bool write_indent = false;
-  for (size_t i = 1; i <= items; i++) {
-
-    child = dtn_item_array_get(value, i);
-    if (!child)
-      goto error;
-
-    write_indent = true;
-
-    if (dtn_item_is_array(child)) {
-
-      if (!dtn_item_is_empty(child))
-        write_indent = false;
-
-    } else if (dtn_item_is_object(child)) {
-
-      if (!dtn_item_is_empty(child))
-        write_indent = false;
-    }
-
-    if (write_indent)
-      if (!array_write_indent(parameter))
+    if (!value || !parameter)
         goto error;
 
-    if (json_value_encode(child, parameter) < 1)
-      goto error;
+    char *start = parameter->buffer;
 
-    if (i < items) {
+    // empty (always without indent!)
+    size_t items = dtn_item_count(value);
 
-      if (!json_parser_write_if_not_null(parameter->config.array.item.separator,
-                                         &parameter->buffer, &parameter->size))
-        goto error;
+    if (items == 0) {
+
+        if (!memcpy(parameter->buffer, "[]", 2))
+            goto error;
+
+        parameter->buffer += 2;
+        parameter->size -= 2;
+        goto done;
     }
-  }
 
-  parameter->depth--;
+    // non empty (use of configured indent)
 
-  if (!array_write_outro(parameter))
-    goto error;
+    if (!array_write_intro(parameter))
+        goto error;
+
+    dtn_item *child = NULL;
+
+    // write childs with depth +1
+    parameter->depth++;
+
+    bool write_indent = false;
+    for (size_t i = 1; i <= items; i++) {
+
+        child = dtn_item_array_get(value, i);
+        if (!child)
+            goto error;
+
+        write_indent = true;
+
+        if (dtn_item_is_array(child)) {
+
+            if (!dtn_item_is_empty(child))
+                write_indent = false;
+
+        } else if (dtn_item_is_object(child)) {
+
+            if (!dtn_item_is_empty(child))
+                write_indent = false;
+        }
+
+        if (write_indent)
+            if (!array_write_indent(parameter))
+                goto error;
+
+        if (json_value_encode(child, parameter) < 1)
+            goto error;
+
+        if (i < items) {
+
+            if (!json_parser_write_if_not_null(
+                    parameter->config.array.item.separator, &parameter->buffer,
+                    &parameter->size))
+                goto error;
+        }
+    }
+
+    parameter->depth--;
+
+    if (!array_write_outro(parameter))
+        goto error;
 
 done:
-  return (parameter->buffer - start);
+    return (parameter->buffer - start);
 
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
 
-static int64_t json_value_encode(dtn_item *value, EncodingParameter *parameter) {
+static int64_t json_value_encode(dtn_item *value,
+                                 EncodingParameter *parameter) {
 
-  if (!value || !parameter)
-    goto error;
+    if (!value || !parameter)
+        goto error;
 
-  if (dtn_item_is_null((dtn_item *)value)) {
+    if (dtn_item_is_null((dtn_item *)value)) {
 
-    return parser_encode_null(value, parameter);
+        return parser_encode_null(value, parameter);
 
-  } else if (dtn_item_is_false((dtn_item *)value)) {
+    } else if (dtn_item_is_false((dtn_item *)value)) {
 
-    return parser_encode_false(value, parameter);
+        return parser_encode_false(value, parameter);
 
-  } else if (dtn_item_is_true((dtn_item *)value)) {
+    } else if (dtn_item_is_true((dtn_item *)value)) {
 
-    return parser_encode_true(value, parameter);
+        return parser_encode_true(value, parameter);
 
-  } else if (dtn_item_is_string((dtn_item *)value)) {
+    } else if (dtn_item_is_string((dtn_item *)value)) {
 
-    return parser_encode_string(value, parameter);
+        return parser_encode_string(value, parameter);
 
-  } else if (dtn_item_is_number((dtn_item *)value)) {
+    } else if (dtn_item_is_number((dtn_item *)value)) {
 
-    return parser_encode_number(value, parameter);
+        return parser_encode_number(value, parameter);
 
-  } else if (dtn_item_is_array((dtn_item *)value)) {
+    } else if (dtn_item_is_array((dtn_item *)value)) {
 
-    return parser_encode_array(value, parameter);
+        return parser_encode_array(value, parameter);
 
-  } else if (dtn_item_is_object((dtn_item *)value)) {
+    } else if (dtn_item_is_object((dtn_item *)value)) {
 
-    return parser_encode_object(value, parameter);
-  }
-
-error:
-  return -1;
-}
-
-/*----------------------------------------------------------------------------*/
-
-static bool dtn_json_parser_collocate_ascending(const char *key, dtn_list *list) {
-
-  if (!key || !dtn_list_cast(list))
-    return false;
-
-  uint8_t *k = (uint8_t *)key;
-  uint8_t *s = NULL;
-
-  size_t klen = strlen(key);
-  size_t slen = 0;
-  size_t len = 0;
-
-  for (size_t i = 1; i <= list->count(list); i++) {
-
-    s = list->get(list, i);
-    slen = strlen((char *)s);
-    len = klen;
-    if (slen < klen)
-      len = slen;
-
-    for (size_t x = 0; x <= len; x++) {
-
-      if (k[x] < s[x]) {
-
-        if (!list->insert(list, i, (void *)key))
-          goto error;
-
-        return true;
-      }
-
-      if (k[x] != s[x])
-        break;
+        return parser_encode_object(value, parameter);
     }
 
-    // check against next item
-  }
-
-  // not returned?
-  if (!list->push(list, (void *)key))
-    goto error;
-
-  return true;
 error:
-  return false;
+    return -1;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static bool dtn_json_parser_collocate_ascending(const char *key,
+                                                dtn_list *list) {
+
+    if (!key || !dtn_list_cast(list))
+        return false;
+
+    uint8_t *k = (uint8_t *)key;
+    uint8_t *s = NULL;
+
+    size_t klen = strlen(key);
+    size_t slen = 0;
+    size_t len = 0;
+
+    for (size_t i = 1; i <= list->count(list); i++) {
+
+        s = list->get(list, i);
+        slen = strlen((char *)s);
+        len = klen;
+        if (slen < klen)
+            len = slen;
+
+        for (size_t x = 0; x <= len; x++) {
+
+            if (k[x] < s[x]) {
+
+                if (!list->insert(list, i, (void *)key))
+                    goto error;
+
+                return true;
+            }
+
+            if (k[x] != s[x])
+                break;
+        }
+
+        // check against next item
+    }
+
+    // not returned?
+    if (!list->push(list, (void *)key))
+        goto error;
+
+    return true;
+error:
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1806,386 +1809,388 @@ static int64_t parser_encode(dtn_item *value,
                              const dtn_item_json_stringify_config *conf,
                              char *buffer, size_t size) {
 
-  if (!value || !buffer || size < 1)
-    goto error;
+    if (!value || !buffer || size < 1)
+        goto error;
 
-  EncodingParameter parameter = {
+    EncodingParameter parameter = {
 
-      .buffer = buffer,
-      .size = size,
-      .depth = 0,
-      .counter = 0,
-      .collocate_keys = dtn_json_parser_collocate_ascending};
+        .buffer = buffer,
+        .size = size,
+        .depth = 0,
+        .counter = 0,
+        .collocate_keys = dtn_json_parser_collocate_ascending};
 
-  if (conf) {
-    parameter.config = *conf;
-  } else {
-    parameter.config = dtn_item_json_config_stringify_minimal();
-  }
+    if (conf) {
+        parameter.config = *conf;
+    } else {
+        parameter.config = dtn_item_json_config_stringify_minimal();
+    }
 
-  size_t len = 0;
+    size_t len = 0;
 
-  if (NULL != parameter.config.intro) {
+    if (NULL != parameter.config.intro) {
 
-    len = strlen(parameter.config.intro);
-    if (len >= size)
-      goto error;
+        len = strlen(parameter.config.intro);
+        if (len >= size)
+            goto error;
 
-    if (!memcpy(buffer, parameter.config.intro, len))
-      goto error;
+        if (!memcpy(buffer, parameter.config.intro, len))
+            goto error;
 
-    parameter.buffer += len;
-    parameter.size -= len;
-  }
+        parameter.buffer += len;
+        parameter.size -= len;
+    }
 
-  int64_t result = json_value_encode(value, &parameter);
-  if (result < 0)
-    goto error;
-  result += len;
-
-  if (NULL != parameter.config.outro) {
-
-    int64_t used = parameter.buffer - buffer;
-    if (used < 0)
-      goto error;
-
-    len = strlen(parameter.config.outro);
-    if (len > size - used)
-      goto error;
-
-    if (!memcpy(parameter.buffer, parameter.config.outro, len))
-      goto error;
-
+    int64_t result = json_value_encode(value, &parameter);
+    if (result < 0)
+        goto error;
     result += len;
-  }
 
-  return result;
+    if (NULL != parameter.config.outro) {
+
+        int64_t used = parameter.buffer - buffer;
+        if (used < 0)
+            goto error;
+
+        len = strlen(parameter.config.outro);
+        if (len > size - used)
+            goto error;
+
+        if (!memcpy(parameter.buffer, parameter.config.outro, len))
+            goto error;
+
+        result += len;
+    }
+
+    return result;
 
 error:
-  return -1;
+    return -1;
 }
 
 /*----------------------------------------------------------------------------*/
 
 char *dtn_item_to_json_with_config(const dtn_item *value,
-                                  dtn_item_json_stringify_config config) {
+                                   dtn_item_json_stringify_config config) {
 
-  char *string = NULL;
+    char *string = NULL;
 
-  if (!dtn_item_cast(value))
-    goto error;
+    if (!dtn_item_cast(value))
+        goto error;
 
-  int64_t size = parser_calculate(value, &config);
-  if (size < 0)
-    goto error;
+    int64_t size = parser_calculate(value, &config);
+    if (size < 0)
+        goto error;
 
-  string = calloc(size + 1, sizeof(char));
-  if (!string)
-    goto error;
+    string = calloc(size + 1, sizeof(char));
+    if (!string)
+        goto error;
 
-  if (0 > parser_encode((dtn_item *)value, &config, string, size))
-    goto error;
+    if (0 > parser_encode((dtn_item *)value, &config, string, size))
+        goto error;
 
-  return string;
+    return string;
 error:
-  if (string)
-    free(string);
-  return NULL;
+    if (string)
+        free(string);
+    return NULL;
 }
 
 /*---------------------------------------------------------------------------*/
 
 char *dtn_item_to_json(const dtn_item *self) {
 
-  char *out = NULL;
+    char *out = NULL;
 
-  if (!self)
-    goto error;
+    if (!self)
+        goto error;
 
-  return dtn_item_to_json_with_config(self,
-                                     dtn_item_json_config_stringify_default());
+    return dtn_item_to_json_with_config(
+        self, dtn_item_json_config_stringify_default());
 
-  return out;
+    return out;
 error:
-  return NULL;
+    return NULL;
 }
-
 
 /*----------------------------------------------------------------------------*/
 
 dtn_item *dtn_item_json_read_file(const char *path) {
 
-  char *buffer = NULL;
-  dtn_item *value = NULL;
+    char *buffer = NULL;
+    dtn_item *value = NULL;
 
-  if (!path)
-    goto error;
-
-  size_t size = 0;
-  size_t filesize = 0;
-  size_t read = 0;
-
-  if (access(path, F_OK) == -1) {
-
-    dtn_log_warning("JSON READ, file (%s) "
-                   "does not exist or no access.",
-                   path);
-
-    goto error;
-  }
-
-  FILE *fp = fopen(path, "r");
-
-  if (fp != NULL) {
-
-    if (fseek(fp, 0L, SEEK_END) == 0) {
-
-      filesize = ftell(fp);
-
-      if ((int)filesize == -1) {
-        dtn_log_error("JSON READ, file (%s) "
-                     "could not read file size.",
-                     path);
-        fclose(fp);
+    if (!path)
         goto error;
-      }
 
-      size = filesize + 2;
-      buffer = calloc(size + 1, sizeof(char));
+    size_t size = 0;
+    size_t filesize = 0;
+    size_t read = 0;
 
-      if (fseek(fp, 0L, SEEK_SET) == 0) {
+    if (access(path, F_OK) == -1) {
 
-        read = fread(buffer, sizeof(char), filesize, fp);
+        dtn_log_warning("JSON READ, file (%s) "
+                        "does not exist or no access.",
+                        path);
 
-        if (read == 0) {
-
-          dtn_log_error("JSON READ, file (%s) "
-                       "could not read file.",
-                       path);
-          fclose(fp);
-          goto error;
-        }
-
-      } else {
-
-        dtn_log_error("JSON READ, file (%s) "
-                     "could not get back to start.",
-                     path);
-
-        fclose(fp);
         goto error;
-      }
     }
 
-    fclose(fp);
+    FILE *fp = fopen(path, "r");
 
-  } else {
+    if (fp != NULL) {
 
-    dtn_log_error("JSON READ, file (%s) "
-                 "could not open file.");
+        if (fseek(fp, 0L, SEEK_END) == 0) {
 
-    fclose(fp);
-    goto error;
-  }
+            filesize = ftell(fp);
 
-  int64_t r = json_decode(&value, buffer, size);
+            if ((int)filesize == -1) {
+                dtn_log_error("JSON READ, file (%s) "
+                              "could not read file size.",
+                              path);
+                fclose(fp);
+                goto error;
+            }
 
-  if (r < 0) goto error;
+            size = filesize + 2;
+            buffer = calloc(size + 1, sizeof(char));
 
-  if (!value) {
+            if (fseek(fp, 0L, SEEK_SET) == 0) {
 
-    dtn_log_error("JSON READ, file (%s) "
-                 "could not parse JSON.",
-                 path);
-    goto error;
-  }
+                read = fread(buffer, sizeof(char), filesize, fp);
 
-  if (buffer)
-    free(buffer);
+                if (read == 0) {
 
-  return value;
+                    dtn_log_error("JSON READ, file (%s) "
+                                  "could not read file.",
+                                  path);
+                    fclose(fp);
+                    goto error;
+                }
+
+            } else {
+
+                dtn_log_error("JSON READ, file (%s) "
+                              "could not get back to start.",
+                              path);
+
+                fclose(fp);
+                goto error;
+            }
+        }
+
+        fclose(fp);
+
+    } else {
+
+        dtn_log_error("JSON READ, file (%s) "
+                      "could not open file.");
+
+        fclose(fp);
+        goto error;
+    }
+
+    int64_t r = json_decode(&value, buffer, size);
+
+    if (r < 0)
+        goto error;
+
+    if (!value) {
+
+        dtn_log_error("JSON READ, file (%s) "
+                      "could not parse JSON.",
+                      path);
+        goto error;
+    }
+
+    if (buffer)
+        free(buffer);
+
+    return value;
 
 error:
-  if (buffer)
-    free(buffer);
-  dtn_item_free(value);
-  return NULL;
+    if (buffer)
+        free(buffer);
+    dtn_item_free(value);
+    return NULL;
 }
 
 /*----------------------------------------------------------------------------*/
 
 dtn_item *dtn_item_json_read_dir(const char *path, const char *extension) {
 
-  dtn_item *value = NULL;
-  dtn_item *content = NULL;
+    dtn_item *value = NULL;
+    dtn_item *content = NULL;
 
-  if (!path)
-    goto error;
+    if (!path)
+        goto error;
 
-  errno = 0;
+    errno = 0;
 
-  DIR *dp;
-  struct dirent *ep;
+    DIR *dp;
+    struct dirent *ep;
 
-  size_t extlen = 0;
-  size_t dirlen = strlen(path);
+    size_t extlen = 0;
+    size_t dirlen = strlen(path);
 
-  char filename[PATH_MAX + 1];
-  memset(filename, 0, PATH_MAX + 1);
+    char filename[PATH_MAX + 1];
+    memset(filename, 0, PATH_MAX + 1);
 
-  int len, i;
-
-  if (extension) {
-    extlen = strlen(extension);
-    if (extlen == 0)
-      goto error;
-  }
-
-  value = dtn_item_object();
-  if (!value) {
-
-    dtn_log_error("Could not create object");
-    goto error;
-  }
-
-  dp = opendir(path);
-
-  if (dp == NULL) {
-
-    dtn_log_debug("JSON LOAD,"
-                 "could not open dir %s ERRNO %i | %s",
-                 path, errno, strerror(errno));
-    goto error;
-  }
-
-  while ((ep = readdir(dp))) {
-
-    content = NULL;
-    memset(filename, 0, PATH_MAX);
-
-    /*
-     *  Do not try to read /. or /..
-     */
-
-    if (0 == strcmp(ep->d_name, ".") || (0 == strcmp(ep->d_name, "..")))
-      continue;
-
-    strcpy(filename, path);
-    if (path[dirlen] != '/')
-      strncat(filename, "/", PATH_MAX);
-
-    strcat(filename, ep->d_name);
-
-    len = strlen(ep->d_name);
-    i = len;
-    while (i > 0) {
-      if (ep->d_name[i] == '.')
-        break;
-      i--;
-    }
+    int len, i;
 
     if (extension) {
+        extlen = strlen(extension);
+        if (extlen == 0)
+            goto error;
+    }
 
-      if (1 > 0) {
+    value = dtn_item_object();
+    if (!value) {
 
-        // file with extension
-        if (0 == strncmp(ep->d_name + i + 1, extension, extlen)) {
+        dtn_log_error("Could not create object");
+        goto error;
+    }
 
-          // same extension as input extension
-          content = dtn_item_json_read_file(filename);
+    dp = opendir(path);
+
+    if (dp == NULL) {
+
+        dtn_log_debug("JSON LOAD,"
+                      "could not open dir %s ERRNO %i | %s",
+                      path, errno, strerror(errno));
+        goto error;
+    }
+
+    while ((ep = readdir(dp))) {
+
+        content = NULL;
+        memset(filename, 0, PATH_MAX);
+
+        /*
+         *  Do not try to read /. or /..
+         */
+
+        if (0 == strcmp(ep->d_name, ".") || (0 == strcmp(ep->d_name, "..")))
+            continue;
+
+        strcpy(filename, path);
+        if (path[dirlen] != '/')
+            strncat(filename, "/", PATH_MAX);
+
+        strcat(filename, ep->d_name);
+
+        len = strlen(ep->d_name);
+        i = len;
+        while (i > 0) {
+            if (ep->d_name[i] == '.')
+                break;
+            i--;
         }
-        // ignore files with wrong extension
-      }
-      // ignore files without extension
 
-    } else {
+        if (extension) {
 
-      // read all
-      content = dtn_item_json_read_file(filename);
+            if (1 > 0) {
+
+                // file with extension
+                if (0 == strncmp(ep->d_name + i + 1, extension, extlen)) {
+
+                    // same extension as input extension
+                    content = dtn_item_json_read_file(filename);
+                }
+                // ignore files with wrong extension
+            }
+            // ignore files without extension
+
+        } else {
+
+            // read all
+            content = dtn_item_json_read_file(filename);
+        }
+
+        if (content) {
+
+            if (!dtn_item_object_set(value, ep->d_name, content)) {
+
+                dtn_log_debug("JSON LOAD, file (%s) "
+                              "failure adding content.",
+                              filename);
+
+                content = dtn_item_free(content);
+            }
+        }
     }
 
-    if (content) {
+    (void)closedir(dp);
 
-      if (!dtn_item_object_set(value, ep->d_name, content)) {
-
-        dtn_log_debug("JSON LOAD, file (%s) "
-                     "failure adding content.",
-                     filename);
-
-        content = dtn_item_free(content);
-      }
-    }
-  }
-
-  (void)closedir(dp);
-
-  return value;
+    return value;
 error:
-  dtn_item_free(value);
-  return NULL;
+    dtn_item_free(value);
+    return NULL;
 }
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_item_json_write_file(const char *path, const dtn_item *value) {
 
-  if (!path || !value)
-    return false;
+    if (!path || !value)
+        return false;
 
-  size_t count = 0;
-  char *string = dtn_item_to_json(value);
+    size_t count = 0;
+    char *string = dtn_item_to_json(value);
 
-  FILE *fp = fopen(path, "w");
+    FILE *fp = fopen(path, "w");
 
-  if (fp != NULL) {
+    if (fp != NULL) {
 
-    count = fprintf(fp, "%s\n", string);
-    fclose(fp);
+        count = fprintf(fp, "%s\n", string);
+        fclose(fp);
 
-    if (count > 0) {
-      /*
-                  dtn_log_debug("JSON WRITE, file (%s), "
-                               "wrote %jd bytes.",
-                               path,
-                               count);
-      */
+        if (count > 0) {
+            /*
+                        dtn_log_debug("JSON WRITE, file (%s), "
+                                     "wrote %jd bytes.",
+                                     path,
+                                     count);
+            */
+        } else {
+
+            dtn_log_error("JSON WRITE, file (%s), "
+                          "could not write",
+                          path);
+
+            goto error;
+        }
+
     } else {
 
-      dtn_log_error("JSON WRITE, file (%s), "
-                   "could not write",
-                   path);
+        dtn_log_error("JSON WRITE, file (%s), "
+                      "could not open path for write",
+                      path);
 
-      goto error;
+        goto error;
     }
 
-  } else {
+    string = dtn_data_pointer_free(string);
 
-    dtn_log_error("JSON WRITE, file (%s), "
-                 "could not open path for write",
-                 path);
-
-    goto error;
-  }
-
-  string = dtn_data_pointer_free(string);
-
-  return true;
+    return true;
 
 error:
-  string = dtn_data_pointer_free(string);
-  return false;
+    string = dtn_data_pointer_free(string);
+    return false;
 }
 
-dtn_item *dtn_item_from_json_string(const char* string, size_t size){
+dtn_item *dtn_item_from_json_string(const char *string, size_t size) {
 
-  dtn_item *out = NULL;
-  if (!string || !size) goto error;
+    dtn_item *out = NULL;
+    if (!string || !size)
+        goto error;
 
-  int64_t len = json_decode(&out, string, size);
-  if (len != (int64_t) size) goto error;
+    int64_t len = json_decode(&out, string, size);
+    if (len != (int64_t)size)
+        goto error;
 
-  return out;
+    return out;
 error:
-  dtn_item_free(out);
-  return NULL;
+    dtn_item_free(out);
+    return NULL;
 }

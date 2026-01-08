@@ -31,8 +31,8 @@
         ------------------------------------------------------------------------
 */
 
-#include "dtn_file.c"
 #include "../include/testrun.h"
+#include "dtn_file.c"
 
 /*
  *      ------------------------------------------------------------------------
@@ -43,10 +43,7 @@
  */
 /*----------------------------------------------------------------------------*/
 
-int dummy() {
-
-  return testrun_log_success();
-}
+int dummy() { return testrun_log_success(); }
 
 /*
  *      ------------------------------------------------------------------------
@@ -58,10 +55,10 @@ int dummy() {
 
 int all_tests() {
 
-  testrun_init();
-  testrun_test(dummy);
+    testrun_init();
+    testrun_test(dummy);
 
-  return testrun_counter;
+    return testrun_counter;
 }
 
 /*

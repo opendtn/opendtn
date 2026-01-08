@@ -128,7 +128,8 @@
 
         @return true on success, false else.
  */
-bool dtn_byteorder_swap_bytes_16_bit(int16_t *array, size_t number_16_bit_words);
+bool dtn_byteorder_swap_bytes_16_bit(int16_t *array,
+                                     size_t number_16_bit_words);
 
 /*---------------------------------------------------------------------------*/
 
@@ -141,7 +142,7 @@ bool dtn_byteorder_swap_bytes_16_bit(int16_t *array, size_t number_16_bit_words)
         @return true on success, false else.
  */
 bool dtn_byteorder_from_little_endian_16_bit(int16_t *array,
-                                            size_t number_16_bit_words);
+                                             size_t number_16_bit_words);
 
 /*---------------------------------------------------------------------------*/
 
@@ -154,7 +155,7 @@ bool dtn_byteorder_from_little_endian_16_bit(int16_t *array,
         @return true on success, false else.
  */
 bool dtn_byteorder_from_big_endian_16_bit(int16_t *array,
-                                         size_t number_16_bit_words);
+                                          size_t number_16_bit_words);
 
 /*---------------------------------------------------------------------------*/
 
@@ -167,7 +168,7 @@ bool dtn_byteorder_from_big_endian_16_bit(int16_t *array,
         @return true on success, false else.
  */
 bool dtn_byteorder_to_little_endian_16_bit(int16_t *array,
-                                          size_t number_16_bit_words);
+                                           size_t number_16_bit_words);
 
 /*---------------------------------------------------------------------------*/
 
@@ -180,7 +181,7 @@ bool dtn_byteorder_to_little_endian_16_bit(int16_t *array,
         @return true on success, false else.
  */
 bool dtn_byteorder_to_big_endian_16_bit(int16_t *array,
-                                       size_t number_16_bit_words);
+                                        size_t number_16_bit_words);
 
 /*----------------------------------------------------------------------------*/
 /* 'INTERNALS'                                                                */

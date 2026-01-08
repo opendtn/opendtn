@@ -76,7 +76,7 @@ bool dtn_dump_socket_sockaddr(FILE *stream, struct sockaddr *addr);
         Dump the content of the sockaddr_storage to stream.
 */
 bool dtn_dump_socket_sockaddr_storage(FILE *stream,
-                                     struct sockaddr_storage *addr);
+                                      struct sockaddr_storage *addr);
 
 /*---------------------------------------------------------------------------*/
 

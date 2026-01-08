@@ -54,21 +54,21 @@ static dtn_registered_cache *g_cache = 0;
 
 struct internal_ringbuffer {
 
-  dtn_ringbuffer public_stuff;
+    dtn_ringbuffer public_stuff;
 
-  size_t capacity;
+    size_t capacity;
 
-  /* access indices - point to the content entry to access NEXT */
-  /* read == write -> buffer empty */
-  size_t read;
-  size_t write;
+    /* access indices - point to the content entry to access NEXT */
+    /* read == write -> buffer empty */
+    size_t read;
+    size_t write;
 
-  void **content;
+    void **content;
 
-  void *additional_arg;
-  void (*free_element)(void *, void *);
+    void *additional_arg;
+    void (*free_element)(void *, void *);
 
-  dtn_ringbuffer_statistics statistics;
+    dtn_ringbuffer_statistics statistics;
 };
 
 /******************************************************************************
@@ -104,9 +104,9 @@ ringbuffer_get_statistics(const dtn_ringbuffer *self);
 
 static void free_element_dummy(void *a, void *b) {
 
-  UNUSED(a);
-  UNUSED(b);
-  /* Dummy function */
+    UNUSED(a);
+    UNUSED(b);
+    /* Dummy function */
 }
 
 /*----------------------------------------------------------------------------*/
@@ -114,60 +114,60 @@ static void free_element_dummy(void *a, void *b) {
 static void drop_element_nocheck(struct internal_ringbuffer *internal,
                                  size_t index) {
 
-  DTN_ASSERT(0 != internal);
-  DTN_ASSERT(index < internal->capacity);
-  DTN_ASSERT(1 < internal->capacity);
+    DTN_ASSERT(0 != internal);
+    DTN_ASSERT(index < internal->capacity);
+    DTN_ASSERT(1 < internal->capacity);
 
-  void *content = internal->content[index];
+    void *content = internal->content[index];
 
-  if (0 != content) {
-    internal->free_element(internal->additional_arg, content);
-    ++internal->statistics.elements_dropped;
-  }
+    if (0 != content) {
+        internal->free_element(internal->additional_arg, content);
+        ++internal->statistics.elements_dropped;
+    }
 
-  internal->content[index] = 0;
+    internal->content[index] = 0;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static void advance_read(struct internal_ringbuffer *internal) {
 
-  DTN_ASSERT(0 != internal);
-  DTN_ASSERT(1 < internal->capacity);
+    DTN_ASSERT(0 != internal);
+    DTN_ASSERT(1 < internal->capacity);
 
-  /* Element we 'read' should have been emptied */
-  DTN_ASSERT(0 == internal->content[internal->read]);
+    /* Element we 'read' should have been emptied */
+    DTN_ASSERT(0 == internal->content[internal->read]);
 
-  ++internal->read;
+    ++internal->read;
 
-  if (internal->read >= internal->capacity) {
+    if (internal->read >= internal->capacity) {
 
-    internal->read = 0;
-  }
+        internal->read = 0;
+    }
 }
 
 /*----------------------------------------------------------------------------*/
 
 static void advance_write(struct internal_ringbuffer *internal) {
 
-  DTN_ASSERT(0 != internal);
-  DTN_ASSERT(1 < internal->capacity);
+    DTN_ASSERT(0 != internal);
+    DTN_ASSERT(1 < internal->capacity);
 
-  ++internal->write;
+    ++internal->write;
 
-  if (internal->write >= internal->capacity) {
+    if (internal->write >= internal->capacity) {
 
-    internal->write = 0;
-  }
+        internal->write = 0;
+    }
 
-  drop_element_nocheck(internal, internal->write);
+    drop_element_nocheck(internal, internal->write);
 
-  if (internal->write == internal->read) {
+    if (internal->write == internal->read) {
 
-    advance_read(internal);
-  }
+        advance_read(internal);
+    }
 
-  DTN_ASSERT(internal->write != internal->read);
+    DTN_ASSERT(internal->write != internal->read);
 }
 
 /******************************************************************************
@@ -176,125 +176,125 @@ static void advance_write(struct internal_ringbuffer *internal) {
 
 static void *ringbuffer_pop(dtn_ringbuffer *self) {
 
-  if (0 == self)
-    goto error;
+    if (0 == self)
+        goto error;
 
-  struct internal_ringbuffer *internal = (struct internal_ringbuffer *)self;
+    struct internal_ringbuffer *internal = (struct internal_ringbuffer *)self;
 
-  if (internal->read == internal->write) {
+    if (internal->read == internal->write) {
 
-    return 0;
-  }
+        return 0;
+    }
 
-  void *retval = internal->content[internal->read];
-  internal->content[internal->read] = 0;
+    void *retval = internal->content[internal->read];
+    internal->content[internal->read] = 0;
 
-  advance_read(internal);
+    advance_read(internal);
 
-  return retval;
+    return retval;
 
 error:
 
-  return 0;
+    return 0;
 }
 
 /*---------------------------------------------------------------------------*/
 
 static bool ringbuffer_insert(dtn_ringbuffer *self, void *element) {
 
-  if (0 == self)
-    goto error;
+    if (0 == self)
+        goto error;
 
-  /* element must not be 0 since 0 indicates an empty slot */
-  if (0 == element)
-    goto error;
+    /* element must not be 0 since 0 indicates an empty slot */
+    if (0 == element)
+        goto error;
 
-  struct internal_ringbuffer *internal = (struct internal_ringbuffer *)self;
+    struct internal_ringbuffer *internal = (struct internal_ringbuffer *)self;
 
-  DTN_ASSERT(1 < internal->capacity);
+    DTN_ASSERT(1 < internal->capacity);
 
-  const size_t write_index = internal->write;
+    const size_t write_index = internal->write;
 
-  DTN_ASSERT(0 == internal->content[write_index]);
+    DTN_ASSERT(0 == internal->content[write_index]);
 
-  internal->content[write_index] = element;
+    internal->content[write_index] = element;
 
-  advance_write(internal);
+    advance_write(internal);
 
-  ++internal->statistics.elements_inserted;
+    ++internal->statistics.elements_inserted;
 
-  return true;
+    return true;
 
 error:
 
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static bool ringbuffer_clear(dtn_ringbuffer *self) {
 
-  if (0 == self)
-    goto error;
+    if (0 == self)
+        goto error;
 
-  struct internal_ringbuffer *internal = (struct internal_ringbuffer *)self;
+    struct internal_ringbuffer *internal = (struct internal_ringbuffer *)self;
 
-  DTN_ASSERT(1 < internal->capacity);
+    DTN_ASSERT(1 < internal->capacity);
 
-  for (size_t i = 0; i < internal->capacity; ++i) {
+    for (size_t i = 0; i < internal->capacity; ++i) {
 
-    /* Empty slots ought to be 0 */
-    drop_element_nocheck(internal, i);
-  }
+        /* Empty slots ought to be 0 */
+        drop_element_nocheck(internal, i);
+    }
 
-  return true;
+    return true;
 
 error:
 
-  return false;
+    return false;
 }
 
 /*---------------------------------------------------------------------------*/
 
 static struct internal_ringbuffer *new_buffer_create(size_t capacity) {
 
-  struct internal_ringbuffer *buffer = 0;
+    struct internal_ringbuffer *buffer = 0;
 
-  if (0 == capacity)
-    goto error;
+    if (0 == capacity)
+        goto error;
 
-  capacity = 1 + capacity;
+    capacity = 1 + capacity;
 
-  buffer = calloc(1, sizeof(struct internal_ringbuffer));
+    buffer = calloc(1, sizeof(struct internal_ringbuffer));
 
-  buffer->public_stuff = (dtn_ringbuffer){
+    buffer->public_stuff = (dtn_ringbuffer){
 
-      .magic_bytes = DTN_RINGBUFFER_MAGIC_BYTES,
-      .capacity = ringbuffer_capacity,
-      .pop = ringbuffer_pop,
-      .insert = ringbuffer_insert,
-      .free = ringbuffer_free,
-      .clear = ringbuffer_clear,
-      .get_statistics = ringbuffer_get_statistics,
+        .magic_bytes = DTN_RINGBUFFER_MAGIC_BYTES,
+        .capacity = ringbuffer_capacity,
+        .pop = ringbuffer_pop,
+        .insert = ringbuffer_insert,
+        .free = ringbuffer_free,
+        .clear = ringbuffer_clear,
+        .get_statistics = ringbuffer_get_statistics,
 
-  };
+    };
 
-  buffer->capacity = capacity;
+    buffer->capacity = capacity;
 
-  /* To be overwritten by caller if required */
-  buffer->free_element = free_element_dummy;
+    /* To be overwritten by caller if required */
+    buffer->free_element = free_element_dummy;
 
-  buffer->content = calloc(capacity, sizeof(void *));
-  buffer->read = 0;
-  buffer->write = 0;
+    buffer->content = calloc(capacity, sizeof(void *));
+    buffer->read = 0;
+    buffer->write = 0;
 
-  DTN_ASSERT(1 < buffer->capacity);
+    DTN_ASSERT(1 < buffer->capacity);
 
-  return buffer;
+    return buffer;
 
 error:
 
-  return 0;
+    return 0;
 }
 
 /******************************************************************************
@@ -303,42 +303,43 @@ error:
  *
  ******************************************************************************/
 
-dtn_ringbuffer *dtn_ringbuffer_create(size_t capacity,
-                                    void (*free_element)(void *additional_arg,
-                                                         void *element_to_free),
-                                    void *additional_arg) {
+dtn_ringbuffer *dtn_ringbuffer_create(
+    size_t capacity,
+    void (*free_element)(void *additional_arg, void *element_to_free),
+    void *additional_arg) {
 
-  struct internal_ringbuffer *buffer = dtn_registered_cache_get(g_cache);
+    struct internal_ringbuffer *buffer = dtn_registered_cache_get(g_cache);
 
-  if (0 == buffer) {
+    if (0 == buffer) {
 
-    buffer = new_buffer_create(capacity);
-  }
+        buffer = new_buffer_create(capacity);
+    }
 
-  if (0 == buffer) {
-    goto error;
-  }
+    if (0 == buffer) {
+        goto error;
+    }
 
-  if (capacity + 1 > buffer->capacity) {
+    if (capacity + 1 > buffer->capacity) {
 
-    buffer->content = realloc(buffer->content, (capacity + 1) * sizeof(void *));
-    buffer->capacity = 1 + capacity;
-    memset(buffer->content, 0, buffer->capacity * sizeof(void *));
+        buffer->content =
+            realloc(buffer->content, (capacity + 1) * sizeof(void *));
+        buffer->capacity = 1 + capacity;
+        memset(buffer->content, 0, buffer->capacity * sizeof(void *));
 
-    buffer->free_element = free_element_dummy;
-  }
+        buffer->free_element = free_element_dummy;
+    }
 
-  buffer->additional_arg = additional_arg;
+    buffer->additional_arg = additional_arg;
 
-  if (0 != free_element) {
-    buffer->free_element = free_element;
-  }
+    if (0 != free_element) {
+        buffer->free_element = free_element;
+    }
 
-  return (dtn_ringbuffer *)buffer;
+    return (dtn_ringbuffer *)buffer;
 
 error:
 
-  return 0;
+    return 0;
 }
 
 /******************************************************************************
@@ -349,42 +350,42 @@ error:
 
 static size_t ringbuffer_capacity(const dtn_ringbuffer *self) {
 
-  if (0 == self)
-    return 0;
+    if (0 == self)
+        return 0;
 
-  struct internal_ringbuffer *internal = (struct internal_ringbuffer *)self;
+    struct internal_ringbuffer *internal = (struct internal_ringbuffer *)self;
 
-  DTN_ASSERT(1 < internal->capacity);
+    DTN_ASSERT(1 < internal->capacity);
 
-  return internal->capacity - 1;
+    return internal->capacity - 1;
 }
 
 /*---------------------------------------------------------------------------*/
 
 static dtn_ringbuffer *ringbuffer_free(dtn_ringbuffer *self) {
 
-  if (0 == self)
-    goto error;
+    if (0 == self)
+        goto error;
 
-  if (!self->clear(self))
-    goto error;
+    if (!self->clear(self))
+        goto error;
 
-  /* Free linked list infrastructure */
-  struct internal_ringbuffer *internal = (struct internal_ringbuffer *)self;
+    /* Free linked list infrastructure */
+    struct internal_ringbuffer *internal = (struct internal_ringbuffer *)self;
 
-  if (0 != dtn_registered_cache_put(g_cache, self)) {
+    if (0 != dtn_registered_cache_put(g_cache, self)) {
 
-    free(internal->content);
-    internal->content = 0;
+        free(internal->content);
+        internal->content = 0;
 
-    free(self);
-  }
+        free(self);
+    }
 
-  self = 0;
+    self = 0;
 
 error:
 
-  return self;
+    return self;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -392,87 +393,87 @@ error:
 static dtn_ringbuffer_statistics
 ringbuffer_get_statistics(const dtn_ringbuffer *self) {
 
-  if (0 == self)
-    goto error;
+    if (0 == self)
+        goto error;
 
-  struct internal_ringbuffer *internal = (struct internal_ringbuffer *)self;
+    struct internal_ringbuffer *internal = (struct internal_ringbuffer *)self;
 
-  return internal->statistics;
+    return internal->statistics;
 
 error:
 
-  return (dtn_ringbuffer_statistics){0};
+    return (dtn_ringbuffer_statistics){0};
 }
 
 /*----------------------------------------------------------------------------*/
 
 void *void_ptr_free(void *void_ptr) {
 
-  dtn_ringbuffer *rb = (dtn_ringbuffer *)void_ptr;
+    dtn_ringbuffer *rb = (dtn_ringbuffer *)void_ptr;
 
-  if (DTN_RINGBUFFER_MAGIC_BYTES != rb->magic_bytes) {
+    if (DTN_RINGBUFFER_MAGIC_BYTES != rb->magic_bytes) {
 
-    goto error;
-  }
+        goto error;
+    }
 
-  return rb->free(rb);
+    return rb->free(rb);
 
 error:
 
-  return 0;
+    return 0;
 }
 
 /*----------------------------------------------------------------------------*/
 
 dtn_ringbuffer *dtn_ringbuffer_free(dtn_ringbuffer *self) {
 
-  if ((0 != self) && (0 != self->free)) {
+    if ((0 != self) && (0 != self->free)) {
 
-    return self->free(self);
+        return self->free(self);
 
-  } else {
+    } else {
 
-    return self;
-  }
+        return self;
+    }
 }
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_ringbuffer_insert(dtn_ringbuffer *self, void *element) {
 
-  return dtn_ptr_valid(self, "Cannot insert element - no ringbuffer") &&
-         dtn_ptr_valid(self->insert,
-                      "Cannot insert element - ringbuffer does not have "
-                      "insert method") &&
-         self->insert(self, element);
+    return dtn_ptr_valid(self, "Cannot insert element - no ringbuffer") &&
+           dtn_ptr_valid(self->insert,
+                         "Cannot insert element - ringbuffer does not have "
+                         "insert method") &&
+           self->insert(self, element);
 }
 
 /*---------------------------------------------------------------------------*/
 
 void *dtn_ringbuffer_pop(dtn_ringbuffer *self) {
 
-  if (dtn_ptr_valid(self, "Cannot pop element - no ringbuffer") &&
-      dtn_ptr_valid(self->insert,
-                   "Cannot pop element - ringbuffer does not have "
-                   "pop method")) {
-    return self->pop(self);
+    if (dtn_ptr_valid(self, "Cannot pop element - no ringbuffer") &&
+        dtn_ptr_valid(self->insert,
+                      "Cannot pop element - ringbuffer does not have "
+                      "pop method")) {
+        return self->pop(self);
 
-  } else {
+    } else {
 
-    return 0;
-  }
+        return 0;
+    }
 }
 
 /*----------------------------------------------------------------------------*/
 
 void dtn_ringbuffer_enable_caching(size_t capacity) {
 
-  dtn_registered_cache_config cfg = {
-      .item_free = void_ptr_free,
-      .capacity = capacity,
-  };
+    dtn_registered_cache_config cfg = {
+        .item_free = void_ptr_free,
+        .capacity = capacity,
+    };
 
-  g_cache = dtn_registered_cache_extend("ringbuffer", cfg);
+    g_cache = dtn_registered_cache_extend("ringbuffer", cfg);
 }
 
 /*----------------------------------------------------------------------------*/

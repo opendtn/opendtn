@@ -40,8 +40,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "dtn_constants.h"
 #include "dtn_arch_compile.h"
+#include "dtn_constants.h"
 #include "dtn_log.h"
 
 /*----------------------------------------------------------------------------*/
@@ -72,8 +72,8 @@
  * }
  */
 
-#define DTN_UTILS_AS_TYPE(vptr, magic_bytes_32bit)                              \
-  (0 != vptr) && (magic_bytes_32bit == *((uint32_t *)vptr)) ? vptr : 0;
+#define DTN_UTILS_AS_TYPE(vptr, magic_bytes_32bit)                             \
+    (0 != vptr) && (magic_bytes_32bit == *((uint32_t *)vptr)) ? vptr : 0;
 
 /*----------------------------------------------------------------------------*/
 
@@ -100,9 +100,9 @@
         to prevent compiler to complain
  */
 #define UNUSED(x)                                                              \
-  do {                                                                         \
-    (void)(x);                                                                 \
-  } while (0)
+    do {                                                                       \
+        (void)(x);                                                             \
+    } while (0)
 
 /*----------------------------------------------------------------------------*/
 
@@ -116,14 +116,14 @@
  * Helper mainly for development.
  */
 #define NOP                                                                    \
-  while (0) {                                                                  \
-  }
+    while (0) {                                                                \
+    }
 
-#define DTN_PANIC(msg)                                                          \
-  do {                                                                         \
-    fprintf(stderr, msg);                                                      \
-    abort();                                                                   \
-  } while (0)
+#define DTN_PANIC(msg)                                                         \
+    do {                                                                       \
+        fprintf(stderr, msg);                                                  \
+        abort();                                                               \
+    } while (0)
 
 /*----------------------------------------------------------------------------*/
 
@@ -205,18 +205,18 @@ void *dtn_free(void *vptr);
  * If cond is false, logs `msg` as error.
  * Returns cond
  */
-#define dtn_cond_valid(cond, msg)                                               \
-  dtn_cond_valid_internal(__FILE__, DTN_LOG_ERR, __FUNCTION__, __LINE__, 0,      \
-                         cond, 0, msg)
+#define dtn_cond_valid(cond, msg)                                              \
+    dtn_cond_valid_internal(__FILE__, DTN_LOG_ERR, __FUNCTION__, __LINE__, 0,  \
+                            cond, 0, msg)
 
 /*----------------------------------------------------------------------------*/
 
 /**
  * If ptr is null, prints appropriate error message
  */
-#define dtn_ptr_valid(ptr, msg)                                                 \
-  dtn_ptr_valid_internal(__FILE__, DTN_LOG_ERR, __FUNCTION__, __LINE__, 0, ptr,  \
-                        0, msg)
+#define dtn_ptr_valid(ptr, msg)                                                \
+    dtn_ptr_valid_internal(__FILE__, DTN_LOG_ERR, __FUNCTION__, __LINE__, 0,   \
+                           ptr, 0, msg)
 
 /*----------------------------------------------------------------------------*/
 
@@ -224,18 +224,18 @@ void *dtn_free(void *vptr);
  * If cond is false, logs `msg` as warning.
  * Returns cond
  */
-#define dtn_cond_valid_warn(cond, msg)                                          \
-  dtn_cond_valid_internal(__FILE__, DTN_LOG_WARNING, __FUNCTION__, __LINE__, 0,  \
-                         cond, 0, msg)
+#define dtn_cond_valid_warn(cond, msg)                                         \
+    dtn_cond_valid_internal(__FILE__, DTN_LOG_WARNING, __FUNCTION__, __LINE__, \
+                            0, cond, 0, msg)
 
 /*----------------------------------------------------------------------------*/
 
 /**
  * If ptr is null, prints appropriate warn message
  */
-#define dtn_ptr_valid_warn(ptr, msg)                                            \
-  dtn_ptr_valid_internal(__FILE__, DTN_LOG_WARNING, __FUNCTION__, __LINE__, 0,   \
-                        ptr, 0, msg)
+#define dtn_ptr_valid_warn(ptr, msg)                                           \
+    dtn_ptr_valid_internal(__FILE__, DTN_LOG_WARNING, __FUNCTION__, __LINE__,  \
+                           0, ptr, 0, msg)
 
 /*----------------------------------------------------------------------------*/
 
@@ -243,36 +243,36 @@ void *dtn_free(void *vptr);
  * If cond is false, logs `msg` as debug message.
  * Returns cond
  */
-#define dtn_cond_valid_debug(cond, msg)                                         \
-  dtn_cond_valid_internal(__FILE__, DTN_LOG_DEBUG, __FUNCTION__, __LINE__, 0,    \
-                         cond, 0, msg)
+#define dtn_cond_valid_debug(cond, msg)                                        \
+    dtn_cond_valid_internal(__FILE__, DTN_LOG_DEBUG, __FUNCTION__, __LINE__,   \
+                            0, cond, 0, msg)
 
 /*----------------------------------------------------------------------------*/
 
 /**
  * If ptr is null, prints appropriate debug message
  */
-#define dtn_ptr_valid_debug(ptr, msg)                                           \
-  dtn_ptr_valid_internal(__FILE__, DTN_LOG_DEBUG, __FUNCTION__, __LINE__, 0,     \
-                        ptr, 0, msg)
+#define dtn_ptr_valid_debug(ptr, msg)                                          \
+    dtn_ptr_valid_internal(__FILE__, DTN_LOG_DEBUG, __FUNCTION__, __LINE__, 0, \
+                           ptr, 0, msg)
 
 /*----------------------------------------------------------------------------*/
 
 /**
  * Like dtn_cond_valid, but sets result in case of error.
  */
-#define dtn_cond_valid_result(cond, res, code, msg)                             \
-  dtn_cond_valid_internal(__FILE__, DTN_LOG_ERR, __FUNCTION__, __LINE__, res,    \
-                         cond, code, msg)
+#define dtn_cond_valid_result(cond, res, code, msg)                            \
+    dtn_cond_valid_internal(__FILE__, DTN_LOG_ERR, __FUNCTION__, __LINE__,     \
+                            res, cond, code, msg)
 
 /*----------------------------------------------------------------------------*/
 
 /**
  * Like dtn_cond_valid, but sets result in case of error.
  */
-#define dtn_ptr_valid_result(ptr, res, code, msg)                               \
-  dtn_ptr_valid_internal(__FILE__, DTN_LOG_ERR, __FUNCTION__, __LINE__, res,     \
-                        ptr, code, msg)
+#define dtn_ptr_valid_result(ptr, res, code, msg)                              \
+    dtn_ptr_valid_internal(__FILE__, DTN_LOG_ERR, __FUNCTION__, __LINE__, res, \
+                           ptr, code, msg)
 
 /*----------------------------------------------------------------------------*/
 
@@ -287,7 +287,7 @@ bool dtn_utils_init_random_generator();
  * @return true if the pointer was found and set to 0, false otherwise
  */
 bool dtn_utils_add_to_array(void *array, size_t array_length,
-                           void *pointer_to_add);
+                            void *pointer_to_add);
 
 /*----------------------------------------------------------------------------*/
 
@@ -296,7 +296,7 @@ bool dtn_utils_add_to_array(void *array, size_t array_length,
  * @return true if the pointer was found and set to 0, false otherwise
  */
 bool dtn_utils_del_from_array(void *array, size_t array_length,
-                             void *pointer_to_remdtne);
+                              void *pointer_to_remdtne);
 
 /*----------------------------------------------------------------------------*/
 
@@ -305,7 +305,7 @@ bool dtn_utils_del_from_array(void *array, size_t array_length,
  * @return true if `pointer` is contained in array
  */
 bool dtn_utils_is_in_array(void const *array, size_t array_length,
-                          void const *pointer);
+                           void const *pointer);
 
 /******************************************************************************
  *                                 INTERNALS
@@ -314,16 +314,16 @@ bool dtn_utils_is_in_array(void const *array, size_t array_length,
 struct dtn_result;
 
 bool dtn_cond_valid_internal(char const *file, dtn_log_level loglevel,
-                            char const *function, size_t line,
-                            struct dtn_result *result, bool condition,
-                            uint64_t error_code, char const *msg);
+                             char const *function, size_t line,
+                             struct dtn_result *result, bool condition,
+                             uint64_t error_code, char const *msg);
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_ptr_valid_internal(char const *file, dtn_log_level loglevel,
-                           char const *function, size_t line,
-                           struct dtn_result *result, void const *ptr,
-                           uint64_t error_code, char const *msg);
+                            char const *function, size_t line,
+                            struct dtn_result *result, void const *ptr,
+                            uint64_t error_code, char const *msg);
 
 /* Unfortunately, since we deal with macros here, all this internal stuff
  * must go into this header ... */
@@ -398,7 +398,7 @@ bool dtn_ptr_valid_internal(char const *file, dtn_log_level loglevel,
 #define PARANOID
 
 #define TODO_INTERNAL(message)                                                 \
-  fprintf(stderr, "%s:%i   TODO: %s\n", __FILE__, __LINE__, message)
+    fprintf(stderr, "%s:%i   TODO: %s\n", __FILE__, __LINE__, message)
 
 #else
 
@@ -411,7 +411,7 @@ bool dtn_ptr_valid_internal(char const *file, dtn_log_level loglevel,
 #define WARNING_INTERNAL(message)
 
 #define NOT_IN_RELEASE_INTERNAL(msg)                                           \
-  fprintf(stderr, "%s:%i  %s\n", __FILE__, __LINE__, msg)
+    fprintf(stderr, "%s:%i  %s\n", __FILE__, __LINE__, msg)
 
 #define TODO_INTERNAL(message)
 
@@ -455,23 +455,23 @@ bool dtn_ptr_valid_internal(char const *file, dtn_log_level loglevel,
 
 /*----------------------------------------------------------------------------*/
 
-#define DTN_ASSERT_INTERNAL(cond)                                               \
-  do {                                                                         \
-    bool _our_internal_condition = cond;                                       \
-    if (!_our_internal_condition) {                                            \
-      dtn_log_error("Condition " TO_STR(cond) " does not hold");                \
-      char *_our_internal_backtrace =                                          \
-          dtn_arch_compile_backtrace(DTN_MAX_BACKTRACE_DEPTH);                   \
-      if (0 != _our_internal_backtrace) {                                      \
-        dtn_log_error("Backtrace: %s", _our_internal_backtrace);                \
-        free(_our_internal_backtrace);                                         \
-        _our_internal_backtrace = 0;                                           \
-      } else {                                                                 \
-        dtn_log_error("Backtrace disabled");                                    \
-      }                                                                        \
-      EXIT_ON_DEBUG_INTERNAL;                                                  \
-    }                                                                          \
-  } while (0)
+#define DTN_ASSERT_INTERNAL(cond)                                              \
+    do {                                                                       \
+        bool _our_internal_condition = cond;                                   \
+        if (!_our_internal_condition) {                                        \
+            dtn_log_error("Condition " TO_STR(cond) " does not hold");         \
+            char *_our_internal_backtrace =                                    \
+                dtn_arch_compile_backtrace(DTN_MAX_BACKTRACE_DEPTH);           \
+            if (0 != _our_internal_backtrace) {                                \
+                dtn_log_error("Backtrace: %s", _our_internal_backtrace);       \
+                free(_our_internal_backtrace);                                 \
+                _our_internal_backtrace = 0;                                   \
+            } else {                                                           \
+                dtn_log_error("Backtrace disabled");                           \
+            }                                                                  \
+            EXIT_ON_DEBUG_INTERNAL;                                            \
+        }                                                                      \
+    } while (0)
 
 #define __TO_STR_HELPER(x) #x
 

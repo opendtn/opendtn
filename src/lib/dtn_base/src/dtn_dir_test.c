@@ -27,13 +27,13 @@
 
         ------------------------------------------------------------------------
 */
-#include "dtn_dir.c"
 #include "../include/testrun.h"
+#include "dtn_dir.c"
 
 #include "../include/dtn_file.h"
-#include <limits.h>
 #include "../include/dtn_random.h"
 #include "../include/dtn_string.h"
+#include <limits.h>
 #include <unistd.h>
 
 /*
@@ -44,10 +44,7 @@
  *      ------------------------------------------------------------------------
  */
 
-int dummy() {
-
-  return testrun_log_success();
-}
+int dummy() { return testrun_log_success(); }
 
 /*
  *      ------------------------------------------------------------------------
@@ -59,9 +56,9 @@ int dummy() {
 
 int all_tests() {
 
-  testrun_init();
-  testrun_test(dummy);
-  return testrun_counter;
+    testrun_init();
+    testrun_test(dummy);
+    return testrun_counter;
 }
 
 /*

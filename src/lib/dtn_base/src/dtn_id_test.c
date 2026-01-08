@@ -33,277 +33,277 @@
 
 static int test_dtn_id_valid() {
 
-  testrun(!dtn_id_valid(0));
-  testrun(!dtn_id_valid(""));
-  testrun(dtn_id_valid("1"));
-  testrun(dtn_id_valid("123456789012345678901234567890123456"));
-  testrun(!dtn_id_valid("This string is too long by one char.."));
-  testrun(
-      !dtn_id_valid("This string is way too long - ought to shorten it to 36 "
-                   "chars"));
+    testrun(!dtn_id_valid(0));
+    testrun(!dtn_id_valid(""));
+    testrun(dtn_id_valid("1"));
+    testrun(dtn_id_valid("123456789012345678901234567890123456"));
+    testrun(!dtn_id_valid("This string is too long by one char.."));
+    testrun(
+        !dtn_id_valid("This string is way too long - ought to shorten it to 36 "
+                      "chars"));
 
-  dtn_id id = {0};
-  testrun(!dtn_id_valid(id));
+    dtn_id id = {0};
+    testrun(!dtn_id_valid(id));
 
-  testrun(dtn_id_set(id, "arachnophobia"));
-  testrun(dtn_id_valid(id));
+    testrun(dtn_id_set(id, "arachnophobia"));
+    testrun(dtn_id_valid(id));
 
-  testrun(dtn_id_clear(id));
-  testrun(!dtn_id_valid(id));
+    testrun(dtn_id_clear(id));
+    testrun(!dtn_id_valid(id));
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
 static int test_dtn_id_set() {
 
-  testrun(!dtn_id_set(0, 0));
+    testrun(!dtn_id_set(0, 0));
 
-  dtn_id id = {0};
+    dtn_id id = {0};
 
-  testrun(!dtn_id_set(id, 0));
-  testrun(!dtn_id_set(id, ""));
-  testrun(!dtn_id_set(0, "arbiter"));
+    testrun(!dtn_id_set(id, 0));
+    testrun(!dtn_id_set(id, ""));
+    testrun(!dtn_id_set(0, "arbiter"));
 
-  testrun(dtn_id_set(id, "arbiter"));
-  testrun(dtn_id_match(id, "arbiter"));
+    testrun(dtn_id_set(id, "arbiter"));
+    testrun(dtn_id_match(id, "arbiter"));
 
-  testrun(dtn_id_set(id, "melanchthon-a fine name if you dead"));
-  testrun(dtn_id_match(id, "melanchthon-a fine name if you dead"));
-  testrun(dtn_id_set(id, "melanchthon-a fine name if you dead"));
+    testrun(dtn_id_set(id, "melanchthon-a fine name if you dead"));
+    testrun(dtn_id_match(id, "melanchthon-a fine name if you dead"));
+    testrun(dtn_id_set(id, "melanchthon-a fine name if you dead"));
 
-  // desired ID string is too long
-  testrun(!dtn_id_set(id, "1234567890123456789012345678901234567"));
+    // desired ID string is too long
+    testrun(!dtn_id_set(id, "1234567890123456789012345678901234567"));
 
-  // Can use dtn_id as source as well?
-  dtn_id src = "abcdef";
-  testrun(dtn_id_set(id, src));
-  testrun(dtn_id_valid(id));
-  testrun(dtn_id_match(id, src));
+    // Can use dtn_id as source as well?
+    dtn_id src = "abcdef";
+    testrun(dtn_id_set(id, src));
+    testrun(dtn_id_valid(id));
+    testrun(dtn_id_match(id, src));
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
 static int test_dtn_id_fill_with_uuid() {
 
-  testrun(!dtn_id_fill_with_uuid(0));
+    testrun(!dtn_id_fill_with_uuid(0));
 
-  for (size_t i = 0; i < 25; ++i) {
+    for (size_t i = 0; i < 25; ++i) {
 
-    dtn_id id1;
-    testrun(dtn_id_fill_with_uuid(id1));
-    testrun(dtn_id_valid(id1));
+        dtn_id id1;
+        testrun(dtn_id_fill_with_uuid(id1));
+        testrun(dtn_id_valid(id1));
 
-    dtn_id id2;
-    testrun(dtn_id_fill_with_uuid(id2));
-    testrun(dtn_id_valid(id2));
+        dtn_id id2;
+        testrun(dtn_id_fill_with_uuid(id2));
+        testrun(dtn_id_valid(id2));
 
-    testrun(!dtn_id_match(id1, id2));
+        testrun(!dtn_id_match(id1, id2));
 
-    fprintf(stderr, "id1 is %s, id2 is %s\n", id1, id2);
-  }
+        fprintf(stderr, "id1 is %s, id2 is %s\n", id1, id2);
+    }
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
 static int test_dtn_id_match() {
 
-  testrun(dtn_id_match(0, 0));
+    testrun(dtn_id_match(0, 0));
 
-  testrun(!dtn_id_match("anton", 0));
-  testrun(!dtn_id_match(0, "anton"));
-  testrun(!dtn_id_match("alpha", "bravo"));
+    testrun(!dtn_id_match("anton", 0));
+    testrun(!dtn_id_match(0, "anton"));
+    testrun(!dtn_id_match("alpha", "bravo"));
 
-  testrun(dtn_id_match("alpha", "alpha"));
+    testrun(dtn_id_match("alpha", "alpha"));
 
-  // Check that the first 36 chars are taken into account
-  testrun(!dtn_id_match("alpha", "alphabravo"));
+    // Check that the first 36 chars are taken into account
+    testrun(!dtn_id_match("alpha", "alphabravo"));
 
-  testrun(dtn_id_match("123456789012345678901234567890123456",
-                      "123456789012345678901234567890123456"));
+    testrun(dtn_id_match("123456789012345678901234567890123456",
+                         "123456789012345678901234567890123456"));
 
-  testrun(!dtn_id_match("123456789012345678901234567890123456",
-                       "123456789012345678901234567890123456 trailing stuff "
-                       "not to be ignored"));
+    testrun(!dtn_id_match("123456789012345678901234567890123456",
+                          "123456789012345678901234567890123456 trailing stuff "
+                          "not to be ignored"));
 
-  testrun(!dtn_id_match("123456789012345678901234567890123456 trailing stuff "
-                       "ignored",
-                       "123456789012345678901234567890123456"));
+    testrun(!dtn_id_match("123456789012345678901234567890123456 trailing stuff "
+                          "ignored",
+                          "123456789012345678901234567890123456"));
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
 static int test_dtn_id_array_reset() {
-  // bool dtn_id_array_reset(dtn_id ids[], size_t capacity);
+    // bool dtn_id_array_reset(dtn_id ids[], size_t capacity);
 
-  testrun(!dtn_id_array_reset(0, 0));
+    testrun(!dtn_id_array_reset(0, 0));
 
-  dtn_id ids[3] = {"a", "b222", "c333333"};
+    dtn_id ids[3] = {"a", "b222", "c333333"};
 
-  size_t capacity = sizeof(ids) / sizeof(ids[0]);
+    size_t capacity = sizeof(ids) / sizeof(ids[0]);
 
-  for (size_t i = 0; i < capacity; ++i) {
-    fprintf(stderr, "ID %s\n", ids[i]);
-  }
+    for (size_t i = 0; i < capacity; ++i) {
+        fprintf(stderr, "ID %s\n", ids[i]);
+    }
 
-  testrun(dtn_id_array_reset(ids, 0));
-  testrun(dtn_id_match(ids[0], "a"));
-  testrun(dtn_id_match(ids[1], "b222"));
-  testrun(dtn_id_match(ids[2], "c333333"));
+    testrun(dtn_id_array_reset(ids, 0));
+    testrun(dtn_id_match(ids[0], "a"));
+    testrun(dtn_id_match(ids[1], "b222"));
+    testrun(dtn_id_match(ids[2], "c333333"));
 
-  testrun(!dtn_id_array_reset(0, capacity));
-  testrun(dtn_id_array_reset(ids, 1));
+    testrun(!dtn_id_array_reset(0, capacity));
+    testrun(dtn_id_array_reset(ids, 1));
 
-  testrun(!dtn_id_valid(ids[0]));
-  testrun(dtn_id_match(ids[1], "b222"));
-  testrun(dtn_id_match(ids[2], "c333333"));
+    testrun(!dtn_id_valid(ids[0]));
+    testrun(dtn_id_match(ids[1], "b222"));
+    testrun(dtn_id_match(ids[2], "c333333"));
 
-  for (size_t i = 0; i < capacity; ++i) {
-    fprintf(stderr, "ID %s\n", ids[i]);
-  }
+    for (size_t i = 0; i < capacity; ++i) {
+        fprintf(stderr, "ID %s\n", ids[i]);
+    }
 
-  testrun(dtn_id_array_reset(ids, capacity));
+    testrun(dtn_id_array_reset(ids, capacity));
 
-  testrun(!dtn_id_valid(ids[0]));
-  testrun(!dtn_id_valid(ids[1]));
-  testrun(!dtn_id_valid(ids[2]));
+    testrun(!dtn_id_valid(ids[0]));
+    testrun(!dtn_id_valid(ids[1]));
+    testrun(!dtn_id_valid(ids[2]));
 
-  for (size_t i = 0; i < capacity; ++i) {
-    fprintf(stderr, "ID %s\n", ids[i]);
-  }
+    for (size_t i = 0; i < capacity; ++i) {
+        fprintf(stderr, "ID %s\n", ids[i]);
+    }
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
 static int test_dtn_id_array_add() {
-  // bool dtn_id_array_add(dtn_id ids[], size_t capacity, const dtn_id id);
+    // bool dtn_id_array_add(dtn_id ids[], size_t capacity, const dtn_id id);
 
-  dtn_id ids[3] = {0};
+    dtn_id ids[3] = {0};
 
-  testrun(!dtn_id_array_add(0, 0, 0));
-  testrun(!dtn_id_array_add(ids, 0, 0));
-  testrun(!dtn_id_array_add(0, 3, 0));
-  testrun(!dtn_id_array_add(ids, 3, 0));
+    testrun(!dtn_id_array_add(0, 0, 0));
+    testrun(!dtn_id_array_add(ids, 0, 0));
+    testrun(!dtn_id_array_add(0, 3, 0));
+    testrun(!dtn_id_array_add(ids, 3, 0));
 
-  testrun(!dtn_id_array_add(0, 0, "a1"));
-  testrun(!dtn_id_array_add(ids, 0, "a1"));
-  testrun(!dtn_id_array_add(0, 3, "a1"));
+    testrun(!dtn_id_array_add(0, 0, "a1"));
+    testrun(!dtn_id_array_add(ids, 0, "a1"));
+    testrun(!dtn_id_array_add(0, 3, "a1"));
 
-  testrun(!dtn_id_valid(ids[0]));
-  testrun(!dtn_id_valid(ids[1]));
-  testrun(!dtn_id_valid(ids[2]));
+    testrun(!dtn_id_valid(ids[0]));
+    testrun(!dtn_id_valid(ids[1]));
+    testrun(!dtn_id_valid(ids[2]));
 
-  testrun(dtn_id_array_add(ids, 3, "a1"));
-  testrun(dtn_id_match(ids[0], "a1"));
-  testrun(!dtn_id_valid(ids[1]));
-  testrun(!dtn_id_valid(ids[2]));
+    testrun(dtn_id_array_add(ids, 3, "a1"));
+    testrun(dtn_id_match(ids[0], "a1"));
+    testrun(!dtn_id_valid(ids[1]));
+    testrun(!dtn_id_valid(ids[2]));
 
-  testrun(dtn_id_array_add(ids, 3, "b22"));
-  testrun(dtn_id_match(ids[0], "a1"));
-  testrun(dtn_id_match(ids[1], "b22"));
-  testrun(!dtn_id_valid(ids[2]));
+    testrun(dtn_id_array_add(ids, 3, "b22"));
+    testrun(dtn_id_match(ids[0], "a1"));
+    testrun(dtn_id_match(ids[1], "b22"));
+    testrun(!dtn_id_valid(ids[2]));
 
-  testrun(!dtn_id_array_add(ids, 2, "c33"));
-  testrun(dtn_id_match(ids[0], "a1"));
-  testrun(dtn_id_match(ids[1], "b22"));
-  testrun(!dtn_id_valid(ids[2]));
+    testrun(!dtn_id_array_add(ids, 2, "c33"));
+    testrun(dtn_id_match(ids[0], "a1"));
+    testrun(dtn_id_match(ids[1], "b22"));
+    testrun(!dtn_id_valid(ids[2]));
 
-  testrun(dtn_id_array_add(ids, 3, "c333"));
-  testrun(dtn_id_match(ids[0], "a1"));
-  testrun(dtn_id_match(ids[1], "b22"));
-  testrun(dtn_id_match(ids[2], "c333"));
+    testrun(dtn_id_array_add(ids, 3, "c333"));
+    testrun(dtn_id_match(ids[0], "a1"));
+    testrun(dtn_id_match(ids[1], "b22"));
+    testrun(dtn_id_match(ids[2], "c333"));
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
 static int test_dtn_id_array_del() {
-  // bool dtn_id_array_del(dtn_id ids[], size_t capacity, const dtn_id id);
+    // bool dtn_id_array_del(dtn_id ids[], size_t capacity, const dtn_id id);
 
-  dtn_id ids[] = {"a", "b2", "c33"};
+    dtn_id ids[] = {"a", "b2", "c33"};
 
-  testrun(!dtn_id_array_del(0, 0, 0));
-  testrun(!dtn_id_array_del(ids, 0, 0));
-  testrun(!dtn_id_array_del(0, 3, 0));
-  testrun(!dtn_id_array_del(ids, 0, 0));
-  testrun(!dtn_id_array_del(ids, 3, 0));
-  testrun(!dtn_id_array_del(0, 0, "quota"));
-  testrun(dtn_id_array_del(ids, 0, "quota"));
+    testrun(!dtn_id_array_del(0, 0, 0));
+    testrun(!dtn_id_array_del(ids, 0, 0));
+    testrun(!dtn_id_array_del(0, 3, 0));
+    testrun(!dtn_id_array_del(ids, 0, 0));
+    testrun(!dtn_id_array_del(ids, 3, 0));
+    testrun(!dtn_id_array_del(0, 0, "quota"));
+    testrun(dtn_id_array_del(ids, 0, "quota"));
 
-  testrun(dtn_id_match(ids[0], "a"));
-  testrun(dtn_id_match(ids[1], "b2"));
-  testrun(dtn_id_match(ids[2], "c33"));
+    testrun(dtn_id_match(ids[0], "a"));
+    testrun(dtn_id_match(ids[1], "b2"));
+    testrun(dtn_id_match(ids[2], "c33"));
 
-  testrun(!dtn_id_array_del(0, 3, "quota"));
+    testrun(!dtn_id_array_del(0, 3, "quota"));
 
-  testrun(dtn_id_match(ids[0], "a"));
-  testrun(dtn_id_match(ids[1], "b2"));
-  testrun(dtn_id_match(ids[2], "c33"));
+    testrun(dtn_id_match(ids[0], "a"));
+    testrun(dtn_id_match(ids[1], "b2"));
+    testrun(dtn_id_match(ids[2], "c33"));
 
-  testrun(dtn_id_array_del(ids, 3, "quota"));
+    testrun(dtn_id_array_del(ids, 3, "quota"));
 
-  testrun(dtn_id_match(ids[0], "a"));
-  testrun(dtn_id_match(ids[1], "b2"));
-  testrun(dtn_id_match(ids[2], "c33"));
+    testrun(dtn_id_match(ids[0], "a"));
+    testrun(dtn_id_match(ids[1], "b2"));
+    testrun(dtn_id_match(ids[2], "c33"));
 
-  testrun(dtn_id_array_del(ids, 3, "c33"));
+    testrun(dtn_id_array_del(ids, 3, "c33"));
 
-  testrun(dtn_id_match(ids[0], "a"));
-  testrun(dtn_id_match(ids[1], "b2"));
-  testrun(!dtn_id_valid(ids[2]));
+    testrun(dtn_id_match(ids[0], "a"));
+    testrun(dtn_id_match(ids[1], "b2"));
+    testrun(!dtn_id_valid(ids[2]));
 
-  testrun(dtn_id_array_del(ids, 3, "c33"));
+    testrun(dtn_id_array_del(ids, 3, "c33"));
 
-  testrun(dtn_id_match(ids[0], "a"));
-  testrun(dtn_id_match(ids[1], "b2"));
-  testrun(!dtn_id_valid(ids[2]));
+    testrun(dtn_id_match(ids[0], "a"));
+    testrun(dtn_id_match(ids[1], "b2"));
+    testrun(!dtn_id_valid(ids[2]));
 
-  testrun(dtn_id_array_del(ids, 3, "a"));
+    testrun(dtn_id_array_del(ids, 3, "a"));
 
-  testrun(!dtn_id_valid(ids[0]));
-  testrun(dtn_id_match(ids[1], "b2"));
-  testrun(!dtn_id_valid(ids[2]));
+    testrun(!dtn_id_valid(ids[0]));
+    testrun(dtn_id_match(ids[1], "b2"));
+    testrun(!dtn_id_valid(ids[2]));
 
-  testrun(dtn_id_array_del(ids, 3, "b2"));
+    testrun(dtn_id_array_del(ids, 3, "b2"));
 
-  testrun(!dtn_id_valid(ids[0]));
-  testrun(!dtn_id_valid(ids[1]));
-  testrun(!dtn_id_valid(ids[2]));
+    testrun(!dtn_id_valid(ids[0]));
+    testrun(!dtn_id_valid(ids[1]));
+    testrun(!dtn_id_valid(ids[2]));
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
 static int test_dtn_id_array_get_index() {
-  // ssize_t dtn_id_array_get_index(dtn_id const *uuids, size_t capacity, const
-  // dtn_id id);
+    // ssize_t dtn_id_array_get_index(dtn_id const *uuids, size_t capacity,
+    // const dtn_id id);
 
-  dtn_id ids[] = {"a", "22", "ccc"};
+    dtn_id ids[] = {"a", "22", "ccc"};
 
-  testrun(0 > dtn_id_array_get_index(0, 0, 0));
-  testrun(0 > dtn_id_array_get_index(ids, 0, 0));
-  testrun(0 > dtn_id_array_get_index(0, 3, 0));
-  testrun(0 > dtn_id_array_get_index(ids, 3, 0));
-  testrun(0 > dtn_id_array_get_index(0, 0, "ccc"));
-  testrun(0 > dtn_id_array_get_index(ids, 0, "ccc"));
-  testrun(2 == dtn_id_array_get_index(ids, 3, "ccc"));
-  testrun(0 > dtn_id_array_get_index(ids, 2, "ccc"));
-  testrun(0 > dtn_id_array_get_index(ids, 3, "dddd"));
-  testrun(1 == dtn_id_array_get_index(ids, 3, "22"));
-  testrun(0 == dtn_id_array_get_index(ids, 3, "a"));
+    testrun(0 > dtn_id_array_get_index(0, 0, 0));
+    testrun(0 > dtn_id_array_get_index(ids, 0, 0));
+    testrun(0 > dtn_id_array_get_index(0, 3, 0));
+    testrun(0 > dtn_id_array_get_index(ids, 3, 0));
+    testrun(0 > dtn_id_array_get_index(0, 0, "ccc"));
+    testrun(0 > dtn_id_array_get_index(ids, 0, "ccc"));
+    testrun(2 == dtn_id_array_get_index(ids, 3, "ccc"));
+    testrun(0 > dtn_id_array_get_index(ids, 2, "ccc"));
+    testrun(0 > dtn_id_array_get_index(ids, 3, "dddd"));
+    testrun(1 == dtn_id_array_get_index(ids, 3, "22"));
+    testrun(0 == dtn_id_array_get_index(ids, 3, "a"));
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 /*
  *      ------------------------------------------------------------------------
@@ -315,17 +315,17 @@ static int test_dtn_id_array_get_index() {
 
 int all_tests() {
 
-  testrun_init();
-  testrun_test(test_dtn_id_valid);
-  testrun_test(test_dtn_id_set);
-  testrun_test(test_dtn_id_fill_with_uuid);
-  testrun_test(test_dtn_id_match);
-  testrun_test(test_dtn_id_array_reset);
-  testrun_test(test_dtn_id_array_add);
-  testrun_test(test_dtn_id_array_del);
-  testrun_test(test_dtn_id_array_get_index);
+    testrun_init();
+    testrun_test(test_dtn_id_valid);
+    testrun_test(test_dtn_id_set);
+    testrun_test(test_dtn_id_fill_with_uuid);
+    testrun_test(test_dtn_id_match);
+    testrun_test(test_dtn_id_array_reset);
+    testrun_test(test_dtn_id_array_add);
+    testrun_test(test_dtn_id_array_del);
+    testrun_test(test_dtn_id_array_get_index);
 
-  return testrun_counter;
+    return testrun_counter;
 }
 
 /*

@@ -36,65 +36,65 @@
 
 bool dtn_result_set(dtn_result *result, int error_code, char const *message) {
 
-  if (0 == result)
-    goto error;
+    if (0 == result)
+        goto error;
 
-  if ((DTN_ERROR_NO_ERROR == error_code) && (0 != message)) {
-    goto error;
-  }
+    if ((DTN_ERROR_NO_ERROR == error_code) && (0 != message)) {
+        goto error;
+    }
 
-  if ((0 == message) && (DTN_ERROR_NO_ERROR != error_code)) {
-    goto error;
-  }
+    if ((0 == message) && (DTN_ERROR_NO_ERROR != error_code)) {
+        goto error;
+    }
 
-  if (result->message) {
-    free(result->message);
-  }
+    if (result->message) {
+        free(result->message);
+    }
 
-  result->error_code = error_code;
-  result->message = 0;
+    result->error_code = error_code;
+    result->message = 0;
 
-  if (0 != message) {
-    result->message = strdup(message);
-  }
+    if (0 != message) {
+        result->message = strdup(message);
+    }
 
-  return true;
+    return true;
 
 error:
 
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
 
 char const *dtn_result_get_message(dtn_result const result) {
 
-  if (0 == result.message) {
-    return "";
-  }
+    if (0 == result.message) {
+        return "";
+    }
 
-  return result.message;
+    return result.message;
 }
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_result_clear(dtn_result *result) {
 
-  if (0 == result)
-    goto error;
+    if (0 == result)
+        goto error;
 
-  if (0 != result->message) {
+    if (0 != result->message) {
 
-    free(result->message);
-  }
+        free(result->message);
+    }
 
-  memset(result, 0, sizeof(*result));
+    memset(result, 0, sizeof(*result));
 
-  return true;
+    return true;
 
 error:
 
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/

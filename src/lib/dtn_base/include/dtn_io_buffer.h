@@ -59,14 +59,11 @@ dtn_io_buffer *dtn_io_buffer_free(dtn_io_buffer *self);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_io_buffer_push(dtn_io_buffer *self, 
-    dtn_socket_data *remote, 
-    const uint8_t *buffer, 
-    size_t size);
+bool dtn_io_buffer_push(dtn_io_buffer *self, dtn_socket_data *remote,
+                        const uint8_t *buffer, size_t size);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_buffer *dtn_io_buffer_pop(dtn_io_buffer *self, 
-    dtn_socket_data *remote);
+dtn_buffer *dtn_io_buffer_pop(dtn_io_buffer *self, dtn_socket_data *remote);
 
 #endif /* dtn_io_buffer_h */

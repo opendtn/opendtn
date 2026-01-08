@@ -33,42 +33,36 @@
 #ifndef dtn_sdnv_h
 #define dtn_sdnv_h
 
-#include <stdbool.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 /*----------------------------------------------------------------------------*/
 
 /**
  *      Decode a max uint64_t number from a buffer.
- * 
+ *
  *      @param buffer   start of the buffer
  *      @param size     size of the input buffer
  *      @param out      pointer to parsed value
  *      @param next     pointer to next byte in buffer after number
  *                      (will be set to next byte after number)
  */
-bool dtn_sdnv_decode(
-        const uint8_t *buffer, 
-        size_t size,
-        uint64_t *out,
-        uint8_t **next);
+bool dtn_sdnv_decode(const uint8_t *buffer, size_t size, uint64_t *out,
+                     uint8_t **next);
 
 /*----------------------------------------------------------------------------*/
 
 /**
  *      Encode a max uint64_t number from a buffer.
- * 
+ *
  *      @param number   number to encode
  *      @param buffer   start of the buffer
  *      @param size     size of the buffer
  *      @param next     pointer to next byte in buffer after number
  *                      (will be set to next byte after encoded number)
  */
-bool dtn_sdnv_encode(
-        const uint64_t number,
-        uint8_t *buffer, 
-        size_t size,
-        uint8_t **next);
+bool dtn_sdnv_encode(const uint64_t number, uint8_t *buffer, size_t size,
+                     uint8_t **next);
 
 #endif /* dtn_sdnv_h */

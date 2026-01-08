@@ -121,10 +121,10 @@ dtn_item *dtn_item_object_get(const dtn_item *self, const char *string);
 /*---------------------------------------------------------------------------*/
 
 bool dtn_item_object_for_each(dtn_item *self,
-                             bool (*function)(char const *key,
-                                              dtn_item const *val,
-                                              void *userdata),
-                             void *userdata);
+                              bool (*function)(char const *key,
+                                               dtn_item const *val,
+                                               void *userdata),
+                              void *userdata);
 /*
  *      ------------------------------------------------------------------------
  *
@@ -136,8 +136,8 @@ bool dtn_item_object_for_each(dtn_item *self,
 dtn_item *dtn_item_array();
 bool dtn_item_is_array(const dtn_item *self);
 
-bool dtn_item_array_for_each(dtn_item *self, void *userdata, 
-        bool (*function)(void *item, void *userdata));
+bool dtn_item_array_for_each(dtn_item *self, void *userdata,
+                             bool (*function)(void *item, void *userdata));
 
 /*---------------------------------------------------------------------------*/
 

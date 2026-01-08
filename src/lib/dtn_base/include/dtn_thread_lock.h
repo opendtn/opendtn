@@ -48,10 +48,10 @@ Copyright   2018        German Aerospace Center DLR e.V.,
 
 struct dtn_thread_lock_struct {
 
-  const uint8_t lock_type;
-  pthread_mutex_t mutex;
-  pthread_cond_t cond;
-  struct timespec timeout;
+    const uint8_t lock_type;
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    struct timespec timeout;
 };
 
 typedef struct dtn_thread_lock_struct dtn_thread_lock;

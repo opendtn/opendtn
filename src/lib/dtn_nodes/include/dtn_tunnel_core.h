@@ -30,10 +30,9 @@
 #ifndef dtn_tunnel_core_h
 #define dtn_tunnel_core_h
 
-
-#include <dtn_base/dtn_event_loop.h>
 #include <dtn/dtn_cbor.h>
 #include <dtn/dtn_security_config.h>
+#include <dtn_base/dtn_event_loop.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -41,7 +40,7 @@ typedef struct dtn_tunnel_core dtn_tunnel_core;
 
 /*---------------------------------------------------------------------------*/
 
-typedef struct dtn_tunnel_core_config{
+typedef struct dtn_tunnel_core_config {
 
     dtn_event_loop *loop;
 
@@ -63,7 +62,7 @@ typedef struct dtn_tunnel_core_config{
     } limits;
 
     dtn_security_config sec;
-    
+
 } dtn_tunnel_core_config;
 
 /*
@@ -86,26 +85,20 @@ dtn_tunnel_core *dtn_tunnel_core_cast(const void *data);
  *      ------------------------------------------------------------------------
  */
 
-bool dtn_tunnel_core_enable_ip_interfaces(
-        dtn_tunnel_core *self,
-        const dtn_item *config);
+bool dtn_tunnel_core_enable_ip_interfaces(dtn_tunnel_core *self,
+                                          const dtn_item *config);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_tunnel_core_enable_routes(
-        dtn_tunnel_core *self, 
-        const char *path);
+bool dtn_tunnel_core_enable_routes(dtn_tunnel_core *self, const char *path);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_tunnel_core_set_source_uri(
-        dtn_tunnel_core *self, 
-        const char *uri);
+bool dtn_tunnel_core_set_source_uri(dtn_tunnel_core *self, const char *uri);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_tunnel_core_set_destination_uri(
-        dtn_tunnel_core *self, 
-        const char *uri);
+bool dtn_tunnel_core_set_destination_uri(dtn_tunnel_core *self,
+                                         const char *uri);
 
 #endif /* dtn_tunnel_core_h */

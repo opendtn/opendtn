@@ -48,23 +48,19 @@ int test_dtn_hash_function_to_string() {
     char *expect = NULL;
 
     expect = "sha1";
-    testrun(0 == strncmp(dtn_hash_function_to_string(DTN_HASH_SHA1),
-                         expect,
+    testrun(0 == strncmp(dtn_hash_function_to_string(DTN_HASH_SHA1), expect,
                          strlen(expect)));
 
     expect = "sha256";
-    testrun(0 == strncmp(dtn_hash_function_to_string(DTN_HASH_SHA256),
-                         expect,
+    testrun(0 == strncmp(dtn_hash_function_to_string(DTN_HASH_SHA256), expect,
                          strlen(expect)));
 
     expect = "sha512";
-    testrun(0 == strncmp(dtn_hash_function_to_string(DTN_HASH_SHA512),
-                         expect,
+    testrun(0 == strncmp(dtn_hash_function_to_string(DTN_HASH_SHA512), expect,
                          strlen(expect)));
 
     expect = "md5";
-    testrun(0 == strncmp(dtn_hash_function_to_string(DTN_HASH_MD5),
-                         expect,
+    testrun(0 == strncmp(dtn_hash_function_to_string(DTN_HASH_MD5), expect,
                          strlen(expect)));
 
     expect = "unspec";
@@ -82,23 +78,19 @@ int test_dtn_hash_function_to_RFC8122_string() {
 
     expect = "sha-1";
     testrun(0 == strncmp(dtn_hash_function_to_RFC8122_string(DTN_HASH_SHA1),
-                         expect,
-                         strlen(expect)));
+                         expect, strlen(expect)));
 
     expect = "sha-256";
     testrun(0 == strncmp(dtn_hash_function_to_RFC8122_string(DTN_HASH_SHA256),
-                         expect,
-                         strlen(expect)));
+                         expect, strlen(expect)));
 
     expect = "sha-512";
     testrun(0 == strncmp(dtn_hash_function_to_RFC8122_string(DTN_HASH_SHA512),
-                         expect,
-                         strlen(expect)));
+                         expect, strlen(expect)));
 
     expect = "md5";
     testrun(0 == strncmp(dtn_hash_function_to_RFC8122_string(DTN_HASH_MD5),
-                         expect,
-                         strlen(expect)));
+                         expect, strlen(expect)));
 
     testrun(NULL == dtn_hash_function_to_RFC8122_string(0));
 
@@ -112,7 +104,8 @@ int test_dtn_hash_function_from_string() {
     char *src = "md5";
 
     testrun(DTN_HASH_UNSPEC == dtn_hash_function_from_string(NULL, 0));
-    testrun(DTN_HASH_UNSPEC == dtn_hash_function_from_string(NULL, strlen(src)));
+    testrun(DTN_HASH_UNSPEC ==
+            dtn_hash_function_from_string(NULL, strlen(src)));
     testrun(DTN_HASH_UNSPEC == dtn_hash_function_from_string(src, 0));
 
     testrun(DTN_HASH_MD5 == dtn_hash_function_from_string(src, strlen(src)));
@@ -140,8 +133,10 @@ int test_dtn_hash_function_from_string() {
 int test_dtn_hash_function_to_EVP() {
 
     testrun(EVP_sha1() == (EVP_MD *)dtn_hash_function_to_EVP(DTN_HASH_SHA1));
-    testrun(EVP_sha256() == (EVP_MD *)dtn_hash_function_to_EVP(DTN_HASH_SHA256));
-    testrun(EVP_sha512() == (EVP_MD *)dtn_hash_function_to_EVP(DTN_HASH_SHA512));
+    testrun(EVP_sha256() ==
+            (EVP_MD *)dtn_hash_function_to_EVP(DTN_HASH_SHA256));
+    testrun(EVP_sha512() ==
+            (EVP_MD *)dtn_hash_function_to_EVP(DTN_HASH_SHA512));
     testrun(EVP_md5() == (EVP_MD *)dtn_hash_function_to_EVP(DTN_HASH_MD5));
     testrun(NULL == (EVP_MD *)dtn_hash_function_to_EVP(DTN_HASH_UNSPEC));
 
@@ -414,7 +409,8 @@ int test_dtn_hash_string() {
     result = buffer;
     res_size = 63;
 
-    testrun(!dtn_hash_string(DTN_HASH_SHA512, src, src_len, &result, &res_size));
+    testrun(
+        !dtn_hash_string(DTN_HASH_SHA512, src, src_len, &result, &res_size));
 
     for (size_t i = 0; i < 100; i++)
         testrun(buffer[i] == 0);
@@ -426,9 +422,7 @@ int test_dtn_hash_string() {
 
 int test_dtn_hash() {
 
-    const char *src[] = {"some test data set to check",
-                         "string2",
-                         "string3",
+    const char *src[] = {"some test data set to check", "string2", "string3",
                          "some other string\r\n",
                          "any \t\n\r other\n string content"};
 

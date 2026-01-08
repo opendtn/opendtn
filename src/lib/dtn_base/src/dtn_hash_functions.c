@@ -39,24 +39,24 @@
 
 uint64_t dtn_hash_simple_c_string(const void *c_string) {
 
-  if (0 == c_string)
-    return 0;
+    if (0 == c_string)
+        return 0;
 
-  const char *s = c_string;
+    const char *s = c_string;
 
-  uint8_t hash = 0;
+    uint8_t hash = 0;
 
-  uint8_t c = (uint8_t)*s;
+    uint8_t c = (uint8_t)*s;
 
-  while (0 != c) {
+    while (0 != c) {
 
-    /* Use a prime as factor to prevent short cycles  -
-     * if you dont understand, leave it as it is ... */
-    hash += 13 * c;
-    c = (uint8_t) * (++s);
-  }
+        /* Use a prime as factor to prevent short cycles  -
+         * if you dont understand, leave it as it is ... */
+        hash += 13 * c;
+        c = (uint8_t) * (++s);
+    }
 
-  return hash;
+    return hash;
 }
 
 /******************************************************************************
@@ -103,67 +103,66 @@ static const uint8_t PEARSON_PERMUTATION_TABLE[256] = {
 
 uint64_t dtn_hash_pearson_c_string(const void *c_string) {
 
-  if (0 == c_string)
-    return 0;
+    if (0 == c_string)
+        return 0;
 
-  const char *s = c_string;
-  uint8_t h = 0;
-  uint8_t c = (uint8_t)*s;
+    const char *s = c_string;
+    uint8_t h = 0;
+    uint8_t c = (uint8_t)*s;
 
-  while (0 != c) {
+    while (0 != c) {
 
-    h = PEARSON_PERMUTATION_TABLE[h ^ c];
-    c = (uint8_t) * (++s);
-  }
+        h = PEARSON_PERMUTATION_TABLE[h ^ c];
+        c = (uint8_t) * (++s);
+    }
 
-  return h;
+    return h;
 }
 
 /*----------------------------------------------------------------------------*/
 
 uint64_t dtn_hash_intptr(const void *intptr) {
-  uint64_t u64_ptr = (intptr_t)intptr;
-  return u64_ptr;
+    uint64_t u64_ptr = (intptr_t)intptr;
+    return u64_ptr;
 }
 
 /*----------------------------------------------------------------------------*/
 
 uint64_t dtn_hash_uint64(const void *uint64) {
 
-  if (!uint64)
-    return 0;
+    if (!uint64)
+        return 0;
 
-  uint64_t *ptr = (uint64_t *)uint64;
-  if (!ptr)
-    return 0;
+    uint64_t *ptr = (uint64_t *)uint64;
+    if (!ptr)
+        return 0;
 
-  return (uint64_t)*ptr;
+    return (uint64_t)*ptr;
 }
 
 /*----------------------------------------------------------------------------*/
 
 uint64_t dtn_hash_int64(const void *int64) {
 
-  if (!int64)
-    return 0;
+    if (!int64)
+        return 0;
 
-  int64_t *ptr = (int64_t *)int64;
-  if (!ptr)
-    return 0;
+    int64_t *ptr = (int64_t *)int64;
+    if (!ptr)
+        return 0;
 
-  return (uint64_t)*ptr;
+    return (uint64_t)*ptr;
 }
 
 /*----------------------------------------------------------------------------*/
 
-uint64_t dtn_hash_dtn_socket_data(const void *self){
+uint64_t dtn_hash_dtn_socket_data(const void *self) {
 
-  char buffer[1024] = {0};
-  if (!self) return 0;
-  dtn_socket_data *data = (dtn_socket_data*)self;
-  size_t bytes = snprintf(buffer, 1024, "%s:%i",
-    data->host, data->port);
-  buffer[bytes +1]= 0;
-  return dtn_hash_pearson_c_string(buffer);
-
+    char buffer[1024] = {0};
+    if (!self)
+        return 0;
+    dtn_socket_data *data = (dtn_socket_data *)self;
+    size_t bytes = snprintf(buffer, 1024, "%s:%i", data->host, data->port);
+    buffer[bytes + 1] = 0;
+    return dtn_hash_pearson_c_string(buffer);
 }

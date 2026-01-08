@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_ip_link.c"
+#include <dtn_base/testrun.h>
 
 #include "../include/dtn_item_json.h"
 
@@ -40,14 +40,11 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_ip_link_get_interface_name(){
+int test_dtn_ip_link_get_interface_name() {
 
     dtn_socket_configuration config = dtn_socket_load_dynamic_port(
-        (dtn_socket_configuration){
-            .host = "localhost",
-            .type = UDP
-        });
-    
+        (dtn_socket_configuration){.host = "localhost", .type = UDP});
+
     int socket = dtn_socket_create(config, false, NULL);
     char *name = dtn_ip_link_get_interface_name(socket);
     testrun(name);
@@ -58,20 +55,17 @@ int test_dtn_ip_link_get_interface_name(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_ip_link_get_state(){
+int test_dtn_ip_link_get_state() {
 
     dtn_socket_configuration config = dtn_socket_load_dynamic_port(
-        (dtn_socket_configuration){
-            .host = "localhost",
-            .type = UDP
-        });
-    
+        (dtn_socket_configuration){.host = "localhost", .type = UDP});
+
     int socket = dtn_socket_create(config, false, NULL);
     char *name = dtn_ip_link_get_interface_name(socket);
     testrun(name);
 
-    // localhost should be up 
-    testrun(DTN_IP_LINK_UP == dtn_ip_link_get_state(name));    
+    // localhost should be up
+    testrun(DTN_IP_LINK_UP == dtn_ip_link_get_state(name));
     name = dtn_data_pointer_free(name);
 
     return testrun_log_success();
@@ -79,7 +73,7 @@ int test_dtn_ip_link_get_state(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_io_link_get_all_interfaces(){
+int test_dtn_io_link_get_all_interfaces() {
 
     dtn_item *item = dtn_io_link_get_all_interfaces();
     testrun(item);
@@ -92,7 +86,6 @@ int test_dtn_io_link_get_all_interfaces(){
 }
 
 /*----------------------------------------------------------------------------*/
-
 
 /*
  *      ------------------------------------------------------------------------

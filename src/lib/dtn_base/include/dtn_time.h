@@ -42,36 +42,36 @@
 #include <sys/time.h>
 #include <time.h>
 
-#include"dtn_log.h"
+#include "dtn_log.h"
 
 typedef enum dtn_time_scope {
-  TIME_SCOPE_YEAR,
-  TIME_SCOPE_MONTH,
-  TIME_SCOPE_DAY,
-  TIME_SCOPE_HOUR,
-  TIME_SCOPE_MINUTE,
-  TIME_SCOPE_SECOND,
-  TIME_SCOPE_MILLISECOND,
-  TIME_SCOPE_MICROSECOND
+    TIME_SCOPE_YEAR,
+    TIME_SCOPE_MONTH,
+    TIME_SCOPE_DAY,
+    TIME_SCOPE_HOUR,
+    TIME_SCOPE_MINUTE,
+    TIME_SCOPE_SECOND,
+    TIME_SCOPE_MILLISECOND,
+    TIME_SCOPE_MICROSECOND
 } dtn_time_scope_t;
 
 /*----------------------------------------------------------------------------*/
 
 typedef enum dtn_time_unit {
-  SEC = 1,
-  USEC,
+    SEC = 1,
+    USEC,
 } dtn_time_unit;
 
 /*----------------------------------------------------------------------------*/
 
 typedef struct {
 
-  uint16_t year;
-  uint8_t month;
-  uint8_t day;
-  uint8_t hour;
-  uint8_t minute;
-  uint8_t second;
+    uint16_t year;
+    uint8_t month;
+    uint8_t day;
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
 
 } dtn_time;
 
@@ -142,13 +142,13 @@ char *dtn_time_string(dtn_time_scope_t scope);
 /*----------------------------------------------------------------------------*/
 
 char *dtn_timestamp_from_data(uint16_t year, uint8_t month, uint8_t day,
-                             uint8_t hour, uint8_t minute, uint8_t second);
+                              uint8_t hour, uint8_t minute, uint8_t second);
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_timestamp_parse(const char *timestamp, uint16_t *year, uint8_t *month,
-                        uint8_t *day, uint8_t *hour, uint8_t *minute,
-                        uint8_t *second);
+                         uint8_t *day, uint8_t *hour, uint8_t *minute,
+                         uint8_t *second);
 
 /*----------------------------------------------------------------------------*/
 
@@ -186,7 +186,7 @@ uint64_t dtn_time_get_current_time_usecs();
 /*----------------------------------------------------------------------------*/
 
 bool dtn_time_to_string(char *target, size_t size, uint64_t usecs,
-                       dtn_time_unit unit);
+                        dtn_time_unit unit);
 
 /*----------------------------------------------------------------------------*/
 

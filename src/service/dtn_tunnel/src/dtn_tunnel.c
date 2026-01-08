@@ -46,8 +46,8 @@
 /*---------------------------------------------------------------------------*/
 
 #define CONFIG_PATH                                                            \
-  DTN_ROOT                                                                \
-  "/src/service/dtn_tunnel/config/default_config.json"
+    DTN_ROOT                                                                   \
+    "/src/service/dtn_tunnel/config/default_config.json"
 
 /*---------------------------------------------------------------------------*/
 
@@ -65,64 +65,71 @@ int main(int argc, char **argv) {
         .max.timers = dtn_socket_get_max_supported_runtime_sockets(0)};
 
     const char *path = dtn_config_path_from_command_line(argc, argv);
-    if (!path) path = CONFIG_PATH;
+    if (!path)
+        path = CONFIG_PATH;
 
-    if (path == VERSION_REQUEST_ONLY) goto done;
+    if (path == VERSION_REQUEST_ONLY)
+        goto done;
 
     config = dtn_config_load(path);
 
     if (!config) {
-        
+
         dtn_log_error("failed to load config from %s", path);
         goto error;
 
     } else {
-        
+
         dtn_log_debug("loaded config from %s", path);
     }
 
-    if (!dtn_config_log_from_json(config)) goto error;
+    if (!dtn_config_log_from_json(config))
+        goto error;
 
     // load eventloop
 
     loop = dtn_event_loop_default(loop_config);
-    if (!loop) goto error;
-    if (!dtn_event_loop_setup_signals(loop)) goto error;
+    if (!loop)
+        goto error;
+    if (!dtn_event_loop_setup_signals(loop))
+        goto error;
 
-    // load io interface 
+    // load io interface
 
     dtn_io_config io_config = dtn_io_config_from_item(config);
     io_config.loop = loop;
 
     io = dtn_io_create(io_config);
-    if (!io) goto error;
+    if (!io)
+        goto error;
 
-    // load node 
+    // load node
 
     dtn_tunnel_app_config node_config = dtn_tunnel_app_config_from_item(config);
     node_config.loop = loop;
     node_config.io = io;
 
     node = dtn_tunnel_app_create(node_config);
-    if (!node) goto error;
+    if (!node)
+        goto error;
 
     if (!dtn_tunnel_app_enable_ip_interfaces(node, config))
         goto error;
-        
-    const char *routes = dtn_item_get_string(dtn_item_get(config, "/dtn/routes/path"));
+
+    const char *routes =
+        dtn_item_get_string(dtn_item_get(config, "/dtn/routes/path"));
     dtn_tunnel_app_enable_routes(node, routes);
-    
+
     dtn_event_loop_run(loop, DTN_RUN_MAX);
 
 done:
     retval = EXIT_SUCCESS;
 
 error:
-    
+
     config = dtn_item_free(config);
     io = dtn_io_free(io);
     node = dtn_tunnel_app_free(node);
     loop = dtn_event_loop_free(loop);
     return retval;
 }
-

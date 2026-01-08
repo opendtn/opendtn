@@ -48,5 +48,5 @@ endif
 
 .PHONY: clang_format
 clang_format:
-	$(shell find $(OPENVOCS_ROOT) -name "*.[c\|h]" -exec clang-format -style=file -i {} \;)
+	$(shell find $(DTN_ROOT) -name "*.[c\|h]" -exec clang-format -style=file -i {} \;)
 	@echo "[FORMAT] code formating done"

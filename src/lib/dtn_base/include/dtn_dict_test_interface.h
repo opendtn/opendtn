@@ -42,25 +42,25 @@
 
 extern dtn_dict *(*dict_creator)(dtn_dict_config);
 
-#define DTN_DICT_PERFORM_PERFORM_INTERFACE_TESTS(create)                        \
-  do {                                                                         \
+#define DTN_DICT_PERFORM_PERFORM_INTERFACE_TESTS(create)                       \
+    do {                                                                       \
                                                                                \
-    dict_creator = create;                                                     \
+        dict_creator = create;                                                 \
                                                                                \
-    testrun_test(test_impl_dict_is_empty);                                     \
-    testrun_test(test_impl_dict_clear);                                        \
-    testrun_test(test_impl_dict_free);                                         \
+        testrun_test(test_impl_dict_is_empty);                                 \
+        testrun_test(test_impl_dict_clear);                                    \
+        testrun_test(test_impl_dict_free);                                     \
                                                                                \
-    testrun_test(test_impl_dict_get_keys);                                     \
+        testrun_test(test_impl_dict_get_keys);                                 \
                                                                                \
-    testrun_test(test_impl_dict_get);                                          \
-    testrun_test(test_impl_dict_set);                                          \
-    testrun_test(test_impl_dict_del);                                          \
-    testrun_test(test_impl_dict_remove);                                       \
+        testrun_test(test_impl_dict_get);                                      \
+        testrun_test(test_impl_dict_set);                                      \
+        testrun_test(test_impl_dict_del);                                      \
+        testrun_test(test_impl_dict_remove);                                   \
                                                                                \
-    testrun_test(test_impl_dict_for_each);                                     \
+        testrun_test(test_impl_dict_for_each);                                 \
                                                                                \
-  } while (0)
+    } while (0)
 
 /******************************************************************************
                                      TESTS

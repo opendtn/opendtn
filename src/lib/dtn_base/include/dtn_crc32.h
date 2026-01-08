@@ -39,7 +39,7 @@
  * expects its input bits to be reverted.
  */
 bool dtn_crc32_generate_table_for(uint32_t polynomial, bool reverted_in,
-                                 uint32_t lookup[0x100]);
+                                  uint32_t lookup[0x100]);
 
 /**
  * Calculate a CRC32 checksum.
@@ -81,7 +81,7 @@ bool dtn_crc32_generate_table_for(uint32_t polynomial, bool reverted_in,
  *
  */
 uint32_t dtn_crc32_sum(uint32_t crc, uint8_t const *data, size_t len_octets,
-                      bool rfin, bool rfout, uint32_t lookup[0x100]);
+                       bool rfin, bool rfout, uint32_t lookup[0x100]);
 
 /*----------------------------------------------------------------------------*/
 
@@ -125,7 +125,7 @@ uint32_t dtn_crc32_ogg(uint32_t init, uint8_t const *data, size_t len_octets);
 uint32_t dtn_crc32_zlib(uint32_t init, uint8_t const *data, size_t len_octets);
 
 /**
- * Calculate CRC32 with the Castagnoli polynom, 
+ * Calculate CRC32 with the Castagnoli polynom,
  * may be faster if hardware acceleration is used.
  */
 uint32_t dtn_crc32c(uint8_t const *data, size_t len_octets);

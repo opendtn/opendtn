@@ -59,11 +59,11 @@
 
 typedef struct {
 
-  uint16_t magic_byte;
+    uint16_t magic_byte;
 
-  uint8_t *start;  // start of data
-  size_t length;   // length of data
-  size_t capacity; // allocated capacity (if 0 start is pointer)
+    uint8_t *start;  // start of data
+    size_t length;   // length of data
+    size_t capacity; // allocated capacity (if 0 start is pointer)
 
 } dtn_buffer;
 
@@ -105,8 +105,8 @@ dtn_buffer *dtn_buffer_concat(dtn_buffer *b1, dtn_buffer const *b2);
 /**
  * Creates a zero-terminated buffer containing a concatenation of all strings
  */
-#define dtn_buffer_from_strlist(...)                                            \
-  dtn_buffer_from_strlist_internal((char const *[]){__VA_ARGS__, 0})
+#define dtn_buffer_from_strlist(...)                                           \
+    dtn_buffer_from_strlist_internal((char const *[]){__VA_ARGS__, 0})
 
 /*----------------------------------------------------------------------------*/
 /**

@@ -170,9 +170,9 @@ typedef struct dtn_registered_cache_struct dtn_registered_cache;
 
 typedef struct {
 
-  uint64_t timeout_usec;
-  void *(*item_free)(void *);
-  size_t capacity;
+    uint64_t timeout_usec;
+    void *(*item_free)(void *);
+    size_t capacity;
 
 } dtn_registered_cache_config;
 
@@ -187,8 +187,9 @@ typedef struct {
  * Call this function *ONLY ONCE* and *ONLY AFTER YOU ARE SURE NOBODY USES
  * ANY OF THE REGISTERED CACHES ANY LONGER!*
  */
-dtn_registered_cache *dtn_registered_cache_extend(char const *cache_name,
-                                                dtn_registered_cache_config cfg);
+dtn_registered_cache *
+dtn_registered_cache_extend(char const *cache_name,
+                            dtn_registered_cache_config cfg);
 
 /*----------------------------------------------------------------------------*/
 
@@ -209,7 +210,8 @@ void *dtn_registered_cache_get(dtn_registered_cache *restrict self);
         @returns object in case of error
         @returns NULL in case of success
 */
-void *dtn_registered_cache_put(dtn_registered_cache *restrict self, void *object);
+void *dtn_registered_cache_put(dtn_registered_cache *restrict self,
+                               void *object);
 
 /*----------------------------------------------------------------------------*/
 
@@ -219,7 +221,7 @@ void *dtn_registered_cache_put(dtn_registered_cache *restrict self, void *object
  * for us
  */
 void dtn_registered_cache_set_element_checker(dtn_registered_cache *cache,
-                                             bool (*element_checker)(void *));
+                                              bool (*element_checker)(void *));
 
 /*----------------------------------------------------------------------------*/
 
@@ -265,7 +267,7 @@ dtn_registered_cache_sizes_from_json(dtn_item const *jval);
  * Returns default cache size if appropriate or 0 if disabled
  */
 size_t dtn_registered_cache_size_for(dtn_registered_cache_sizes *sizes,
-                                    char const *cache_name);
+                                     char const *cache_name);
 
 /*----------------------------------------------------------------------------*/
 

@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_io_buffer.c"
+#include <dtn_base/testrun.h>
 
 /*
  *      ------------------------------------------------------------------------
@@ -38,8 +38,8 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_io_buffer_create(){
-    
+int test_dtn_io_buffer_create() {
+
     dtn_io_buffer *self = dtn_io_buffer_create((dtn_io_buffer_config){0});
     testrun(self);
     testrun(self->dict);
@@ -50,15 +50,15 @@ int test_dtn_io_buffer_create(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_io_buffer_free(){
-    
+int test_dtn_io_buffer_free() {
+
     dtn_io_buffer *self = dtn_io_buffer_create((dtn_io_buffer_config){0});
     testrun(self);
     testrun(self->dict);
 
     dtn_socket_data remote = {0};
 
-    testrun(dtn_io_buffer_push(self, &remote, (uint8_t*) "test", 4));
+    testrun(dtn_io_buffer_push(self, &remote, (uint8_t *)"test", 4));
 
     testrun(NULL == dtn_io_buffer_free(self));
 
@@ -67,15 +67,15 @@ int test_dtn_io_buffer_free(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_io_buffer_push(){
-    
+int test_dtn_io_buffer_push() {
+
     dtn_io_buffer *self = dtn_io_buffer_create((dtn_io_buffer_config){0});
     testrun(self);
     testrun(self->dict);
 
     dtn_socket_data remote = {0};
 
-    testrun(dtn_io_buffer_push(self, &remote, (uint8_t*) "test", 4));
+    testrun(dtn_io_buffer_push(self, &remote, (uint8_t *)"test", 4));
     dtn_buffer *buffer = dtn_io_buffer_pop(self, &remote);
     testrun(buffer);
     testrun(0 == memcmp("test", buffer->start, buffer->length));
@@ -88,15 +88,15 @@ int test_dtn_io_buffer_push(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_io_buffer_pop(){
-    
+int test_dtn_io_buffer_pop() {
+
     dtn_io_buffer *self = dtn_io_buffer_create((dtn_io_buffer_config){0});
     testrun(self);
     testrun(self->dict);
 
     dtn_socket_data remote = {0};
 
-    testrun(dtn_io_buffer_push(self, &remote, (uint8_t*) "test", 4));
+    testrun(dtn_io_buffer_push(self, &remote, (uint8_t *)"test", 4));
     dtn_buffer *buffer = dtn_io_buffer_pop(self, &remote);
     testrun(buffer);
     testrun(0 == memcmp("test", buffer->start, buffer->length));
@@ -108,7 +108,6 @@ int test_dtn_io_buffer_pop(){
 }
 
 /*----------------------------------------------------------------------------*/
-
 
 /*
  *      ------------------------------------------------------------------------

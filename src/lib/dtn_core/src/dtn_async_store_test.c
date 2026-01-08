@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_async_store.c"
+#include <dtn_base/testrun.h>
 
 /*
  *      ------------------------------------------------------------------------
@@ -38,15 +38,14 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_async_store_create(){
-    
+int test_dtn_async_store_create() {
+
     dtn_event_loop *loop = dtn_event_loop_default(
-      (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
+        (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
     testrun(loop);
 
-    dtn_async_store *store = dtn_async_store_create((dtn_async_store_config){
-        .loop = loop
-    });
+    dtn_async_store *store =
+        dtn_async_store_create((dtn_async_store_config){.loop = loop});
 
     testrun(store);
     testrun(dtn_async_store_cast(store));
@@ -64,23 +63,23 @@ int test_dtn_async_store_create(){
 
 struct dummy_userdata {
 
-   dtn_async_data data; 
+    dtn_async_data data;
 };
 
 /*----------------------------------------------------------------------------*/
 
-static void dummy_timeout(void *userdata, dtn_async_data data){
+static void dummy_timeout(void *userdata, dtn_async_data data) {
 
-    struct dummy_userdata *dummy = (struct dummy_userdata*) userdata;
+    struct dummy_userdata *dummy = (struct dummy_userdata *)userdata;
     dummy->data = data;
     return;
 }
 
 /*----------------------------------------------------------------------------*/
 
-static void dummy_callback(void *userdata, int socket, dtn_item *message){
+static void dummy_callback(void *userdata, int socket, dtn_item *message) {
 
-    struct dummy_userdata *dummy = (struct dummy_userdata*) userdata;
+    struct dummy_userdata *dummy = (struct dummy_userdata *)userdata;
     dummy->data.socket = socket;
     dummy->data.message = message;
     return;
@@ -88,37 +87,30 @@ static void dummy_callback(void *userdata, int socket, dtn_item *message){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_async_store_free(){
+int test_dtn_async_store_free() {
 
     struct dummy_userdata dummy = {0};
-    
+
     dtn_event_loop *loop = dtn_event_loop_default(
-      (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
+        (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
     testrun(loop);
 
-    dtn_async_store *store = dtn_async_store_create((dtn_async_store_config){
-        .loop = loop
-    });
+    dtn_async_store *store =
+        dtn_async_store_create((dtn_async_store_config){.loop = loop});
 
     testrun(store);
     testrun(NULL == dtn_async_store_free(store));
 
-    store = dtn_async_store_create((dtn_async_store_config){
-        .loop = loop
-    });
+    store = dtn_async_store_create((dtn_async_store_config){.loop = loop});
 
     testrun(store);
 
-    testrun(dtn_async_set(store, 
-        "1", 
-        (dtn_async_data){
-            .socket = 1,
-            .message = NULL,
-            .timedout.userdata = &dummy,
-            .timedout.callback = dummy_timeout
-        },
-        10000000
-    ));
+    testrun(dtn_async_set(store, "1",
+                          (dtn_async_data){.socket = 1,
+                                           .message = NULL,
+                                           .timedout.userdata = &dummy,
+                                           .timedout.callback = dummy_timeout},
+                          10000000));
 
     testrun(NULL == dtn_async_store_free(store));
     testrun(NULL == dtn_event_loop_free(loop));
@@ -127,18 +119,16 @@ int test_dtn_async_store_free(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_async_data_clear(){
+int test_dtn_async_data_clear() {
 
     struct dummy_userdata dummy = {0};
 
-    dtn_async_data data = (dtn_async_data){
-        .socket = 1,
-        .message = dtn_item_object(),
-        .timedout.userdata = &dummy,
-        .timedout.callback = dummy_timeout,
-        .callback.userdata = &dummy,
-        .callback.callback = dummy_callback
-    };
+    dtn_async_data data = (dtn_async_data){.socket = 1,
+                                           .message = dtn_item_object(),
+                                           .timedout.userdata = &dummy,
+                                           .timedout.callback = dummy_timeout,
+                                           .callback.userdata = &dummy,
+                                           .callback.callback = dummy_callback};
 
     dtn_async_data_clear(&data);
 
@@ -154,35 +144,30 @@ int test_dtn_async_data_clear(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_async_set(){
+int test_dtn_async_set() {
 
     struct dummy_userdata dummy = {0};
-    
+
     dtn_event_loop *loop = dtn_event_loop_default(
-      (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
+        (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
     testrun(loop);
 
     dtn_async_store *store = dtn_async_store_create((dtn_async_store_config){
-        .loop = loop,
-        .limits.invalidate_check_usec = 50000
-    });
+        .loop = loop, .limits.invalidate_check_usec = 50000});
 
     testrun(store);
 
-    testrun(dtn_async_set(store, "1", 
-        (dtn_async_data){
-            .socket = 1,
-            .message = NULL,
-            .timedout.userdata = &dummy,
-            .timedout.callback = dummy_timeout
-        },
-        100000
-    ));
+    testrun(dtn_async_set(store, "1",
+                          (dtn_async_data){.socket = 1,
+                                           .message = NULL,
+                                           .timedout.userdata = &dummy,
+                                           .timedout.callback = dummy_timeout},
+                          100000));
 
     testrun(!dtn_async_set(NULL, NULL, (dtn_async_data){0}, 0));
     testrun(!dtn_async_set(store, NULL, (dtn_async_data){0}, 0));
     testrun(!dtn_async_set(NULL, "id", (dtn_async_data){0}, 0));
-    
+
     testrun(dtn_async_set(store, "2", (dtn_async_data){0}, 0));
 
     sleep(1);
@@ -200,33 +185,28 @@ int test_dtn_async_set(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_async_get(){
+int test_dtn_async_get() {
 
     struct dummy_userdata dummy = {0};
-    
+
     dtn_event_loop *loop = dtn_event_loop_default(
-      (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
+        (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
     testrun(loop);
 
     dtn_async_store *store = dtn_async_store_create((dtn_async_store_config){
-        .loop = loop,
-        .limits.invalidate_check_usec = 50000
-    });
+        .loop = loop, .limits.invalidate_check_usec = 50000});
 
     testrun(store);
 
-    testrun(dtn_async_set(store, "1", 
-        (dtn_async_data){
-            .socket = 1,
-            .message = dtn_item_object(),
-            .timedout.userdata = &dummy,
-            .timedout.callback = dummy_timeout
-        },
-        1000000
-    ));
+    testrun(dtn_async_set(store, "1",
+                          (dtn_async_data){.socket = 1,
+                                           .message = dtn_item_object(),
+                                           .timedout.userdata = &dummy,
+                                           .timedout.callback = dummy_timeout},
+                          1000000));
 
     testrun(1 == dtn_dict_count(store->data.dict));
-    
+
     dtn_async_data data = dtn_async_get(store, "1");
     testrun(0 == dtn_dict_count(store->data.dict));
     testrun(1 == data.socket);
@@ -235,7 +215,6 @@ int test_dtn_async_get(){
     testrun(dummy_timeout == data.timedout.callback);
     dtn_async_data_clear(&data);
 
-
     testrun(NULL == dtn_async_store_free(store));
     testrun(NULL == dtn_event_loop_free(loop));
     return testrun_log_success();
@@ -243,60 +222,46 @@ int test_dtn_async_get(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_async_drop(){
+int test_dtn_async_drop() {
 
     struct dummy_userdata dummy = {0};
-    
+
     dtn_event_loop *loop = dtn_event_loop_default(
-      (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
+        (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
     testrun(loop);
 
     dtn_async_store *store = dtn_async_store_create((dtn_async_store_config){
-        .loop = loop,
-        .limits.invalidate_check_usec = 50000
-    });
+        .loop = loop, .limits.invalidate_check_usec = 50000});
 
     testrun(store);
 
-    testrun(dtn_async_set(store, "1", 
-        (dtn_async_data){
-            .socket = 1,
-            .message = dtn_item_object(),
-            .timedout.userdata = &dummy,
-            .timedout.callback = dummy_timeout
-        },
-        1000000
-    ));
+    testrun(dtn_async_set(store, "1",
+                          (dtn_async_data){.socket = 1,
+                                           .message = dtn_item_object(),
+                                           .timedout.userdata = &dummy,
+                                           .timedout.callback = dummy_timeout},
+                          1000000));
 
-    testrun(dtn_async_set(store, "2", 
-        (dtn_async_data){
-            .socket = 1,
-            .message = dtn_item_object(),
-            .timedout.userdata = &dummy,
-            .timedout.callback = dummy_timeout
-        },
-        1000000
-    ));
+    testrun(dtn_async_set(store, "2",
+                          (dtn_async_data){.socket = 1,
+                                           .message = dtn_item_object(),
+                                           .timedout.userdata = &dummy,
+                                           .timedout.callback = dummy_timeout},
+                          1000000));
 
-    testrun(dtn_async_set(store, "3", 
-        (dtn_async_data){
-            .socket = 1,
-            .message = dtn_item_object(),
-            .timedout.userdata = &dummy,
-            .timedout.callback = dummy_timeout
-        },
-        1000000
-    ));
+    testrun(dtn_async_set(store, "3",
+                          (dtn_async_data){.socket = 1,
+                                           .message = dtn_item_object(),
+                                           .timedout.userdata = &dummy,
+                                           .timedout.callback = dummy_timeout},
+                          1000000));
 
-    testrun(dtn_async_set(store, "4", 
-        (dtn_async_data){
-            .socket = 2,
-            .message = dtn_item_object(),
-            .timedout.userdata = &dummy,
-            .timedout.callback = dummy_timeout
-        },
-        1000000
-    ));
+    testrun(dtn_async_set(store, "4",
+                          (dtn_async_data){.socket = 2,
+                                           .message = dtn_item_object(),
+                                           .timedout.userdata = &dummy,
+                                           .timedout.callback = dummy_timeout},
+                          1000000));
 
     testrun(4 == dtn_dict_count(store->data.dict));
     testrun(dtn_async_drop(store, 1));

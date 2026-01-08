@@ -40,7 +40,7 @@ typedef enum aes_key_gcm_algorithm {
     AES_192_GCM = 2,
     AES_256_GCM = 3
 
-} aes_key_gcm_algorithm; 
+} aes_key_gcm_algorithm;
 
 /*----------------------------------------------------------------------------*/
 
@@ -48,6 +48,5 @@ typedef enum aes_key_gcm_algorithm {
  *  This function generates a random buffer, which may be used as an AES key
  */
 dtn_buffer *dtn_aes_key_generate(aes_key_gcm_algorithm algorithm);
-
 
 #endif /* dtn_aes_key_h */

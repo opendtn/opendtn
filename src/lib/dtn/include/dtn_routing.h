@@ -30,8 +30,8 @@
 #ifndef dtn_routing_h
 #define dtn_routing_h
 
-#include <dtn_base/dtn_event_loop.h>
 #include "dtn_dtn_uri.h"
+#include <dtn_base/dtn_event_loop.h>
 
 typedef enum dtn_routing_class {
 
@@ -84,7 +84,7 @@ typedef struct dtn_routing_config {
 dtn_routing *dtn_routing_create(dtn_routing_config config);
 dtn_routing *dtn_routing_free(dtn_routing *self);
 
-bool dtn_routing_dump(FILE *file, dtn_routing* self);
+bool dtn_routing_dump(FILE *file, dtn_routing *self);
 
 /*---------------------------------------------------------------------------*/
 
@@ -92,8 +92,8 @@ bool dtn_routing_dump(FILE *file, dtn_routing* self);
  *  Find a list of routing entries for the given uri,
  *  @returns a list of dtn_routing_info items.
  */
-dtn_list *dtn_routing_get_info_for_uri(
-    dtn_routing *self, const dtn_dtn_uri *uri);
+dtn_list *dtn_routing_get_info_for_uri(dtn_routing *self,
+                                       const dtn_dtn_uri *uri);
 
 /*---------------------------------------------------------------------------*/
 

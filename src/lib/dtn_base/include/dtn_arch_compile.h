@@ -32,14 +32,14 @@
 
 /*----------------------------------------------------------------------------*/
 
-#define DTN_ARCH_COMPILE_WARNING(message)                                       \
-  DTN_ARCH_COMPILE_WARNING_INTERNAL(message)
+#define DTN_ARCH_COMPILE_WARNING(message)                                      \
+    DTN_ARCH_COMPILE_WARNING_INTERNAL(message)
 
-#define DTN_ARCH_COMPILE_DEPRECATED(message)                                    \
-  DTN_ARCH_COMPILE_DEPRECATED_INTERNAL(message)
+#define DTN_ARCH_COMPILE_DEPRECATED(message)                                   \
+    DTN_ARCH_COMPILE_DEPRECATED_INTERNAL(message)
 
-#define DTN_ARCH_COMPILE_ATTRIBUTE_WARNING(message)                             \
-  DTN_ARCH_COMPILE_ATTRIBUTE_WARNING_INTERNAL(message)
+#define DTN_ARCH_COMPILE_ATTRIBUTE_WARNING(message)                            \
+    DTN_ARCH_COMPILE_ATTRIBUTE_WARNING_INTERNAL(message)
 
 /**
  * Returns the backtrace of the current function
@@ -58,12 +58,12 @@ char *dtn_arch_compile_backtrace(size_t max_frames);
 /* Supported since
  * [GCC 4.5.0](https://gcc.gnu.org/gcc-4.5/changes.html) */
 
-#define DTN_ARCH_COMPILE_DEPRECATED_INTERNAL(message)                           \
-  __attribute__((deprecated(message)))
+#define DTN_ARCH_COMPILE_DEPRECATED_INTERNAL(message)                          \
+    __attribute__((deprecated(message)))
 
 /* Earliest GCC version support unknown - 4.5.4 does it ... */
-#define DTN_ARCH_COMPILE_ATTRIBUTE_WARNING_INTERNAL(message)                    \
-  __attribute__((warning(message)))
+#define DTN_ARCH_COMPILE_ATTRIBUTE_WARNING_INTERNAL(message)                   \
+    __attribute__((warning(message)))
 
 /*----------------------------------------------------------------------------
                                    Older GCC
@@ -75,10 +75,11 @@ char *dtn_arch_compile_backtrace(size_t max_frames);
 
 #define DTN_ARCH_COMPILE_WARNING_INTERNAL(message)
 
-#define DTN_ARCH_COMPILE_DEPRECATED_INTERNAL(message) __attribute__((deprecated))
+#define DTN_ARCH_COMPILE_DEPRECATED_INTERNAL(message)                          \
+    __attribute__((deprecated))
 
-#define DTN_ARCH_COMPILE_ATTRIBUTE_WARNING_INTERNAL(message)                    \
-  __attribute__((warning(message)))
+#define DTN_ARCH_COMPILE_ATTRIBUTE_WARNING_INTERNAL(message)                   \
+    __attribute__((warning(message)))
 
 /*----------------------------------------------------------------------------
                                      CLANG
@@ -88,10 +89,11 @@ char *dtn_arch_compile_backtrace(size_t max_frames);
 
 #define DTN_ARCH_COMPILE_WARNING_INTERNAL(message)
 
-#define DTN_ARCH_COMPILE_DEPRECATED_INTERNAL(message) __attribute__((deprecated))
+#define DTN_ARCH_COMPILE_DEPRECATED_INTERNAL(message)                          \
+    __attribute__((deprecated))
 
-#define DTN_ARCH_COMPILE_ATTRIBUTE_WARNING_INTERNAL(message)                    \
-  __attribute__((warning(message)))
+#define DTN_ARCH_COMPILE_ATTRIBUTE_WARNING_INTERNAL(message)                   \
+    __attribute__((warning(message)))
 
 /*----------------------------------------------------------------------------
                                     GARBAGE

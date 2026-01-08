@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_key_store.c"
+#include <dtn_base/testrun.h>
 
 #ifndef DTN_TEST_RESOURCE_DIR
 #error "Must provide -D DTN_TEST_RESOURCE_DIR=value while compiling this file."
@@ -42,11 +42,10 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_key_store_create(){
-    
-    dtn_key_store_config config = (dtn_key_store_config){
-        .path = DTN_TEST_RESOURCE_DIR "/keys"
-    };
+int test_dtn_key_store_create() {
+
+    dtn_key_store_config config =
+        (dtn_key_store_config){.path = DTN_TEST_RESOURCE_DIR "/keys"};
 
     dtn_key_store *store = dtn_key_store_create(config);
     testrun(store);
@@ -59,18 +58,17 @@ int test_dtn_key_store_create(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_key_store_free(){
-    
-    dtn_key_store_config config = (dtn_key_store_config){
-        .path = DTN_TEST_RESOURCE_DIR "keys/"
-    };
+int test_dtn_key_store_free() {
+
+    dtn_key_store_config config =
+        (dtn_key_store_config){.path = DTN_TEST_RESOURCE_DIR "keys/"};
 
     dtn_key_store *store = dtn_key_store_create(config);
     testrun(store);
     testrun(store->data);
 
     dtn_log_debug("%s", store->config.path);
-    
+
     testrun(dtn_key_store_load(store, NULL));
     testrun(3 == dtn_dict_count(store->data));
 
@@ -81,16 +79,15 @@ int test_dtn_key_store_free(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_key_store_load(){
-    
-    dtn_key_store_config config = (dtn_key_store_config){
-        .path = DTN_TEST_RESOURCE_DIR "keys"
-    };
+int test_dtn_key_store_load() {
+
+    dtn_key_store_config config =
+        (dtn_key_store_config){.path = DTN_TEST_RESOURCE_DIR "keys"};
 
     dtn_key_store *store = dtn_key_store_create(config);
     testrun(store);
     testrun(store->data);
-    
+
     testrun(dtn_key_store_load(store, NULL));
     testrun(3 == dtn_dict_count(store->data));
     testrun(dtn_dict_get(store->data, "aes128"));
@@ -104,16 +101,15 @@ int test_dtn_key_store_load(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_key_store_save(){
-    
-    dtn_key_store_config config = (dtn_key_store_config){
-        .path = DTN_TEST_RESOURCE_DIR "keys"
-    };
+int test_dtn_key_store_save() {
+
+    dtn_key_store_config config =
+        (dtn_key_store_config){.path = DTN_TEST_RESOURCE_DIR "keys"};
 
     dtn_key_store *store = dtn_key_store_create(config);
     testrun(store);
     testrun(store->data);
-    
+
     testrun(dtn_key_store_load(store, NULL));
     testrun(3 == dtn_dict_count(store->data));
     testrun(dtn_dict_get(store->data, "aes128"));
@@ -129,16 +125,15 @@ int test_dtn_key_store_save(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_key_store_get(){
-    
-    dtn_key_store_config config = (dtn_key_store_config){
-        .path = DTN_TEST_RESOURCE_DIR "keys"
-    };
+int test_dtn_key_store_get() {
+
+    dtn_key_store_config config =
+        (dtn_key_store_config){.path = DTN_TEST_RESOURCE_DIR "keys"};
 
     dtn_key_store *store = dtn_key_store_create(config);
     testrun(store);
     testrun(store->data);
-    
+
     testrun(dtn_key_store_load(store, NULL));
     testrun(3 == dtn_dict_count(store->data));
     testrun(dtn_dict_get(store->data, "aes128"));
@@ -157,16 +152,15 @@ int test_dtn_key_store_get(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_key_store_set(){
-    
-    dtn_key_store_config config = (dtn_key_store_config){
-        .path = DTN_TEST_RESOURCE_DIR "keys"
-    };
+int test_dtn_key_store_set() {
+
+    dtn_key_store_config config =
+        (dtn_key_store_config){.path = DTN_TEST_RESOURCE_DIR "keys"};
 
     dtn_key_store *store = dtn_key_store_create(config);
     testrun(store);
     testrun(store->data);
-    
+
     testrun(dtn_key_store_load(store, NULL));
     testrun(3 == dtn_dict_count(store->data));
     testrun(dtn_dict_get(store->data, "aes128"));
@@ -183,7 +177,6 @@ int test_dtn_key_store_set(){
     testrun(dtn_dict_get(store->data, "aes192"));
     testrun(dtn_dict_get(store->data, "aes256"));
     testrun(dtn_dict_get(store->data, "test"));
-
 
     testrun(NULL == dtn_key_store_free(store));
 

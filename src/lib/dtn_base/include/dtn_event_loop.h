@@ -111,128 +111,129 @@ typedef struct dtn_event_loop_event dtn_event_loop_event;
 
 struct dtn_event_loop_config {
 
-  struct {
+    struct {
 
-    uint32_t sockets;
-    uint32_t timers;
+        uint32_t sockets;
+        uint32_t timers;
 
-  } max;
+    } max;
 };
 
 /*---------------------------------------------------------------------------*/
 
 struct dtn_event_loop {
 
-  uint16_t magic_byte; // identify an event loop structure
-  uint16_t type;       // identify a custom implementation type
+    uint16_t magic_byte; // identify an event loop structure
+    uint16_t type;       // identify a custom implementation type
 
-  /*------------------------------------------------------------------*/
+    /*------------------------------------------------------------------*/
 
-  /** Don't call that method directly */
-  dtn_event_loop *(*free)(dtn_event_loop *self);
-  bool (*is_running)(const dtn_event_loop *self);
-
-  /*
-   *      Stop self from running.
-   */
-  bool (*stop)(dtn_event_loop *self);
-
-  /*
-   *      Run the loop and handle events until
-   *      (A) the loop is stopped,
-   *      (B) or max_runtime exceeded.
-   *
-   *      @NOTE   a max_runtime of dtn_RUN_ONCE
-   *              MUST run the loop exactely ONCE on all sockets
-   *
-   *      @NOTE   maximum supported runtime is UINT64_MAX usec
-   *
-   *      @param self             eventloop to run
-   *      @param max_runtime      max loop runtime
-   */
-  bool (*run)(dtn_event_loop *self, uint64_t max_runtime_usec);
-
-  /*------------------------------------------------------------------*/
-
-  struct {
+    /** Don't call that method directly */
+    dtn_event_loop *(*free)(dtn_event_loop *self);
+    bool (*is_running)(const dtn_event_loop *self);
 
     /*
-     *      Set a callback to a socket_fd
-     *
-     *      @param self     eventloop to use
-     *      @param socket   socket fd to use
-     *      @param events   events to listen to (OR of dtn_events)
-     *      @param userdata optional data for callback
-     *      @param callback mandatory callback for fd
-     *
-     *      BEWARE: the callback *must* check for EOF (`read` /
-     *      `write` returns 0) and return `false` in that case!
-     *
-     *      @NOTE           access over socket_fd number
-     *
+     *      Stop self from running.
      */
-    bool (*set)(dtn_event_loop *self, int socket, uint8_t events, void *userdata,
-                bool (*callback)(int socket_fd, uint8_t events,
-                                 void *userdata));
+    bool (*stop)(dtn_event_loop *self);
 
     /*
-     *      Unset a callback of a socket_fd
+     *      Run the loop and handle events until
+     *      (A) the loop is stopped,
+     *      (B) or max_runtime exceeded.
      *
-     *      @param self     eventloop to use
-     *      @param socket   socket fd to use
-     *      @param userdata optional pointer to get out some
-     *                      userdata set during callback.set
+     *      @NOTE   a max_runtime of dtn_RUN_ONCE
+     *              MUST run the loop exactely ONCE on all sockets
+     *
+     *      @NOTE   maximum supported runtime is UINT64_MAX usec
+     *
+     *      @param self             eventloop to run
+     *      @param max_runtime      max loop runtime
      */
-    bool (*unset)(dtn_event_loop *self, int socket, void **userdata);
+    bool (*run)(dtn_event_loop *self, uint64_t max_runtime_usec);
 
-  } callback;
+    /*------------------------------------------------------------------*/
 
-  /*------------------------------------------------------------------*/
+    struct {
 
-  struct {
+        /*
+         *      Set a callback to a socket_fd
+         *
+         *      @param self     eventloop to use
+         *      @param socket   socket fd to use
+         *      @param events   events to listen to (OR of dtn_events)
+         *      @param userdata optional data for callback
+         *      @param callback mandatory callback for fd
+         *
+         *      BEWARE: the callback *must* check for EOF (`read` /
+         *      `write` returns 0) and return `false` in that case!
+         *
+         *      @NOTE           access over socket_fd number
+         *
+         */
+        bool (*set)(dtn_event_loop *self, int socket, uint8_t events,
+                    void *userdata,
+                    bool (*callback)(int socket_fd, uint8_t events,
+                                     void *userdata));
 
-    /*
-     *      Set a timer callback at target_usec. ONE SHOT ONLY
-     *
-     *      The timer is invalid after call. Any data pointer
-     *      MAY be reused in a next timer->set to create intervall
-     *      style timers.
-     *
-     *      Time accuracy MAY be dependent on the implementation and
-     *      load.
-     *
-     *      @param self     eventloop to use
-     *      @param relative relative target callback time in usecs
-     *      @param data     optional user data for callback
-     *      @param callback mandatory callback at target time
-     *
-     *      @returns        uint32_t id for timer
-     *                      dtn_TIMER_INVALID on error
-     *
-     *      @NOTE           There is no guarantee whatsoever about
-     *                      the way the timer ids are acquired,
-     *                      they might start off with 0 and
-     *                      increase, but that is in no way
-     *                     guaranteed!
-     *
-     */
+        /*
+         *      Unset a callback of a socket_fd
+         *
+         *      @param self     eventloop to use
+         *      @param socket   socket fd to use
+         *      @param userdata optional pointer to get out some
+         *                      userdata set during callback.set
+         */
+        bool (*unset)(dtn_event_loop *self, int socket, void **userdata);
 
-    uint32_t (*set)(dtn_event_loop *self, uint64_t relative_usec, void *data,
-                    bool (*callback)(uint32_t id, void *data));
+    } callback;
 
-    /*
-     *      Unset a timer with timer_id
-     *
-     *      @param self     eventloop to use
-     *      @param id       timer id to use
-     *      @param dfree    optional free function for data
-     *                      handover with set
-     */
-    bool (*unset)(dtn_event_loop *self, uint32_t id, void **userdata);
+    /*------------------------------------------------------------------*/
 
-  } timer;
+    struct {
 
-  int log_fd;
+        /*
+         *      Set a timer callback at target_usec. ONE SHOT ONLY
+         *
+         *      The timer is invalid after call. Any data pointer
+         *      MAY be reused in a next timer->set to create intervall
+         *      style timers.
+         *
+         *      Time accuracy MAY be dependent on the implementation and
+         *      load.
+         *
+         *      @param self     eventloop to use
+         *      @param relative relative target callback time in usecs
+         *      @param data     optional user data for callback
+         *      @param callback mandatory callback at target time
+         *
+         *      @returns        uint32_t id for timer
+         *                      dtn_TIMER_INVALID on error
+         *
+         *      @NOTE           There is no guarantee whatsoever about
+         *                      the way the timer ids are acquired,
+         *                      they might start off with 0 and
+         *                      increase, but that is in no way
+         *                     guaranteed!
+         *
+         */
+
+        uint32_t (*set)(dtn_event_loop *self, uint64_t relative_usec,
+                        void *data, bool (*callback)(uint32_t id, void *data));
+
+        /*
+         *      Unset a timer with timer_id
+         *
+         *      @param self     eventloop to use
+         *      @param id       timer id to use
+         *      @param dfree    optional free function for data
+         *                      handover with set
+         */
+        bool (*unset)(dtn_event_loop *self, uint32_t id, void **userdata);
+
+    } timer;
+
+    int log_fd;
 };
 
 /*
@@ -270,18 +271,18 @@ void *dtn_event_loop_free(void *eventloop);
 /*----------------------------------------------------------------------------*/
 
 uint32_t dtn_event_loop_timer_set(dtn_event_loop *self, uint64_t relative_usec,
-                                 void *data,
-                                 bool (*callback)(uint32_t id, void *data));
+                                  void *data,
+                                  bool (*callback)(uint32_t id, void *data));
 
 bool dtn_event_loop_timer_unset(dtn_event_loop *self, uint32_t id,
-                               void **userdata);
+                                void **userdata);
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_event_loop_set(dtn_event_loop *self, int socket, uint8_t events,
-                       void *userdata,
-                       bool (*callback)(int socket_fd, uint8_t events,
-                                        void *userdata));
+                        void *userdata,
+                        bool (*callback)(int socket_fd, uint8_t events,
+                                         void *userdata));
 
 bool dtn_event_loop_unset(dtn_event_loop *self, int socket, void **userdata);
 
@@ -370,7 +371,8 @@ bool dtn_event_add_default_connection_accept(
         Remove all default connection accept data from a socket.
         Counterpart to @see dtn_event_add_default_connection_accept.
 */
-bool dtn_event_remove_default_connection_accept(dtn_event_loop *self, int socket);
+bool dtn_event_remove_default_connection_accept(dtn_event_loop *self,
+                                                int socket);
 
 /*---------------------------------------------------------------------------*/
 

@@ -31,11 +31,10 @@
 #define dtn_crc16_h
 
 #include <inttypes.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 // RFC 1662
 uint16_t crc16x25(const uint8_t *buffer, size_t size);
-
 
 #endif /* dtn_crc16_h */

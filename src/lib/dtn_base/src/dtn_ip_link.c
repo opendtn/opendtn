@@ -29,82 +29,82 @@
 */
 #include "../include/dtn_ip_link.h"
 
-#include <stddef.h>
 #include "../include/dtn_socket.h"
 #include "../include/dtn_string.h"
-#include <sys/types.h>
-#include <ifaddrs.h>
-#include <sys/socket.h>
-#include <netdb.h>
 #include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <netdb.h>
+#include <stddef.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
-
-char *dtn_ip_link_get_interface_name(int socket){
+char *dtn_ip_link_get_interface_name(int socket) {
 
     char *name = NULL;
 
-    if (socket < 0) goto error;
+    if (socket < 0)
+        goto error;
 
     struct sockaddr_storage sa = {0};
     socklen_t addr_len = sizeof(sa);
 
-    struct ifaddrs* ifaddr = NULL;
-    struct ifaddrs* ifa = NULL;
+    struct ifaddrs *ifaddr = NULL;
+    struct ifaddrs *ifa = NULL;
 
     int opt = 0;
     socklen_t optlen = sizeof(opt);
 
     int r = getsockopt(socket, SOL_SOCKET, SO_TYPE, &opt, &optlen);
-    if (r != 0) goto error;
+    if (r != 0)
+        goto error;
 
-    r = getsockname(socket, (struct sockaddr*)&sa, &addr_len);
-    if (r != 0) goto error;
+    r = getsockname(socket, (struct sockaddr *)&sa, &addr_len);
+    if (r != 0)
+        goto error;
 
     r = getifaddrs(&ifaddr);
-    if (r != 0) goto error;
+    if (r != 0)
+        goto error;
 
-    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
-    {
-        if (ifa->ifa_addr)
-        {
-            if (opt == ifa->ifa_addr->sa_family){
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr) {
+            if (opt == ifa->ifa_addr->sa_family) {
 
-                switch(opt){
+                switch (opt) {
 
-                    case AF_INET:
+                case AF_INET:
 
-                        struct sockaddr_in* inaddr = (struct sockaddr_in*)ifa->ifa_addr;
-                        struct sockaddr_in* addr = (struct sockaddr_in*)&sa;
-                        
-                        if (inaddr->sin_addr.s_addr == addr->sin_addr.s_addr)
-                        {
-                            if (ifa->ifa_name)
-                            {
-                                // Found it
-                                name = dtn_string_dup(ifa->ifa_name);
-                            }
+                    struct sockaddr_in *inaddr =
+                        (struct sockaddr_in *)ifa->ifa_addr;
+                    struct sockaddr_in *addr = (struct sockaddr_in *)&sa;
+
+                    if (inaddr->sin_addr.s_addr == addr->sin_addr.s_addr) {
+                        if (ifa->ifa_name) {
+                            // Found it
+                            name = dtn_string_dup(ifa->ifa_name);
                         }
-    
-                        break;
-    
-                    case AF_INET6:
+                    }
 
-                        struct sockaddr_in6* inaddr6 = (struct sockaddr_in6*)ifa->ifa_addr;
-                        struct sockaddr_in6* addr6 = (struct sockaddr_in6*)&sa;
-                        
-                        if (inaddr6->sin6_addr.s6_addr == addr6->sin6_addr.s6_addr)
-                        {
-                            if (ifa->ifa_name)
-                            {
-                                // Found it
-                                name = dtn_string_dup(ifa->ifa_name);
-                            }
+                    break;
+
+                case AF_INET6:
+
+                    struct sockaddr_in6 *inaddr6 =
+                        (struct sockaddr_in6 *)ifa->ifa_addr;
+                    struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&sa;
+
+                    if (inaddr6->sin6_addr.s6_addr ==
+                        addr6->sin6_addr.s6_addr) {
+                        if (ifa->ifa_name) {
+                            // Found it
+                            name = dtn_string_dup(ifa->ifa_name);
                         }
-    
-                        break;
-    
-                    default:
-                        break;
+                    }
+
+                    break;
+
+                default:
+                    break;
                 }
             }
         }
@@ -116,16 +116,16 @@ char *dtn_ip_link_get_interface_name(int socket){
 
 error:
     return NULL;
-
 }
 
 /*------------------------------------------------------------------*/
 
-dtn_ip_link_state dtn_ip_link_get_state(const char *name){
+dtn_ip_link_state dtn_ip_link_get_state(const char *name) {
 
     dtn_ip_link_state result = DTN_IP_LINK_DOWN;
 
-    if (!name) goto error;
+    if (!name)
+        goto error;
 
     struct ifaddrs *curr, *list = NULL;
 
@@ -133,7 +133,7 @@ dtn_ip_link_state dtn_ip_link_get_state(const char *name){
         goto error;
 
     for (curr = list; curr != NULL; curr = curr->ifa_next) {
-        
+
         if (!dtn_string_compare(name, curr->ifa_name)) {
             if (curr->ifa_addr->sa_family == AF_INET)
                 result = DTN_IP_LINK_UP;
@@ -151,65 +151,67 @@ error:
 
 /*------------------------------------------------------------------*/
 
-dtn_item *dtn_io_link_get_all_interfaces(){
+dtn_item *dtn_io_link_get_all_interfaces() {
 
     dtn_item *out = dtn_item_object();
     dtn_item *arr = NULL;
 
     dtn_socket_configuration config = {0};
 
-    struct ifaddrs* ifaddr = NULL;
-    struct ifaddrs* ifa = NULL;
+    struct ifaddrs *ifaddr = NULL;
+    struct ifaddrs *ifa = NULL;
 
     int r = getifaddrs(&ifaddr);
-    if (r != 0) goto error;
+    if (r != 0)
+        goto error;
 
-    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
-    {
-        if (ifa->ifa_addr){
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr) {
 
             arr = dtn_item_object_get(out, ifa->ifa_name);
-            if (!arr){
+            if (!arr) {
                 arr = dtn_item_array();
                 dtn_item_object_set(out, ifa->ifa_name, arr);
             }
 
-            switch(ifa->ifa_addr->sa_family){
-                case AF_INET:
+            switch (ifa->ifa_addr->sa_family) {
+            case AF_INET:
 
-                    struct sockaddr_in* inaddr = (struct sockaddr_in*)ifa->ifa_addr;
-                    if (inet_ntop(AF_INET,
-                        &inaddr->sin_addr,
-                        config.host, DTN_HOST_NAME_MAX)){
+                struct sockaddr_in *inaddr =
+                    (struct sockaddr_in *)ifa->ifa_addr;
+                if (inet_ntop(AF_INET, &inaddr->sin_addr, config.host,
+                              DTN_HOST_NAME_MAX)) {
 
-                        dtn_item *val = dtn_item_string(config.host);
-                        if (!val) goto error;
-                        if (!dtn_item_array_push(arr,val)){
-                            val = dtn_item_free(val);
-                                goto error;
-                        } 
+                    dtn_item *val = dtn_item_string(config.host);
+                    if (!val)
+                        goto error;
+                    if (!dtn_item_array_push(arr, val)) {
+                        val = dtn_item_free(val);
+                        goto error;
                     }
-                    break;
+                }
+                break;
 
-                case AF_INET6:
+            case AF_INET6:
 
-                    struct sockaddr_in6* inaddr6 = (struct sockaddr_in6*)ifa->ifa_addr;
-                    if (inet_ntop(AF_INET6,
-                        &inaddr6->sin6_addr,
-                        config.host, DTN_HOST_NAME_MAX)){
+                struct sockaddr_in6 *inaddr6 =
+                    (struct sockaddr_in6 *)ifa->ifa_addr;
+                if (inet_ntop(AF_INET6, &inaddr6->sin6_addr, config.host,
+                              DTN_HOST_NAME_MAX)) {
 
-                        dtn_item *val = dtn_item_string(config.host);
-                        if (!val) goto error;
-                        if (!dtn_item_array_push(arr,val)){
-                            val = dtn_item_free(val);
-                                goto error;
-                        } 
+                    dtn_item *val = dtn_item_string(config.host);
+                    if (!val)
+                        goto error;
+                    if (!dtn_item_array_push(arr, val)) {
+                        val = dtn_item_free(val);
+                        goto error;
                     }
-                    break;
+                }
+                break;
 
-                default:
-                    break;
-            } 
+            default:
+                break;
+            }
         }
     }
 

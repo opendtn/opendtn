@@ -34,12 +34,12 @@
 void dtn_reset_getopt(void) {
 
 #if DTN_ARCH == DTN_LINUX
-  optind = 0;
+    optind = 0;
 #elif DTN_ARCH == DTN_MACOS
-  optind = 1;
+    optind = 1;
 #endif
 
 #ifdef HAVE_OPTRESET
-  optreset = 1;
+    optreset = 1;
 #endif
 }

@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_dtn_uri.c"
+#include <dtn_base/testrun.h>
 
 /*
  *      ------------------------------------------------------------------------
@@ -38,8 +38,8 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_dtn_uri_create(){
-    
+int test_dtn_dtn_uri_create() {
+
     dtn_dtn_uri *self = dtn_dtn_uri_create();
     testrun(self);
 
@@ -49,8 +49,8 @@ int test_dtn_dtn_uri_create(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_dtn_uri_free(){
-    
+int test_dtn_dtn_uri_free() {
+
     dtn_dtn_uri *self = dtn_dtn_uri_create();
     testrun(self);
 
@@ -69,8 +69,8 @@ int test_dtn_dtn_uri_free(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_dtn_uri_clear(){
-    
+int test_dtn_dtn_uri_clear() {
+
     dtn_dtn_uri *self = dtn_dtn_uri_create();
     testrun(self);
 
@@ -92,8 +92,8 @@ int test_dtn_dtn_uri_clear(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_dtn_uri_dump(){
-    
+int test_dtn_dtn_uri_dump() {
+
     dtn_dtn_uri *self = dtn_dtn_uri_create();
     testrun(self);
 
@@ -115,13 +115,13 @@ int test_dtn_dtn_uri_dump(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_dtn_uri_copy(){
-        
+int test_dtn_dtn_uri_copy() {
+
     dtn_dtn_uri *copy = NULL;
     dtn_dtn_uri *self = dtn_dtn_uri_create();
     testrun(self);
 
-    testrun(dtn_dtn_uri_copy((void**)&copy, self));
+    testrun(dtn_dtn_uri_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->name == NULL);
     testrun(copy->scheme == NULL);
@@ -131,7 +131,7 @@ int test_dtn_dtn_uri_copy(){
     self->scheme = dtn_string_dup("scheme");
     self->name = dtn_string_dup("name");
     self->demux = dtn_string_dup("demux");
-    testrun(dtn_dtn_uri_copy((void**)&copy, self));
+    testrun(dtn_dtn_uri_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->name != NULL);
     testrun(copy->scheme != NULL);
@@ -148,8 +148,8 @@ int test_dtn_dtn_uri_copy(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_dtn_uri_decode(){
-        
+int test_dtn_dtn_uri_decode() {
+
     dtn_dtn_uri *self = NULL;
 
     self = dtn_dtn_uri_decode("scheme:none");
@@ -199,7 +199,7 @@ int test_dtn_dtn_uri_decode(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_dtn_uri_encode(){
+int test_dtn_dtn_uri_encode() {
 
     dtn_dtn_uri *self = dtn_dtn_uri_create();
 
@@ -231,8 +231,6 @@ int test_dtn_dtn_uri_encode(){
     self = dtn_dtn_uri_free(self);
     return testrun_log_success();
 }
-
-
 
 /*
  *      ------------------------------------------------------------------------

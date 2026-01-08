@@ -54,7 +54,7 @@ dtn_dtn_uri *dtn_dtn_uri_create();
 void *dtn_dtn_uri_free(void *self);
 bool dtn_dtn_uri_clear(void *self);
 bool dtn_dtn_uri_dump(FILE *stream, void *self);
-void *dtn_dtn_uri_copy(void** destination, void *source);
+void *dtn_dtn_uri_copy(void **destination, void *source);
 
 /*
  *      ------------------------------------------------------------------------

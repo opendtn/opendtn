@@ -31,33 +31,34 @@
 
 #include <openssl/rand.h>
 
-dtn_buffer *dtn_aes_key_generate(aes_key_gcm_algorithm algorithm){
+dtn_buffer *dtn_aes_key_generate(aes_key_gcm_algorithm algorithm) {
 
     dtn_buffer *buffer = NULL;
 
     size_t len = 256;
 
-    switch (algorithm){
+    switch (algorithm) {
 
-        case AES_128_GCM:
+    case AES_128_GCM:
 
-            len = 128;
-            break;
+        len = 128;
+        break;
 
-        case AES_192_GCM:
-            len = 192;
-            break;
+    case AES_192_GCM:
+        len = 192;
+        break;
 
-        case AES_256_GCM:
-            len = 256;
-            break;
+    case AES_256_GCM:
+        len = 256;
+        break;
 
-        default:
-            goto error;
+    default:
+        goto error;
     }
 
     buffer = dtn_buffer_create(len);
-    if (!buffer) goto error;
+    if (!buffer)
+        goto error;
 
     if (1 != RAND_bytes(buffer->start, len))
         goto error;

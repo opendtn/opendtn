@@ -48,36 +48,36 @@ typedef struct dtn_ringbuffer_statistics_struct dtn_ringbuffer_statistics;
 
 struct dtn_ringbuffer_struct {
 
-  uint32_t magic_bytes;
+    uint32_t magic_bytes;
 
-  /**
-   * Returns the max number of elements this buffer may hold before
-   * starting to overwrite elements.
-   */
-  size_t (*capacity)(const dtn_ringbuffer *self);
-  /**
-   * Retrieves and erases an element from the ring buffer.
-   * Prefer directly calling dtn_ringbufer_pop() ...
-   */
-  void *(*pop)(dtn_ringbuffer *self);
+    /**
+     * Returns the max number of elements this buffer may hold before
+     * starting to overwrite elements.
+     */
+    size_t (*capacity)(const dtn_ringbuffer *self);
+    /**
+     * Retrieves and erases an element from the ring buffer.
+     * Prefer directly calling dtn_ringbufer_pop() ...
+     */
+    void *(*pop)(dtn_ringbuffer *self);
 
-  /**
-   * Inserts an element into the ring buffer.
-   * '0' as element is prohibited.
-   * Prefer dtn_ringbuffer_insert() ...
-   */
-  bool (*insert)(dtn_ringbuffer *self, void *element);
-  bool (*clear)(dtn_ringbuffer *self);
-  dtn_ringbuffer *(*free)(dtn_ringbuffer *self);
-  dtn_ringbuffer_statistics (*get_statistics)(const dtn_ringbuffer *self);
+    /**
+     * Inserts an element into the ring buffer.
+     * '0' as element is prohibited.
+     * Prefer dtn_ringbuffer_insert() ...
+     */
+    bool (*insert)(dtn_ringbuffer *self, void *element);
+    bool (*clear)(dtn_ringbuffer *self);
+    dtn_ringbuffer *(*free)(dtn_ringbuffer *self);
+    dtn_ringbuffer_statistics (*get_statistics)(const dtn_ringbuffer *self);
 };
 
 /*---------------------------------------------------------------------------*/
 
 struct dtn_ringbuffer_statistics_struct {
 
-  uint64_t elements_inserted;
-  uint64_t elements_dropped;
+    uint64_t elements_inserted;
+    uint64_t elements_dropped;
 };
 
 /*---------------------------------------------------------------------------*/
@@ -95,10 +95,10 @@ struct dtn_ringbuffer_statistics_struct {
         @param free_element        Function to free an element placed in
                                         the buffer
  */
-dtn_ringbuffer *dtn_ringbuffer_create(size_t capacity,
-                                    void (*free_element)(void *additional_arg,
-                                                         void *element_to_free),
-                                    void *additional_arg);
+dtn_ringbuffer *dtn_ringbuffer_create(
+    size_t capacity,
+    void (*free_element)(void *additional_arg, void *element_to_free),
+    void *additional_arg);
 
 /*----------------------------------------------------------------------------*/
 

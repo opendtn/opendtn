@@ -28,7 +28,6 @@
         ------------------------------------------------------------------------
 */
 
-
 #include <dtn_base/dtn_config.h>
 #include <dtn_base/dtn_config_log.h>
 #include <dtn_base/dtn_event_loop.h>
@@ -47,8 +46,8 @@
 /*---------------------------------------------------------------------------*/
 
 #define CONFIG_PATH                                                            \
-  DTN_ROOT                                                                \
-  "/src/service/dtn_web_node/config/default_config.json"
+    DTN_ROOT                                                                   \
+    "/src/service/dtn_web_node/config/default_config.json"
 
 /*---------------------------------------------------------------------------*/
 
@@ -67,72 +66,80 @@ int main(int argc, char **argv) {
         .max.timers = dtn_socket_get_max_supported_runtime_sockets(0)};
 
     const char *path = dtn_config_path_from_command_line(argc, argv);
-    if (!path) path = CONFIG_PATH;
+    if (!path)
+        path = CONFIG_PATH;
 
-    if (path == VERSION_REQUEST_ONLY) goto done;
+    if (path == VERSION_REQUEST_ONLY)
+        goto done;
 
     config = dtn_config_load(path);
 
     if (!config) {
-        
+
         dtn_log_error("failed to load config from %s", path);
         goto error;
 
     } else {
-        
+
         dtn_log_debug("loaded config from %s", path);
     }
 
-    if (!dtn_config_log_from_json(config)) goto error;
+    if (!dtn_config_log_from_json(config))
+        goto error;
 
     // load eventloop
 
     loop = dtn_os_event_loop(loop_config);
-    if (!loop) goto error;
-    if (!dtn_event_loop_setup_signals(loop)) goto error;
+    if (!loop)
+        goto error;
+    if (!dtn_event_loop_setup_signals(loop))
+        goto error;
 
-    // load io interface 
+    // load io interface
 
     dtn_io_config io_config = dtn_io_config_from_item(config);
     io_config.loop = loop;
 
     io = dtn_io_create(io_config);
-    if (!io) goto error;
+    if (!io)
+        goto error;
 
-    // load webserver 
+    // load webserver
 
     dtn_webserver_config server_config = dtn_webserver_config_from_item(config);
     server_config.loop = loop;
     server_config.io = io;
 
     server = dtn_webserver_create(server_config);
-    if (!server) goto error;
+    if (!server)
+        goto error;
 
-    if (!dtn_webserver_enable_domains(server, config)) goto error;
+    if (!dtn_webserver_enable_domains(server, config))
+        goto error;
 
     // add the node
 
-    const char *domain = dtn_item_get_string(dtn_item_get(config, 
-                            "/webserver/domains/0/name"));
+    const char *domain =
+        dtn_item_get_string(dtn_item_get(config, "/webserver/domains/0/name"));
 
     dtn_log_debug("using domain %s", domain);
 
-    dtn_test_node_app_config node_config = dtn_test_node_app_config_from_item(config);
+    dtn_test_node_app_config node_config =
+        dtn_test_node_app_config_from_item(config);
     node_config.loop = loop;
     node_config.io = io;
     node_config.server = server;
 
     node = dtn_test_node_app_create(node_config);
-    if (!node) goto error;
+    if (!node)
+        goto error;
 
     if (!dtn_test_node_enable_ip_interfaces(node, config))
         goto error;
 
-    if (!dtn_webserver_enable_callback(
-        server, 
-        domain,
-        node,
-        dtn_test_node_app_websocket_callback)) goto error;
+    if (!dtn_webserver_enable_callback(server, domain, node,
+                                       dtn_test_node_app_websocket_callback))
+        goto error;
 
     dtn_log_info("Enabled JSON IO callback for node %s", domain);
 
@@ -142,7 +149,7 @@ done:
     retval = EXIT_SUCCESS;
 
 error:
-    
+
     config = dtn_item_free(config);
     io = dtn_io_free(io);
     server = dtn_webserver_free(server);

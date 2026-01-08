@@ -31,27 +31,17 @@
 #define dtn_aes_key_wrap_h
 
 #include <stdbool.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_aes_key_wrap(
-    uint8_t *input, 
-    size_t in_size, 
-    uint8_t *out,
-    size_t *out_size,
-    uint8_t *key, 
-    size_t key_size);
+bool dtn_aes_key_wrap(uint8_t *input, size_t in_size, uint8_t *out,
+                      size_t *out_size, uint8_t *key, size_t key_size);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_aes_key_unwrap(
-    uint8_t *input, 
-    size_t in_size, 
-    uint8_t *out,
-    size_t *out_size,
-    uint8_t *key, 
-    size_t key_size);
+bool dtn_aes_key_unwrap(uint8_t *input, size_t in_size, uint8_t *out,
+                        size_t *out_size, uint8_t *key, size_t key_size);
 
 #endif /* dtn_aes_key_wrap_h */

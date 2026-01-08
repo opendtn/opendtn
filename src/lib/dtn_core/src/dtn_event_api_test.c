@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_event_api.c"
+#include <dtn_base/testrun.h>
 
 /*
  *      ------------------------------------------------------------------------
@@ -38,17 +38,17 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_event_message_create(){
-    
+int test_dtn_event_message_create() {
+
     dtn_item *msg = dtn_event_message_create("1", "1");
     testrun(msg);
-    testrun(0 == strcmp("1",dtn_item_get_string(dtn_item_get(msg, "/event"))));
-    testrun(0 == strcmp("1",dtn_item_get_string(dtn_item_get(msg, "/uuid"))));
+    testrun(0 == strcmp("1", dtn_item_get_string(dtn_item_get(msg, "/event"))));
+    testrun(0 == strcmp("1", dtn_item_get_string(dtn_item_get(msg, "/uuid"))));
     msg = dtn_item_free(msg);
 
     msg = dtn_event_message_create(NULL, "1");
     testrun(msg);
-    testrun(0 == strcmp("1",dtn_item_get_string(dtn_item_get(msg, "/event"))));
+    testrun(0 == strcmp("1", dtn_item_get_string(dtn_item_get(msg, "/event"))));
     testrun(dtn_item_get_string(dtn_item_get(msg, "/uuid")));
     msg = dtn_item_free(msg);
 
@@ -57,8 +57,8 @@ int test_dtn_event_message_create(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_event_message_create_response(){
-    
+int test_dtn_event_message_create_response() {
+
     dtn_item *msg = dtn_event_message_create("1", "1");
     testrun(msg);
 
@@ -75,8 +75,8 @@ int test_dtn_event_message_create_response(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_event_set_error(){
-    
+int test_dtn_event_set_error() {
+
     dtn_item *msg = dtn_event_message_create("1", "1");
     testrun(msg);
     testrun(dtn_event_set_error(msg, 1, "error"));
@@ -93,8 +93,8 @@ int test_dtn_event_set_error(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_event_get_error_code(){
-    
+int test_dtn_event_get_error_code() {
+
     dtn_item *msg = dtn_event_message_create("1", "1");
     testrun(msg);
     testrun(dtn_event_set_error(msg, 1, "error"));
@@ -106,8 +106,8 @@ int test_dtn_event_get_error_code(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_event_get_error_desc(){
-    
+int test_dtn_event_get_error_desc() {
+
     dtn_item *msg = dtn_event_message_create("1", "1");
     testrun(msg);
     testrun(dtn_event_set_error(msg, 1, "error"));
@@ -119,8 +119,8 @@ int test_dtn_event_get_error_desc(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_event_get_event(){
-    
+int test_dtn_event_get_event() {
+
     dtn_item *msg = dtn_event_message_create("1", "2");
     testrun(msg);
     testrun(0 == strcmp("2", dtn_event_get_event(msg)));
@@ -131,8 +131,8 @@ int test_dtn_event_get_event(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_event_get_uuid(){
-    
+int test_dtn_event_get_uuid() {
+
     dtn_item *msg = dtn_event_message_create("1", "2");
     testrun(msg);
     testrun(0 == strcmp("1", dtn_event_get_uuid(msg)));
@@ -143,8 +143,8 @@ int test_dtn_event_get_uuid(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_event_get_type(){
-    
+int test_dtn_event_get_type() {
+
     dtn_item *msg = dtn_event_message_create("1", "2");
     testrun(msg);
     testrun(NULL == dtn_event_get_type(msg));
@@ -157,8 +157,8 @@ int test_dtn_event_get_type(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_event_get_paramenter(){
-    
+int test_dtn_event_get_paramenter() {
+
     dtn_item *msg = dtn_event_message_create("1", "2");
     testrun(msg);
     testrun(NULL != dtn_event_get_paramenter(msg));
@@ -170,8 +170,8 @@ int test_dtn_event_get_paramenter(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_event_get_request(){
-    
+int test_dtn_event_get_request() {
+
     dtn_item *msg = dtn_event_message_create("1", "2");
     testrun(msg);
     testrun(NULL != dtn_event_get_request(msg));
@@ -183,8 +183,8 @@ int test_dtn_event_get_request(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_event_get_response(){
-    
+int test_dtn_event_get_response() {
+
     dtn_item *msg = dtn_event_message_create("1", "2");
     testrun(msg);
     testrun(NULL != dtn_event_get_response(msg));
@@ -193,7 +193,6 @@ int test_dtn_event_get_response(){
 
     return testrun_log_success();
 }
-
 
 /*
  *      ------------------------------------------------------------------------
@@ -217,7 +216,6 @@ int all_tests() {
     testrun_test(test_dtn_event_get_paramenter);
     testrun_test(test_dtn_event_get_request);
     testrun_test(test_dtn_event_get_response);
-
 
     return testrun_counter;
 }

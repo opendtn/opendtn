@@ -34,16 +34,16 @@
 /*----------------------------------------------------------------------------*/
 
 // Just in case - all our current architectures already use 2's complement
-#define DTN_TWOS_COMPLEMENT(x)                                                  \
-  _Generic((x),                                                                \
-      int: (unsigned int)(x),                                                  \
-      unsigned int: (x),                                                       \
-      long int: (unsigned long int)(x),                                        \
-      unsigned long int: (x),                                                  \
-      long long int: (unsigned long long int)(x),                              \
-      unsigned long long int: (x),                                             \
-      short int: (unsigned short int)(x),                                      \
-      unsigned short int: (short int)(x))
+#define DTN_TWOS_COMPLEMENT(x)                                                 \
+    _Generic((x),                                                              \
+        int: (unsigned int)(x),                                                \
+        unsigned int: (x),                                                     \
+        long int: (unsigned long int)(x),                                      \
+        unsigned long int: (x),                                                \
+        long long int: (unsigned long long int)(x),                            \
+        unsigned long long int: (x),                                           \
+        short int: (unsigned short int)(x),                                    \
+        unsigned short int: (short int)(x))
 
 #define DTN_BIG_ENDIAN 128
 #define DTN_LITTLE_ENDIAN 1

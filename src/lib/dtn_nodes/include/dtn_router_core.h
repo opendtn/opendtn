@@ -30,9 +30,8 @@
 #ifndef dtn_router_core_h
 #define dtn_router_core_h
 
-
-#include <dtn_base/dtn_event_loop.h>
 #include <dtn/dtn_cbor.h>
+#include <dtn_base/dtn_event_loop.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -40,7 +39,7 @@ typedef struct dtn_router_core dtn_router_core;
 
 /*---------------------------------------------------------------------------*/
 
-typedef struct dtn_router_core_config{
+typedef struct dtn_router_core_config {
 
     dtn_event_loop *loop;
 
@@ -72,15 +71,13 @@ dtn_router_core *dtn_router_core_cast(const void *data);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_router_core_enable_ip_interfaces(
-        dtn_router_core *self,
-        const dtn_item *config);
+bool dtn_router_core_enable_ip_interfaces(dtn_router_core *self,
+                                          const dtn_item *config);
 
 /*---------------------------------------------------------------------------*/
 
-bool dtn_router_core_send_raw(
-        dtn_router_core *self,
-        dtn_socket_configuration remote,
-        const dtn_cbor *data);
+bool dtn_router_core_send_raw(dtn_router_core *self,
+                              dtn_socket_configuration remote,
+                              const dtn_cbor *data);
 
 #endif /* dtn_router_core_h */

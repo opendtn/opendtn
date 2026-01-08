@@ -37,8 +37,8 @@
 
 typedef struct dtn_result {
 
-  uint64_t error_code; /* See dtn_error_codes.h for possible values */
-  char *message;       /* If error_code == dtn_ERROR_NOERROR, must be 0. */
+    uint64_t error_code; /* See dtn_error_codes.h for possible values */
+    char *message;       /* If error_code == dtn_ERROR_NOERROR, must be 0. */
 
 } dtn_result;
 

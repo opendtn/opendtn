@@ -130,11 +130,11 @@
 
 typedef enum {
 
-  DTN_WEBSOCKET_PARSER_ABSENT = -3,  // not present e.g. when searching a key
-  DTN_WEBSOCKET_PARSER_OOB = -2,     // Out of Bound e.g. for array
-  DTN_WEBSOCKET_PARSER_ERROR = -1,   // processing error or mismatch
-  DTN_WEBSOCKET_PARSER_PROGRESS = 0, // still matching, need more input data
-  DTN_WEBSOCKET_PARSER_SUCCESS = 1   // content match
+    DTN_WEBSOCKET_PARSER_ABSENT = -3,  // not present e.g. when searching a key
+    DTN_WEBSOCKET_PARSER_OOB = -2,     // Out of Bound e.g. for array
+    DTN_WEBSOCKET_PARSER_ERROR = -1,   // processing error or mismatch
+    DTN_WEBSOCKET_PARSER_PROGRESS = 0, // still matching, need more input data
+    DTN_WEBSOCKET_PARSER_SUCCESS = 1   // content match
 
 } dtn_websocket_parser_state;
 
@@ -142,11 +142,11 @@ typedef enum {
 
 typedef enum {
 
-  DTN_WEBSOCKET_FRAGMENTATION_ERROR = -1,   // input error
-  DTN_WEBSOCKET_FRAGMENTATION_NONE = 0,     // not fragmented
-  DTN_WEBSOCKET_FRAGMENTATION_START = 1,    // start frame
-  DTN_WEBSOCKET_FRAGMENTATION_CONTINUE = 2, // continue frame
-  DTN_WEBSOCKET_FRAGMENTATION_LAST = 3      // last frame
+    DTN_WEBSOCKET_FRAGMENTATION_ERROR = -1,   // input error
+    DTN_WEBSOCKET_FRAGMENTATION_NONE = 0,     // not fragmented
+    DTN_WEBSOCKET_FRAGMENTATION_START = 1,    // start frame
+    DTN_WEBSOCKET_FRAGMENTATION_CONTINUE = 2, // continue frame
+    DTN_WEBSOCKET_FRAGMENTATION_LAST = 3      // last frame
 
 } dtn_websocket_fragmentation_state;
 
@@ -154,12 +154,12 @@ typedef enum {
 
 typedef enum {
 
-  DTN_WEBSOCKET_OPCODE_CONTINUATION = 0x00,
-  DTN_WEBSOCKET_OPCODE_TEXT = 0x01,
-  DTN_WEBSOCKET_OPCODE_BINARY = 0x02,
-  DTN_WEBSOCKET_OPCODE_CLOSE = 0x08,
-  DTN_WEBSOCKET_OPCODE_PING = 0x09,
-  DTN_WEBSOCKET_OPCODE_PONG = 0x0A
+    DTN_WEBSOCKET_OPCODE_CONTINUATION = 0x00,
+    DTN_WEBSOCKET_OPCODE_TEXT = 0x01,
+    DTN_WEBSOCKET_OPCODE_BINARY = 0x02,
+    DTN_WEBSOCKET_OPCODE_CLOSE = 0x08,
+    DTN_WEBSOCKET_OPCODE_PING = 0x09,
+    DTN_WEBSOCKET_OPCODE_PONG = 0x0A
 
 } dtn_websocket_opcode;
 
@@ -167,12 +167,12 @@ typedef enum {
 
 typedef struct dtn_websocket_frame_config {
 
-  struct {
+    struct {
 
-    size_t default_size;      // default buffer size
-    size_t max_bytes_recache; // max buffer size to recache
+        size_t default_size;      // default buffer size
+        size_t max_bytes_recache; // max buffer size to recache
 
-  } buffer;
+    } buffer;
 
 } dtn_websocket_frame_config;
 
@@ -180,17 +180,17 @@ typedef struct dtn_websocket_frame_config {
 
 typedef struct {
 
-  uint16_t magic_byte;
-  dtn_websocket_frame_config config;
+    uint16_t magic_byte;
+    dtn_websocket_frame_config config;
 
-  dtn_websocket_opcode opcode;
-  dtn_websocket_fragmentation_state state;
+    dtn_websocket_opcode opcode;
+    dtn_websocket_fragmentation_state state;
 
-  const uint8_t *mask;
+    const uint8_t *mask;
 
-  dtn_memory_pointer content;
+    dtn_memory_pointer content;
 
-  dtn_buffer *buffer;
+    dtn_buffer *buffer;
 
 } dtn_websocket_frame;
 
@@ -202,7 +202,8 @@ typedef struct {
  *      ------------------------------------------------------------------------
  */
 
-dtn_websocket_frame *dtn_websocket_frame_create(dtn_websocket_frame_config config);
+dtn_websocket_frame *
+dtn_websocket_frame_create(dtn_websocket_frame_config config);
 bool dtn_websocket_frame_clear(dtn_websocket_frame *message);
 void *dtn_websocket_frame_free(void *message);
 void *dtn_websocket_frame_free_uncached(void *message);
@@ -236,8 +237,8 @@ void dtn_websocket_enable_caching(size_t capacity);
     if no traling bytes are contained in source
 */
 bool dtn_websocket_frame_shift_trailing_bytes(dtn_websocket_frame *source,
-                                             uint8_t *next,
-                                             dtn_websocket_frame **dest);
+                                              uint8_t *next,
+                                              dtn_websocket_frame **dest);
 
 /*
  *      ------------------------------------------------------------------------
@@ -267,8 +268,8 @@ bool dtn_websocket_frame_shift_trailing_bytes(dtn_websocket_frame *source,
     or processing failed.
 */
 bool dtn_websocket_process_handshake_request(const dtn_http_message *msg,
-                                            dtn_http_message **out,
-                                            bool *is_handshake);
+                                             dtn_http_message **out,
+                                             bool *is_handshake);
 
 /*
  *      ------------------------------------------------------------------------
@@ -289,7 +290,7 @@ bool dtn_websocket_process_handshake_request(const dtn_http_message *msg,
     @returns true if the data was set to the frame (frame will be reparsed)
 */
 bool dtn_websocket_set_data(dtn_websocket_frame *frame, const uint8_t *data,
-                           size_t length, bool mask);
+                            size_t length, bool mask);
 
 /*----------------------------------------------------------------------------*/
 
@@ -315,7 +316,7 @@ bool dtn_websocket_frame_unmask(dtn_websocket_frame *parsed_frame);
  */
 
 dtn_websocket_parser_state dtn_websocket_parse_frame(dtn_websocket_frame *self,
-                                                   uint8_t **next);
+                                                     uint8_t **next);
 
 /*
  *      ------------------------------------------------------------------------
@@ -347,13 +348,13 @@ bool dtn_websocket_generate_secure_websocket_key(uint8_t *buffer, size_t size);
     NOTE *result will be some allocated string and MUST be freed by the caller
 */
 bool dtn_websocket_generate_secure_accept_key(const uint8_t *key, size_t length,
-                                             uint8_t **result, size_t *size);
+                                              uint8_t **result, size_t *size);
 
 /*----------------------------------------------------------------------------*/
 
 dtn_websocket_frame *
 dtn_websocket_frame_pop(dtn_buffer **buffer,
-                       const dtn_websocket_frame_config *config,
-                       dtn_websocket_parser_state *state);
+                        const dtn_websocket_frame_config *config,
+                        dtn_websocket_parser_state *state);
 
 #endif /* dtn_websocket_pointer_h */

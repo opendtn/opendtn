@@ -51,12 +51,12 @@
 
 typedef enum {
 
-  DTN_FILE_ERROR,        // general error (unspecific, no log)
-  DTN_FILE_FAILURE,      // failure during processing (err log)
-  DTN_FILE_NOT_FOUND,    // not found
-  DTN_FILE_NO_ACCESS,    // no access
-  DTN_FILE_MEMORY_ERROR, // (e.g. input to small, out of memory)
-  DTN_FILE_SUCCESS
+    DTN_FILE_ERROR,        // general error (unspecific, no log)
+    DTN_FILE_FAILURE,      // failure during processing (err log)
+    DTN_FILE_NOT_FOUND,    // not found
+    DTN_FILE_NO_ACCESS,    // no access
+    DTN_FILE_MEMORY_ERROR, // (e.g. input to small, out of memory)
+    DTN_FILE_SUCCESS
 
 } dtn_file_handle_state;
 
@@ -114,7 +114,7 @@ ssize_t dtn_file_read_check_get_bytes(const char *restrict path);
         @return dtn_FILE_SUCCESS if the full file was read.
 */
 dtn_file_handle_state dtn_file_read(const char *path, uint8_t **buffer,
-                                  size_t *size);
+                                    size_t *size);
 
 /*----------------------------------------------------------------------------*/
 
@@ -138,8 +138,8 @@ dtn_file_handle_state dtn_file_read(const char *path, uint8_t **buffer,
         @return dtn_FILE_SUCCESS if the full file was read.
 */
 dtn_file_handle_state dtn_file_read_partial(const char *path, uint8_t **buffer,
-                                          size_t *size, size_t from, size_t to,
-                                          size_t *all);
+                                            size_t *size, size_t from,
+                                            size_t to, size_t *all);
 
 /*----------------------------------------------------------------------------*/
 
@@ -154,7 +154,7 @@ dtn_file_handle_state dtn_file_read_partial(const char *path, uint8_t **buffer,
         @return dtn_FILE_SUCCESS if the full file was written.
 */
 dtn_file_handle_state dtn_file_write(const char *path, const uint8_t *buffer,
-                                   size_t size, const char *mode);
+                                     size_t size, const char *mode);
 
 /******************************************************************************
  *                                Low-Level IO
@@ -162,10 +162,10 @@ dtn_file_handle_state dtn_file_write(const char *path, const uint8_t *buffer,
 
 typedef enum {
 
-  DTN_FILE_RAW,
-  DTN_FILE_LITTLE_ENDIAN,
-  DTN_FILE_BIG_ENDIAN,
-  DTN_FILE_SWAP_BYTES
+    DTN_FILE_RAW,
+    DTN_FILE_LITTLE_ENDIAN,
+    DTN_FILE_BIG_ENDIAN,
+    DTN_FILE_SWAP_BYTES
 
 } dtn_file_byteorder;
 
@@ -179,7 +179,7 @@ typedef enum {
  * @param byte_order
  */
 bool dtn_file_get_16(uint16_t *out, uint8_t **rd_ptr, size_t *length,
-                    dtn_file_byteorder byte_order);
+                     dtn_file_byteorder byte_order);
 
 /*----------------------------------------------------------------------------*/
 
@@ -193,7 +193,7 @@ bool dtn_file_get_16(uint16_t *out, uint8_t **rd_ptr, size_t *length,
  * @param byte_order
  */
 bool dtn_file_get_32(uint32_t *out, uint8_t **rd_ptr, size_t *length,
-                    dtn_file_byteorder byte_order);
+                     dtn_file_byteorder byte_order);
 
 /*----------------------------------------------------------------------------*/
 

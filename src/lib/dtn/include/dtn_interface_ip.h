@@ -31,8 +31,8 @@
 #define dtn_interface_ip_h
 
 #include <dtn_base/dtn_event_loop.h>
-#include <dtn_base/dtn_socket.h>
 #include <dtn_base/dtn_ip_link.h>
+#include <dtn_base/dtn_socket.h>
 
 #include "dtn_bundle.h"
 
@@ -43,7 +43,7 @@ typedef struct dtn_interface_ip dtn_interface_ip;
 /*---------------------------------------------------------------------------*/
 
 typedef struct dtn_interface_ip_config {
-    
+
     dtn_event_loop *loop;
     dtn_socket_configuration socket;
 
@@ -59,11 +59,12 @@ typedef struct dtn_interface_ip_config {
         void *userdata;
 
         // bundle reception
-        void (*io)(void *userdata, 
-            const dtn_socket_data *remote, dtn_bundle *bundle, const char *name);
+        void (*io)(void *userdata, const dtn_socket_data *remote,
+                   dtn_bundle *bundle, const char *name);
 
         // state change propagation
-        void (*state)(void *userdata, dtn_ip_link_state state, const char *name);
+        void (*state)(void *userdata, dtn_ip_link_state state,
+                      const char *name);
 
         // close state propagation
         void (*close)(void *userdata, const char *name);
@@ -87,9 +88,7 @@ dtn_interface_ip *dtn_interface_ip_cast(const void *self);
 const char *dtn_interface_ip_name(const dtn_interface_ip *self);
 
 bool dtn_interface_ip_send(dtn_interface_ip *self,
-    dtn_socket_configuration remote,
-    const uint8_t *buffer,
-    size_t size);
-
+                           dtn_socket_configuration remote,
+                           const uint8_t *buffer, size_t size);
 
 #endif /* dtn_interface_ip_h */

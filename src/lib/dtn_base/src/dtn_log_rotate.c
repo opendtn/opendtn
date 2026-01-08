@@ -35,90 +35,90 @@
 
 static char *get_numerated_file_name(char const *path, size_t num) {
 
-  char *numerated_path = 0;
+    char *numerated_path = 0;
 
-  if (0 == path) {
-    goto error;
-  }
+    if (0 == path) {
+        goto error;
+    }
 
-  if (0 == num) {
-    return strdup(path);
-  }
+    if (0 == num) {
+        return strdup(path);
+    }
 
-  if (DTN_LOG_ROTATE_MAX_FILES <= num) {
-    goto error;
-  }
+    if (DTN_LOG_ROTATE_MAX_FILES <= num) {
+        goto error;
+    }
 
-  //                             path           .  xxx terminal \0
-  size_t length_numerated_path = strlen(path) + 1 + 3 + 1;
+    //                             path           .  xxx terminal \0
+    size_t length_numerated_path = strlen(path) + 1 + 3 + 1;
 
-  numerated_path = calloc(1, length_numerated_path);
-  DTN_ASSERT(numerated_path);
+    numerated_path = calloc(1, length_numerated_path);
+    DTN_ASSERT(numerated_path);
 
-  const ssize_t printed =
-      snprintf(numerated_path, length_numerated_path, "%s.%03zu", path, num);
+    const ssize_t printed =
+        snprintf(numerated_path, length_numerated_path, "%s.%03zu", path, num);
 
-  if (0 > printed) {
-    goto error;
-  }
+    if (0 > printed) {
+        goto error;
+    }
 
-  return numerated_path;
+    return numerated_path;
 
 error:
 
-  if (0 != numerated_path) {
-    free(numerated_path);
-    numerated_path = 0;
-  }
+    if (0 != numerated_path) {
+        free(numerated_path);
+        numerated_path = 0;
+    }
 
-  DTN_ASSERT(0 == numerated_path);
+    DTN_ASSERT(0 == numerated_path);
 
-  return 0;
+    return 0;
 }
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_log_rotate_files(char const *path, size_t max_num_files) {
 
-  char *fname_1 = 0;
-  char *fname_2 = get_numerated_file_name(path, max_num_files - 1);
+    char *fname_1 = 0;
+    char *fname_2 = get_numerated_file_name(path, max_num_files - 1);
 
-  if (0 == fname_2) {
-    goto error;
-  }
+    if (0 == fname_2) {
+        goto error;
+    }
 
-  if (0 != remove(fname_2)) {
-    // fprintf(stderr, "Could not remdtne %s\n", fname_2);
-  }
+    if (0 != remove(fname_2)) {
+        // fprintf(stderr, "Could not remdtne %s\n", fname_2);
+    }
 
-  for (size_t num = max_num_files - 1; num >= 1; --num) {
+    for (size_t num = max_num_files - 1; num >= 1; --num) {
 
-    fname_1 = get_numerated_file_name(path, num - 1);
+        fname_1 = get_numerated_file_name(path, num - 1);
 
-    DTN_ASSERT(0 != fname_1);
+        DTN_ASSERT(0 != fname_1);
 
-    if (0 != rename(fname_1, fname_2)) {
-      // fprintf(stderr, "Could not rename %s to %s\n", fname_1, fname_2);
+        if (0 != rename(fname_1, fname_2)) {
+            // fprintf(stderr, "Could not rename %s to %s\n", fname_1, fname_2);
+        }
+
+        free(fname_2);
+        fname_2 = fname_1;
+        fname_1 = 0;
     }
 
     free(fname_2);
-    fname_2 = fname_1;
-    fname_1 = 0;
-  }
 
-  free(fname_2);
-
-  return true;
+    return true;
 
 error:
 
-  if (0 != fname_2) {
-    free(fname_2);
-  }
+    if (0 != fname_2) {
+        free(fname_2);
+    }
 
-  if (0 != fname_1) {
-    free(fname_1);
-  }
+    if (0 != fname_1) {
+        free(fname_1);
+    }
 
-  return false;
+    return false;
 }

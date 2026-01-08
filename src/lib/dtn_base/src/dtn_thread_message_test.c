@@ -28,8 +28,8 @@ Copyright   2018       German Aerospace Center DLR e.V.,
  **/
 /*---------------------------------------------------------------------------*/
 
-#include "dtn_thread_message.c"
 #include "../include/testrun.h"
+#include "dtn_thread_message.c"
 
 /*---------------------------------------------------------------------------*/
 
@@ -40,74 +40,74 @@ const dtn_thread_message_type INVALID =
 
 int test_dtn_thread_message_standard_create() {
 
-  testrun(0 == dtn_thread_message_standard_create(INVALID, 0));
+    testrun(0 == dtn_thread_message_standard_create(INVALID, 0));
 
-  dtn_thread_message *message = 0;
-  message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE, 0);
+    dtn_thread_message *message = 0;
+    message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE, 0);
 
-  testrun(0 != message);
-  testrun(DTN_THREAD_MESSAGE_MAGIC_BYTES == message->magic_bytes);
-  testrun(0 == message->message);
-  testrun(DTN_GENERIC_MESSAGE == message->type);
-  testrun(0 != message->free);
+    testrun(0 != message);
+    testrun(DTN_THREAD_MESSAGE_MAGIC_BYTES == message->magic_bytes);
+    testrun(0 == message->message);
+    testrun(DTN_GENERIC_MESSAGE == message->type);
+    testrun(0 != message->free);
 
-  message = dtn_thread_message_free(message);
-  testrun(0 == message);
+    message = dtn_thread_message_free(message);
+    testrun(0 == message);
 
-  message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE + 2, 0);
+    message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE + 2, 0);
 
-  testrun(0 != message);
-  testrun(DTN_THREAD_MESSAGE_MAGIC_BYTES == message->magic_bytes);
-  testrun(0 == message->message);
-  testrun(DTN_GENERIC_MESSAGE + 2 == message->type);
-  testrun(0 != message->free);
+    testrun(0 != message);
+    testrun(DTN_THREAD_MESSAGE_MAGIC_BYTES == message->magic_bytes);
+    testrun(0 == message->message);
+    testrun(DTN_GENERIC_MESSAGE + 2 == message->type);
+    testrun(0 != message->free);
 
-  message = dtn_thread_message_free(message);
-  testrun(0 == message);
+    message = dtn_thread_message_free(message);
+    testrun(0 == message);
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*---------------------------------------------------------------------------*/
 
 int test_dtn_thread_message_free() {
 
-  testrun(0 == dtn_thread_message_free(0));
+    testrun(0 == dtn_thread_message_free(0));
 
-  dtn_thread_message *message = 0;
+    dtn_thread_message *message = 0;
 
-  message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE, 0);
-  testrun(0 == dtn_thread_message_free(message));
+    message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE, 0);
+    testrun(0 == dtn_thread_message_free(message));
 
-  /* Try to dispose  invalid message */
-  message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE, 0);
-  message->magic_bytes = ~DTN_THREAD_MESSAGE_MAGIC_BYTES;
-  testrun(message == dtn_thread_message_free(message));
-  message->magic_bytes = DTN_THREAD_MESSAGE_MAGIC_BYTES;
-  testrun(0 == dtn_thread_message_free(message));
+    /* Try to dispose  invalid message */
+    message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE, 0);
+    message->magic_bytes = ~DTN_THREAD_MESSAGE_MAGIC_BYTES;
+    testrun(message == dtn_thread_message_free(message));
+    message->magic_bytes = DTN_THREAD_MESSAGE_MAGIC_BYTES;
+    testrun(0 == dtn_thread_message_free(message));
 
-  /* Try to free any other message than DTN_GENERIC_MESSAGE */
-  message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE + 1, 0);
-  testrun(0 == dtn_thread_message_free(message));
+    /* Try to free any other message than DTN_GENERIC_MESSAGE */
+    message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE + 1, 0);
+    testrun(0 == dtn_thread_message_free(message));
 
-  /* Try to free with JSON attached */
-  dtn_item *json = dtn_item_object();
-  message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE, json);
-  testrun(0 == dtn_thread_message_free(message));
+    /* Try to free with JSON attached */
+    dtn_item *json = dtn_item_object();
+    message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE, json);
+    testrun(0 == dtn_thread_message_free(message));
 
-  /* Try to free without free() callback */
-  message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE, 0);
+    /* Try to free without free() callback */
+    message = dtn_thread_message_standard_create(DTN_GENERIC_MESSAGE, 0);
 
-  dtn_thread_message *(*free_func)(dtn_thread_message *) = message->free;
+    dtn_thread_message *(*free_func)(dtn_thread_message *) = message->free;
 
-  message->free = 0;
-  testrun(message == dtn_thread_message_free(message));
+    message->free = 0;
+    testrun(message == dtn_thread_message_free(message));
 
-  message->free = free_func;
-  message = dtn_thread_message_free(message);
-  testrun(0 == message);
+    message->free = free_func;
+    message = dtn_thread_message_free(message);
+    testrun(0 == message);
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*
@@ -120,11 +120,11 @@ int test_dtn_thread_message_free() {
 
 int all_tests() {
 
-  testrun_init();
-  testrun_test(test_dtn_thread_message_standard_create);
-  testrun_test(test_dtn_thread_message_free);
+    testrun_init();
+    testrun_test(test_dtn_thread_message_standard_create);
+    testrun_test(test_dtn_thread_message_free);
 
-  return testrun_counter;
+    return testrun_counter;
 }
 
 /*

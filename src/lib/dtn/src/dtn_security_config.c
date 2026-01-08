@@ -31,12 +31,13 @@
 
 #include <dtn_base/dtn_string.h>
 
-dtn_security_config dtn_security_config_from_item(const dtn_item *input){
+dtn_security_config dtn_security_config_from_item(const dtn_item *input) {
 
     dtn_security_config config = {0};
 
     const dtn_item *conf = dtn_item_get(input, "/security");
-    if (!conf) conf = input;
+    if (!conf)
+        conf = input;
 
     dtn_item *bib = dtn_item_get(conf, "/bib");
 
@@ -52,10 +53,10 @@ dtn_security_config dtn_security_config_from_item(const dtn_item *input){
             config.bib.aad_flags = 0x07;
 
         const char *sha = dtn_item_get_string(dtn_item_get(bib, "/sha"));
-        
-        if (0 == dtn_string_compare(sha, "sha256")){
+
+        if (0 == dtn_string_compare(sha, "sha256")) {
             config.bib.sha = HMAC256;
-        } else if (0 == dtn_string_compare(sha, "sha512")){
+        } else if (0 == dtn_string_compare(sha, "sha512")) {
             config.bib.sha = HMAC512;
         } else {
             config.bib.sha = HMAC384;
@@ -63,7 +64,7 @@ dtn_security_config dtn_security_config_from_item(const dtn_item *input){
     }
 
     dtn_item *bcb = dtn_item_get(conf, "/bcb");
-    
+
     if (bcb) {
 
         if (dtn_item_is_true(dtn_item_get(bcb, "/protect/bib")))
@@ -79,8 +80,8 @@ dtn_security_config dtn_security_config_from_item(const dtn_item *input){
             config.bcb.aad_flags = 0x07;
 
         const char *sha = dtn_item_get_string(dtn_item_get(bcb, "/aes"));
-        
-        if (0 == dtn_string_compare(sha, "128")){
+
+        if (0 == dtn_string_compare(sha, "128")) {
             config.bcb.aes = A128GCM;
         } else {
             config.bcb.aes = A256GCM;

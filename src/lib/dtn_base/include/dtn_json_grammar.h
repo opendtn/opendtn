@@ -185,6 +185,6 @@ bool dtn_json_match_object(uint8_t **start, uint8_t **end, size_t size);
    to 0
 */
 bool dtn_json_match(const uint8_t *start, size_t size, bool incomplete,
-                   uint8_t **last_of_first);
+                    uint8_t **last_of_first);
 
 #endif /* dtn_json_grammar_h */

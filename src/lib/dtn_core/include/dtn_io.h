@@ -32,8 +32,8 @@
 
 #include "dtn_domain.h"
 
-#include <dtn_base/dtn_item.h>
 #include <dtn_base/dtn_event_loop.h>
+#include <dtn_base/dtn_item.h>
 #include <dtn_base/dtn_memory_pointer.h>
 #include <dtn_base/dtn_socket.h>
 
@@ -48,21 +48,21 @@ typedef struct dtn_io_socket_config dtn_io_socket_config;
 
 typedef struct dtn_io_config {
 
-  dtn_event_loop *loop;
+    dtn_event_loop *loop;
 
-  struct {
+    struct {
 
-    char path[PATH_MAX];
+        char path[PATH_MAX];
 
-  } domain;
+    } domain;
 
-  struct {
+    struct {
 
-    uint64_t reconnect_interval_usec;
-    uint64_t timeout_usec;
-    uint64_t threadlock_timeout_usec;
+        uint64_t reconnect_interval_usec;
+        uint64_t timeout_usec;
+        uint64_t threadlock_timeout_usec;
 
-  } limits;
+    } limits;
 
 } dtn_io_config;
 
@@ -92,57 +92,57 @@ dtn_io_config dtn_io_config_from_item(const dtn_item *input);
 
 struct dtn_io_callback {
 
-  void *userdata;
+    void *userdata;
 
-  // will be called back in listener based setup
-  bool (*accept)(void *userdata, int listener, int connection);
+    // will be called back in listener based setup
+    bool (*accept)(void *userdata, int listener, int connection);
 
-  bool (*io)(void *userdata, int connection,
-             const char *optional_domain, // only transmitted for TLS
-             const dtn_memory_pointer data);
+    bool (*io)(void *userdata, int connection,
+               const char *optional_domain, // only transmitted for TLS
+               const dtn_memory_pointer data);
 
-  void (*close)(void *userdata, int connection);
+    void (*close)(void *userdata, int connection);
 
-  // will be called back in connection based setup
-  void (*connected)(void *userdata, int connection);
+    // will be called back in connection based setup
+    void (*connected)(void *userdata, int connection);
 };
 
 /*----------------------------------------------------------------------------*/
 
 struct dtn_io_ssl_config {
 
-  char domain[PATH_MAX]; // hostname to use in handshake
+    char domain[PATH_MAX]; // hostname to use in handshake
 
-  struct {
+    struct {
 
-    char cert[PATH_MAX];
-    char key[PATH_MAX];
+        char cert[PATH_MAX];
+        char key[PATH_MAX];
 
-  } certificate;
+    } certificate;
 
-  struct {
+    struct {
 
-    char file[PATH_MAX]; // path to CA verify file
-    char path[PATH_MAX]; // path to CAs to use
+        char file[PATH_MAX]; // path to CA verify file
+        char path[PATH_MAX]; // path to CAs to use
 
-    char client_ca[PATH_MAX]; // client CA to request for certificate auth
+        char client_ca[PATH_MAX]; // client CA to request for certificate auth
 
-  } ca;
+    } ca;
 
-  uint8_t verify_depth;
+    uint8_t verify_depth;
 };
 
 /*----------------------------------------------------------------------------*/
 
 struct dtn_io_socket_config {
 
-  bool auto_reconnect; // only used for clients
+    bool auto_reconnect; // only used for clients
 
-  dtn_socket_configuration socket;
+    dtn_socket_configuration socket;
 
-  dtn_io_callback callbacks;
+    dtn_io_callback callbacks;
 
-  dtn_io_ssl_config ssl;
+    dtn_io_ssl_config ssl;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -167,7 +167,7 @@ bool dtn_io_close(dtn_io *self, int socket);
 /*----------------------------------------------------------------------------*/
 
 /**
- *  Threadsafe send function 
+ *  Threadsafe send function
  */
 bool dtn_io_send(dtn_io *self, int socket, const dtn_memory_pointer buffer);
 

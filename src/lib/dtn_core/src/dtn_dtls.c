@@ -79,7 +79,8 @@ struct dtn_dtls {
 
 static bool init_dtls_cookie_keys(size_t quantity, size_t length) {
 
-    if ((0 == quantity) || (0 == length)) return false;
+    if ((0 == quantity) || (0 == length))
+        return false;
 
     if (dtls_keys) {
         dtn_list_clear(dtls_keys);
@@ -89,21 +90,24 @@ static bool init_dtls_cookie_keys(size_t quantity, size_t length) {
             (dtn_list_config){.item = dtn_buffer_data_functions()});
     }
 
-    if (!dtls_keys) goto error;
+    if (!dtls_keys)
+        goto error;
 
     dtn_buffer *buffer = NULL;
 
     for (size_t i = 0; i < quantity; i++) {
 
         buffer = dtn_buffer_create(length);
-        if (!buffer) goto error;
+        if (!buffer)
+            goto error;
 
         if (!dtn_list_push(dtls_keys, buffer)) {
             buffer = dtn_buffer_free(buffer);
             goto error;
         }
 
-        if (!dtn_random_bytes(buffer->start, buffer->capacity)) goto error;
+        if (!dtn_random_bytes(buffer->start, buffer->capacity))
+            goto error;
 
         buffer->length = buffer->capacity;
     }
@@ -118,15 +122,17 @@ error:
 
 static bool renew_dtls_keys(uint32_t id, void *data) {
 
-    if (0 == id) goto error;
+    if (0 == id)
+        goto error;
 
     dtn_dtls *ssl = (dtn_dtls *)data;
-    if (!ssl) goto error;
+    if (!ssl)
+        goto error;
 
     dtls_keys = dtn_list_free(dtls_keys);
 
-    if (!init_dtls_cookie_keys(
-            ssl->config.dtls.keys.quantity, ssl->config.dtls.keys.length)) {
+    if (!init_dtls_cookie_keys(ssl->config.dtls.keys.quantity,
+                               ssl->config.dtls.keys.length)) {
 
         dtn_log_error("Failed to reinit DTLS key cookies");
 
@@ -135,8 +141,7 @@ static bool renew_dtls_keys(uint32_t id, void *data) {
 
     if (!ssl->config.loop || !ssl->config.loop->timer.set ||
         !ssl->config.loop->timer.set(ssl->config.loop,
-                                     ssl->config.dtls.keys.lifetime_usec,
-                                     ssl,
+                                     ssl->config.dtls.keys.lifetime_usec, ssl,
                                      renew_dtls_keys)) {
 
         dtn_log_error("Failed to reenable DTLS key renew timer");
@@ -151,17 +156,18 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-static bool write_cookie(unsigned char *cookie,
-                         unsigned int *cookie_len,
+static bool write_cookie(unsigned char *cookie, unsigned int *cookie_len,
                          const dtn_buffer *key) {
 
-    if (!cookie || !cookie_len || !key) return false;
+    if (!cookie || !cookie_len || !key)
+        return false;
 
     const char *array[] = {(char *)key->start};
 
     size_t outlen = DTLS1_COOKIE_LENGTH;
 
-    if (!dtn_hash(DTN_HASH_MD5, array, 1, &cookie, &outlen)) return false;
+    if (!dtn_hash(DTN_HASH_MD5, array, 1, &cookie, &outlen))
+        return false;
 
     *cookie_len = outlen;
     return true;
@@ -169,11 +175,11 @@ static bool write_cookie(unsigned char *cookie,
 
 /*----------------------------------------------------------------------------*/
 
-static bool check_cookie(const unsigned char *cookie,
-                         unsigned int cookie_len,
+static bool check_cookie(const unsigned char *cookie, unsigned int cookie_len,
                          dtn_list *list) {
 
-    if (!cookie || cookie_len < 1 || !list) return false;
+    if (!cookie || cookie_len < 1 || !list)
+        return false;
 
     size_t hlen = DTN_MD5_SIZE;
     uint8_t hash[hlen];
@@ -189,16 +195,19 @@ static bool check_cookie(const unsigned char *cookie,
     while (next) {
 
         next = list->next(list, next, (void **)&buffer);
-        if (!buffer) return false;
+        if (!buffer)
+            return false;
 
         array[0] = (char *)buffer->start;
 
         hlen = DTN_MD5_SIZE;
         memset(hash, 0, hlen);
 
-        if (!dtn_hash(DTN_HASH_MD5, array, 1, &ptr, &hlen)) return false;
+        if (!dtn_hash(DTN_HASH_MD5, array, 1, &ptr, &hlen))
+            return false;
 
-        if (0 == memcmp(hash, cookie, hlen)) return true;
+        if (0 == memcmp(hash, cookie, hlen))
+            return true;
     }
 
     return false;
@@ -206,11 +215,11 @@ static bool check_cookie(const unsigned char *cookie,
 
 /*----------------------------------------------------------------------------*/
 
-static int generate_dtls_cookie(SSL *ssl,
-                                unsigned char *cookie,
+static int generate_dtls_cookie(SSL *ssl, unsigned char *cookie,
                                 unsigned int *cookie_len) {
 
-    if (!ssl || !cookie || !cookie_len) goto error;
+    if (!ssl || !cookie || !cookie_len)
+        goto error;
 
     /*
      *      To create a DTLS cookie, we choose a random
@@ -231,8 +240,8 @@ static int generate_dtls_cookie(SSL *ssl,
 
     if (!dtls_keys) {
 
-        if (!init_dtls_cookie_keys(
-                DTN_DTLS_KEYS_QUANTITY_DEFAULT, DTN_DTLS_KEYS_LENGTH_DEFAULT))
+        if (!init_dtls_cookie_keys(DTN_DTLS_KEYS_QUANTITY_DEFAULT,
+                                   DTN_DTLS_KEYS_LENGTH_DEFAULT))
             goto error;
     }
 
@@ -240,12 +249,15 @@ static int generate_dtls_cookie(SSL *ssl,
     long int number = rand();
     number = (number * (dtn_list_count(dtls_keys))) / RAND_MAX;
 
-    if (number == 0) number = 1;
+    if (number == 0)
+        number = 1;
 
     dtn_buffer *buffer = dtn_list_get(dtls_keys, number);
-    if (!buffer) goto error;
+    if (!buffer)
+        goto error;
 
-    if (!write_cookie(cookie, cookie_len, buffer)) goto error;
+    if (!write_cookie(cookie, cookie_len, buffer))
+        goto error;
 
     return 1;
 error:
@@ -254,17 +266,20 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static int verify_dtls_cookie(SSL *ssl,
-                              const unsigned char *cookie,
+static int verify_dtls_cookie(SSL *ssl, const unsigned char *cookie,
                               unsigned int cookie_len) {
 
-    if (!ssl || !cookie || !dtls_keys) goto error;
+    if (!ssl || !cookie || !dtls_keys)
+        goto error;
 
-    if (cookie_len < 1) goto error;
+    if (cookie_len < 1)
+        goto error;
 
-    if (!dtls_keys) goto error;
+    if (!dtls_keys)
+        goto error;
 
-    if (!check_cookie(cookie, cookie_len, dtls_keys)) goto error;
+    if (!check_cookie(cookie, cookie_len, dtls_keys))
+        goto error;
 
     return 1;
 error:
@@ -273,52 +288,39 @@ error:
 
 /*----------------------------------------------------------------------------*/
 
-static bool load_certificates(SSL_CTX *ctx,
-                              const dtn_dtls_config *config,
+static bool load_certificates(SSL_CTX *ctx, const dtn_dtls_config *config,
                               const char *type) {
 
-    if (!ctx || !config || !type) goto error;
+    if (!ctx || !config || !type)
+        goto error;
 
     if (SSL_CTX_use_certificate_chain_file(ctx, config->cert) != 1) {
 
-        dtn_log_error(
-            "ICE %s config failure load certificate "
-            "from %s | error %d | %s",
-            type,
-            config->cert,
-            errno,
-            strerror(errno));
+        dtn_log_error("ICE %s config failure load certificate "
+                      "from %s | error %d | %s",
+                      type, config->cert, errno, strerror(errno));
         goto error;
     }
 
     if (SSL_CTX_use_PrivateKey_file(ctx, config->key, SSL_FILETYPE_PEM) != 1) {
 
-        dtn_log_error(
-            "ICE %s config failure load key "
-            "from %s | error %d | %s",
-            type,
-            config->key,
-            errno,
-            strerror(errno));
+        dtn_log_error("ICE %s config failure load key "
+                      "from %s | error %d | %s",
+                      type, config->key, errno, strerror(errno));
         goto error;
     }
 
     if (SSL_CTX_check_private_key(ctx) != 1) {
 
-        dtn_log_error(
-            "ICE %s config failure private key for\n"
-            "CERT | %s\n"
-            " KEY | %s",
-            type,
-            config->cert,
-            config->key);
+        dtn_log_error("ICE %s config failure private key for\n"
+                      "CERT | %s\n"
+                      " KEY | %s",
+                      type, config->cert, config->key);
         goto error;
     }
 
-    dtn_log_info("DTLS loaded %s certificate \n file %s\n key %s\n",
-                type,
-                config->cert,
-                config->key);
+    dtn_log_info("DTLS loaded %s certificate \n file %s\n key %s\n", type,
+                 config->cert, config->key);
 
     return true;
 error:
@@ -331,26 +333,29 @@ static bool configure_dtls(dtn_dtls *ssl) {
 
     DTN_ASSERT(ssl);
 
-    if (!ssl) goto error;
+    if (!ssl)
+        goto error;
 
     if (!ssl->dtls.ctx) {
         ssl->dtls.ctx = SSL_CTX_new(DTLS_server_method());
     }
 
-    if (!ssl->dtls.ctx) goto error;
+    if (!ssl->dtls.ctx)
+        goto error;
 
     if (DTN_TIMER_INVALID != ssl->dtls.timer.key_renew) {
 
-        ssl->config.loop->timer.unset(
-            ssl->config.loop, ssl->dtls.timer.key_renew, NULL);
+        ssl->config.loop->timer.unset(ssl->config.loop,
+                                      ssl->dtls.timer.key_renew, NULL);
     }
 
     ssl->dtls.timer.key_renew = DTN_TIMER_INVALID;
 
-    if (!load_certificates(ssl->dtls.ctx, &ssl->config, "DTLS")) goto error;
+    if (!load_certificates(ssl->dtls.ctx, &ssl->config, "DTLS"))
+        goto error;
 
-    if (!init_dtls_cookie_keys(
-            ssl->config.dtls.keys.quantity, ssl->config.dtls.keys.length)) {
+    if (!init_dtls_cookie_keys(ssl->config.dtls.keys.quantity,
+                               ssl->config.dtls.keys.length)) {
         goto error;
     }
 
@@ -360,13 +365,12 @@ static bool configure_dtls(dtn_dtls *ssl) {
 
     SSL_CTX_set_cookie_verify_cb(ssl->dtls.ctx, verify_dtls_cookie);
 
-    ssl->dtls.timer.key_renew =
-        ssl->config.loop->timer.set(ssl->config.loop,
-                                    ssl->config.dtls.keys.lifetime_usec,
-                                    ssl,
-                                    renew_dtls_keys);
+    ssl->dtls.timer.key_renew = ssl->config.loop->timer.set(
+        ssl->config.loop, ssl->config.dtls.keys.lifetime_usec, ssl,
+        renew_dtls_keys);
 
-    if (DTN_TIMER_INVALID == ssl->dtls.timer.key_renew) goto error;
+    if (DTN_TIMER_INVALID == ssl->dtls.timer.key_renew)
+        goto error;
 
     if (0 ==
         SSL_CTX_set_tlsext_use_srtp(ssl->dtls.ctx, ssl->config.srtp.profile)) {
@@ -407,7 +411,8 @@ static char *fingerprint_format_RFC8122(const char *source, size_t length) {
 
     char *fingerprint = NULL;
 
-    if (!source) return NULL;
+    if (!source)
+        return NULL;
 
     size_t hex_len = 2 * length + 1;
     char hex[hex_len + 1];
@@ -424,13 +429,15 @@ static char *fingerprint_format_RFC8122(const char *source, size_t length) {
 
         fingerprint[(i * 3) + 0] = toupper(hex[(i * 2) + 0]);
         fingerprint[(i * 3) + 1] = toupper(hex[(i * 2) + 1]);
-        if (i < length - 1) fingerprint[(i * 3) + 2] = ':';
+        if (i < length - 1)
+            fingerprint[(i * 3) + 2] = ':';
     }
 
     return fingerprint;
 
 error:
-    if (fingerprint) free(fingerprint);
+    if (fingerprint)
+        free(fingerprint);
     return NULL;
 }
 
@@ -444,7 +451,8 @@ static char *X509_fingerprint_create(const X509 *cert, dtn_hash_function type) {
     char *fingerprint = NULL;
 
     const EVP_MD *func = dtn_hash_function_to_EVP(type);
-    if (!func || !cert) return NULL;
+    if (!func || !cert)
+        return NULL;
 
     if (0 < X509_digest(cert, func, mdigest, &mdigest_size)) {
         fingerprint = fingerprint_format_RFC8122((char *)mdigest, mdigest_size);
@@ -455,16 +463,17 @@ static char *X509_fingerprint_create(const X509 *cert, dtn_hash_function type) {
 
 /*----------------------------------------------------------------------------*/
 
-static bool create_fingerprint_cert(const char *path,
-                                    dtn_hash_function hash,
+static bool create_fingerprint_cert(const char *path, dtn_hash_function hash,
                                     char *out) {
 
     char *x509_fingerprint = NULL;
 
-    if (!path || !out) goto error;
+    if (!path || !out)
+        goto error;
 
     const char *hash_string = dtn_hash_function_to_RFC8122_string(hash);
-    if (!hash_string) goto error;
+    if (!hash_string)
+        goto error;
 
     X509 *x = NULL;
 
@@ -479,18 +488,17 @@ static bool create_fingerprint_cert(const char *path,
     fclose(fp);
     X509_free(x);
 
-    if (!x509_fingerprint) goto error;
+    if (!x509_fingerprint)
+        goto error;
 
     size_t size = strlen(x509_fingerprint) + strlen(hash_string) + 2;
 
-    if (size >= DTN_DTLS_FINGERPRINT_MAX) goto error;
+    if (size >= DTN_DTLS_FINGERPRINT_MAX)
+        goto error;
 
     memset(out, 0, DTN_DTLS_FINGERPRINT_MAX);
 
-    if (!snprintf(out,
-                  DTN_DTLS_FINGERPRINT_MAX,
-                  "%s %s",
-                  hash_string,
+    if (!snprintf(out, DTN_DTLS_FINGERPRINT_MAX, "%s %s", hash_string,
                   x509_fingerprint))
         goto error;
 
@@ -513,11 +521,13 @@ error:
 dtn_dtls_config dtn_dtls_config_from_json(const dtn_item *input) {
 
     dtn_dtls_config out = (dtn_dtls_config){0};
-    if (!input) goto error;
+    if (!input)
+        goto error;
 
-    const dtn_item *conf = dtn_item_get(input, "/ssl/dtls" );
+    const dtn_item *conf = dtn_item_get(input, "/ssl/dtls");
 
-    if (!conf) conf = input;
+    if (!conf)
+        conf = input;
 
     /*
      *      We perform a read access on the cert and key,
@@ -539,30 +549,28 @@ dtn_dtls_config dtn_dtls_config_from_json(const dtn_item *input) {
     const char *error = dtn_file_read_check(cert);
 
     if (error) {
-        dtn_log_error(
-            "SSL config cannot read certificate "
-            "at %s error %s",
-            cert,
-            error);
+        dtn_log_error("SSL config cannot read certificate "
+                      "at %s error %s",
+                      cert, error);
         goto error;
     }
 
     error = dtn_file_read_check(key);
 
     if (error) {
-        dtn_log_error(
-            "SSL config cannot read key "
-            "at %s error %s",
-            key,
-            error);
+        dtn_log_error("SSL config cannot read key "
+                      "at %s error %s",
+                      key, error);
         goto error;
     }
 
     bytes = snprintf(out.cert, PATH_MAX, "%s", cert);
-    if (bytes != strlen(cert)) goto error;
+    if (bytes != strlen(cert))
+        goto error;
 
     bytes = snprintf(out.key, PATH_MAX, "%s", key);
-    if (bytes != strlen(key)) goto error;
+    if (bytes != strlen(key))
+        goto error;
 
     const char *string =
         dtn_item_get_string(dtn_item_object_get(conf, "ca file"));
@@ -572,16 +580,15 @@ dtn_dtls_config dtn_dtls_config_from_json(const dtn_item *input) {
         error = dtn_file_read_check(string);
 
         if (error) {
-            dtn_log_error(
-                "SSL config cannot read CA FILE "
-                "at %s error %s",
-                string,
-                error);
+            dtn_log_error("SSL config cannot read CA FILE "
+                          "at %s error %s",
+                          string, error);
             goto error;
         }
 
         bytes = snprintf(out.ca.file, PATH_MAX, "%s", string);
-        if (bytes != strlen(string)) goto error;
+        if (bytes != strlen(string))
+            goto error;
     }
 
     string = dtn_item_get_string(dtn_item_object_get(conf, "ca path"));
@@ -592,29 +599,27 @@ dtn_dtls_config dtn_dtls_config_from_json(const dtn_item *input) {
 
         if (!error) {
 
-            dtn_log_error(
-                "SSL config wrong path for CA PATH "
-                "at %s error %s",
-                string,
-                error);
+            dtn_log_error("SSL config wrong path for CA PATH "
+                          "at %s error %s",
+                          string, error);
             goto error;
 
         } else if (0 != strcmp(error, DTN_FILE_IS_DIR)) {
 
-            dtn_log_error(
-                "SSL config wrong path for CA PATH "
-                "at %s error %s",
-                string,
-                error);
+            dtn_log_error("SSL config wrong path for CA PATH "
+                          "at %s error %s",
+                          string, error);
             goto error;
         }
 
         bytes = snprintf(out.ca.path, PATH_MAX, "%s", string);
-        if (bytes != strlen(string)) goto error;
+        if (bytes != strlen(string))
+            goto error;
     }
 
     dtn_item *keys = dtn_item_object_get(conf, "keys");
-    if (!keys) goto key_defaults;
+    if (!keys)
+        goto key_defaults;
 
     out.dtls.keys.quantity =
         dtn_item_get_number(dtn_item_object_get(keys, "quantity"));
@@ -651,18 +656,22 @@ dtn_dtls *dtn_dtls_create(dtn_dtls_config config) {
 
     dtn_dtls *self = NULL;
 
-    if (!config.loop) goto error;
+    if (!config.loop)
+        goto error;
 
-    if (0 == config.cert[0]) goto error;
+    if (0 == config.cert[0])
+        goto error;
 
-    if (0 == config.key[0]) goto error;
+    if (0 == config.key[0])
+        goto error;
 
     self = calloc(1, sizeof(dtn_dtls));
-    if (!self) goto error;
+    if (!self)
+        goto error;
 
     if (0 == config.srtp.profile[0])
-        snprintf(
-            config.srtp.profile, DTN_DTLS_PROFILE_MAX, DTN_DTLS_SRTP_PROFILES);
+        snprintf(config.srtp.profile, DTN_DTLS_PROFILE_MAX,
+                 DTN_DTLS_SRTP_PROFILES);
 
     if (0 == config.dtls.keys.quantity)
         config.dtls.keys.quantity = DTN_DTLS_KEYS_QUANTITY_DEFAULT;
@@ -685,10 +694,11 @@ dtn_dtls *dtn_dtls_create(dtn_dtls_config config) {
     SSL_library_init();
     SSL_load_error_strings();
 
-    if (!configure_dtls(self)) goto error;
+    if (!configure_dtls(self))
+        goto error;
 
-    if (!create_fingerprint_cert(
-            self->config.cert, DTN_HASH_SHA256, self->fingerprint))
+    if (!create_fingerprint_cert(self->config.cert, DTN_HASH_SHA256,
+                                 self->fingerprint))
         goto error;
 
     return self;
@@ -701,7 +711,8 @@ error:
 
 dtn_dtls *dtn_dtls_free(dtn_dtls *self) {
 
-    if (!self) goto error;
+    if (!self)
+        goto error;
 
     if (self->dtls.ctx) {
         SSL_CTX_free(self->dtls.ctx);
@@ -711,8 +722,8 @@ dtn_dtls *dtn_dtls_free(dtn_dtls *self) {
     // free used timers
     if (DTN_TIMER_INVALID != self->dtls.timer.key_renew) {
         if (self->config.loop && self->config.loop->timer.unset)
-            self->config.loop->timer.unset(
-                self->config.loop, self->dtls.timer.key_renew, NULL);
+            self->config.loop->timer.unset(self->config.loop,
+                                           self->dtls.timer.key_renew, NULL);
     }
 
     self->dtls.timer.key_renew = DTN_TIMER_INVALID;
@@ -739,7 +750,8 @@ error:
 
 const char *dtn_dtls_get_fingerprint(const dtn_dtls *ssl) {
 
-    if (!ssl) goto error;
+    if (!ssl)
+        goto error;
 
     return ssl->fingerprint;
 
@@ -755,17 +767,17 @@ const char *dtn_dtls_type_to_string(dtn_dtls_type type) {
 
     switch (type) {
 
-        case DTN_DTLS_ACTIVE:
-            out = DTN_KEY_ACTIVE;
-            break;
+    case DTN_DTLS_ACTIVE:
+        out = DTN_KEY_ACTIVE;
+        break;
 
-        case DTN_DTLS_PASSIVE:
-            out = DTN_KEY_PASSIVE;
-            break;
+    case DTN_DTLS_PASSIVE:
+        out = DTN_KEY_PASSIVE;
+        break;
 
-        default:
-            out = DTN_KEY_UNSET;
-            break;
+    default:
+        out = DTN_KEY_UNSET;
+        break;
     }
 
     return out;
@@ -775,7 +787,8 @@ const char *dtn_dtls_type_to_string(dtn_dtls_type type) {
 
 SSL_CTX *dtn_dtls_get_ctx(dtn_dtls *self) {
 
-    if (!self) return NULL;
+    if (!self)
+        return NULL;
     return self->dtls.ctx;
 }
 
@@ -783,14 +796,16 @@ SSL_CTX *dtn_dtls_get_ctx(dtn_dtls *self) {
 
 const char *dtn_dtls_get_srtp_profile(dtn_dtls *self) {
 
-    if (!self) return NULL;
+    if (!self)
+        return NULL;
     return self->config.srtp.profile;
 }
 
 /*----------------------------------------------------------------------------*/
 const char *dtn_dtls_get_verify_file(dtn_dtls *self) {
 
-    if (!self) return NULL;
+    if (!self)
+        return NULL;
     return self->config.ca.file;
 }
 
@@ -798,7 +813,8 @@ const char *dtn_dtls_get_verify_file(dtn_dtls *self) {
 
 const char *dtn_dtls_get_verify_path(dtn_dtls *self) {
 
-    if (!self) return NULL;
+    if (!self)
+        return NULL;
     return self->config.ca.path;
 }
 

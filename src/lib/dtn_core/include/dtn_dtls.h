@@ -31,11 +31,11 @@
 #define dtn_dtls_h
 
 #include "dtn_hash.h"
-#include <limits.h>
 #include <dtn_base/dtn_event_loop.h>
 #include <dtn_base/dtn_item.h>
+#include <limits.h>
 
-#define DTN_DTLS_SRTP_PROFILES                                                  \
+#define DTN_DTLS_SRTP_PROFILES                                                 \
     "SRTP_AES128_CM_SHA1_80:"                                                  \
     "SRTP_AES128_CM_SHA1_32"
 

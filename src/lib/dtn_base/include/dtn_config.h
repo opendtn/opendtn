@@ -96,21 +96,22 @@ dtn_item *dtn_config_from_command_line(size_t argc, char *argv[]);
 /*----------------------------------------------------------------------------*/
 
 double dtn_config_double_or_default(dtn_item const *jval, char const *key,
-                                   double default_val);
+                                    double default_val);
 
 uint32_t dtn_config_u32_or_default(dtn_item const *jval, char const *key,
-                                  uint32_t default_val);
+                                   uint32_t default_val);
 
 uint64_t dtn_config_u64_or_default(dtn_item const *jval, char const *key,
-                                  uint64_t default_val);
+                                   uint64_t default_val);
 
 bool dtn_config_bool_or_default(dtn_item const *jval, char const *key,
-                               bool default_val);
+                                bool default_val);
 
 /*----------------------------------------------------------------------------*/
 
-dtn_socket_configuration dtn_config_socket_configuration_or_default(
-    dtn_item const *jcfg, char const *key);
+dtn_socket_configuration
+dtn_config_socket_configuration_or_default(dtn_item const *jcfg,
+                                           char const *key);
 
 /*----------------------------------------------------------------------------*/
 

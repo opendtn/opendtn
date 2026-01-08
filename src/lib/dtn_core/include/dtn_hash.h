@@ -77,7 +77,7 @@ const char *dtn_hash_function_to_RFC8122_string(dtn_hash_function func);
         Parse the hash function from a string (caseignore)
 */
 dtn_hash_function dtn_hash_function_from_string(const char *string,
-                                              size_t length);
+                                                size_t length);
 
 /*----------------------------------------------------------------------------*/
 
@@ -104,11 +104,8 @@ const EVP_MD *dtn_hash_function_to_EVP(dtn_hash_function type);
         @param result   pointer to result buffer
         @param length   length of result buffer (will be set to used length)
 */
-bool dtn_hash(dtn_hash_function func,
-             const char *array[],
-             size_t items,
-             uint8_t **result,
-             size_t *length);
+bool dtn_hash(dtn_hash_function func, const char *array[], size_t items,
+              uint8_t **result, size_t *length);
 
 /*----------------------------------------------------------------------------*/
 
@@ -125,10 +122,7 @@ bool dtn_hash(dtn_hash_function func,
         @param length   length of result buffer (will be set to used length)
 
 */
-bool dtn_hash_string(dtn_hash_function func,
-                    const uint8_t *source,
-                    size_t src_len,
-                    uint8_t **result,
-                    size_t *length);
+bool dtn_hash_string(dtn_hash_function func, const uint8_t *source,
+                     size_t src_len, uint8_t **result, size_t *length);
 
 #endif /* dtn_hash_h */

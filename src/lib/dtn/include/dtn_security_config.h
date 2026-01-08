@@ -76,5 +76,4 @@ typedef struct dtn_security_config {
 
 dtn_security_config dtn_security_config_from_item(const dtn_item *input);
 
-
 #endif /* dtn_security_config_h */

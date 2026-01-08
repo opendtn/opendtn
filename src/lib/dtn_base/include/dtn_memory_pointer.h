@@ -35,8 +35,8 @@
 
 typedef struct {
 
-  const uint8_t *start;
-  size_t length;
+    const uint8_t *start;
+    size_t length;
 
 } dtn_memory_pointer;
 

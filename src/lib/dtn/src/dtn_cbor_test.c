@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_cbor.c"
+#include <dtn_base/testrun.h>
 
 #include <dtn_base/dtn_random.h>
 #include <dtn_base/dtn_utf8.h>
@@ -41,8 +41,8 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_cbor_clear(){
-    
+int test_cbor_clear() {
+
     dtn_cbor *self = dtn_cbor_create(DTN_CBOR_UNDEF);
     testrun(cbor_clear(self));
     testrun(self->type == DTN_CBOR_UNDEF);
@@ -102,8 +102,8 @@ int test_cbor_clear(){
     self = dtn_cbor_free(self);
 
     self = dtn_cbor_create(DTN_CBOR_ARRAY);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(cbor_clear(self));
     testrun(self->type == DTN_CBOR_UNDEF);
     testrun(self->data == NULL);
@@ -151,8 +151,8 @@ int test_cbor_clear(){
     self = dtn_cbor_free(self);
 
     self = dtn_cbor_create(DTN_CBOR_DEC_FRACTION);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(cbor_clear(self));
     testrun(self->type == DTN_CBOR_UNDEF);
     testrun(self->data == NULL);
@@ -160,8 +160,8 @@ int test_cbor_clear(){
     self = dtn_cbor_free(self);
 
     self = dtn_cbor_create(DTN_CBOR_BIGFLOAT);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(cbor_clear(self));
     testrun(self->type == DTN_CBOR_UNDEF);
     testrun(self->data == NULL);
@@ -206,8 +206,8 @@ int test_cbor_clear(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_cbor_free(){
-    
+int test_cbor_free() {
+
     dtn_cbor *self = dtn_cbor_create(DTN_CBOR_UNDEF);
     testrun(cbor_clear(self));
     testrun(self->type == DTN_CBOR_UNDEF);
@@ -239,8 +239,8 @@ int test_cbor_free(){
     testrun(NULL == cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_ARRAY);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(NULL == cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_MAP);
@@ -264,13 +264,13 @@ int test_cbor_free(){
     testrun(NULL == cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_DEC_FRACTION);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(NULL == cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_BIGFLOAT);
-     self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(NULL == cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_TAG);
@@ -295,33 +295,33 @@ int test_cbor_free(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_cbor_copy(){
-    
+int test_cbor_copy() {
+
     dtn_cbor *copy = NULL;
     dtn_cbor *self = dtn_cbor_create(DTN_CBOR_UNDEF);
 
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_UNDEF);
     self = cbor_free(self);
     copy = cbor_free(copy);
 
     self = dtn_cbor_create(DTN_CBOR_FALSE);
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_FALSE);
     self = cbor_free(self);
     copy = cbor_free(copy);
 
     self = dtn_cbor_create(DTN_CBOR_TRUE);
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_TRUE);
     self = cbor_free(self);
     copy = cbor_free(copy);
 
     self = dtn_cbor_create(DTN_CBOR_NULL);
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_NULL);
     self = cbor_free(self);
@@ -329,7 +329,7 @@ int test_cbor_copy(){
 
     self = dtn_cbor_create(DTN_CBOR_UINT64);
     self->nbr_uint = 1234;
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_UINT64);
     testrun(copy->nbr_uint == self->nbr_uint);
@@ -338,7 +338,7 @@ int test_cbor_copy(){
 
     self = dtn_cbor_create(DTN_CBOR_INT64);
     self->nbr_int = 1234;
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_INT64);
     testrun(copy->nbr_uint == self->nbr_uint);
@@ -348,7 +348,7 @@ int test_cbor_copy(){
     self = dtn_cbor_create(DTN_CBOR_STRING);
     self->string = dtn_string_dup("test");
     self->nbr_uint = strlen("test");
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_STRING);
     testrun(copy->nbr_uint == self->nbr_uint);
@@ -359,7 +359,7 @@ int test_cbor_copy(){
     self = dtn_cbor_create(DTN_CBOR_UTF8);
     self->string = dtn_string_dup("test");
     self->nbr_uint = strlen("test");
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_UTF8);
     testrun(copy->nbr_uint == self->nbr_uint);
@@ -371,7 +371,7 @@ int test_cbor_copy(){
     self->data = dtn_linked_list_create(
         (dtn_list_config){.item.free = cbor_free, .item.copy = cbor_copy});
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_TRUE)));
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_ARRAY);
     testrun(1 == dtn_list_count(copy->data));
@@ -385,7 +385,7 @@ int test_cbor_copy(){
     dtn_cbor *val = dtn_cbor_create(DTN_CBOR_STRING);
     val->string = dtn_string_dup("val");
     testrun(dtn_dict_set(self->data, key, val, NULL));
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_MAP);
     testrun(1 == dtn_dict_count(copy->data));
@@ -395,7 +395,7 @@ int test_cbor_copy(){
     self = dtn_cbor_create(DTN_CBOR_DATE_TIME);
     self->string = dtn_string_dup("timestamp");
     self->nbr_uint = strlen("timestamp");
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_DATE_TIME);
     testrun(copy->nbr_uint == self->nbr_uint);
@@ -405,7 +405,7 @@ int test_cbor_copy(){
 
     self = dtn_cbor_create(DTN_CBOR_DATE_TIME_EPOCH);
     self->nbr_uint = 12345;
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_DATE_TIME_EPOCH);
     testrun(copy->nbr_uint == self->nbr_uint);
@@ -415,7 +415,7 @@ int test_cbor_copy(){
     self = dtn_cbor_create(DTN_CBOR_UBIGNUM);
     self->string = dtn_string_dup("DTN_CBOR_UBIGNUM");
     self->nbr_uint = strlen("DTN_CBOR_UBIGNUM");
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_UBIGNUM);
     testrun(copy->nbr_uint == self->nbr_uint);
@@ -426,7 +426,7 @@ int test_cbor_copy(){
     self = dtn_cbor_create(DTN_CBOR_IBIGNUM);
     self->string = dtn_string_dup("DTN_CBOR_IBIGNUM");
     self->nbr_uint = strlen("DTN_CBOR_IBIGNUM");
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_IBIGNUM);
     testrun(copy->nbr_uint == self->nbr_uint);
@@ -437,7 +437,7 @@ int test_cbor_copy(){
     self = dtn_cbor_create(DTN_CBOR_DEC_FRACTION);
     self->data = dtn_cbor_array();
     testrun(dtn_cbor_array_push(self->data, dtn_cbor_create(DTN_CBOR_TRUE)));
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_DEC_FRACTION);
     testrun(1 == dtn_cbor_array_count(copy->data));
@@ -446,7 +446,7 @@ int test_cbor_copy(){
 
     self = dtn_cbor_create(DTN_CBOR_BIGFLOAT);
     self->data = dtn_cbor_array();
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_BIGFLOAT);
     testrun(copy->nbr_uint == self->nbr_uint);
@@ -456,7 +456,7 @@ int test_cbor_copy(){
     self = dtn_cbor_create(DTN_CBOR_TAG);
     self->nbr_uint = 1234;
     self->data = dtn_cbor_create(DTN_CBOR_NULL);
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_TAG);
     testrun(copy->nbr_uint == self->nbr_uint);
@@ -466,7 +466,7 @@ int test_cbor_copy(){
 
     self = dtn_cbor_create(DTN_CBOR_SIMPLE);
     self->nbr_uint = 1234;
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_SIMPLE);
     testrun(copy->nbr_uint == self->nbr_uint);
@@ -475,7 +475,7 @@ int test_cbor_copy(){
 
     self = dtn_cbor_create(DTN_CBOR_FLOAT);
     self->nbr_float = 1.2;
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_FLOAT);
     testrun(copy->nbr_float == self->nbr_float);
@@ -484,7 +484,7 @@ int test_cbor_copy(){
 
     self = dtn_cbor_create(DTN_CBOR_DOUBLE);
     self->nbr_double = 1.2e4;
-    testrun(cbor_copy((void**)&copy, self));
+    testrun(cbor_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->type == DTN_CBOR_DOUBLE);
     testrun(copy->nbr_double == self->nbr_double);
@@ -496,8 +496,8 @@ int test_cbor_copy(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_cbor_dump(){
-    
+int test_cbor_dump() {
+
     dtn_cbor *self = dtn_cbor_create(DTN_CBOR_UNDEF);
     testrun(cbor_clear(self));
     testrun(self->type == DTN_CBOR_UNDEF);
@@ -538,8 +538,8 @@ int test_cbor_dump(){
     testrun(NULL == cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_ARRAY);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(cbor_dump(stdout, self));
     testrun(NULL == cbor_free(self));
 
@@ -572,14 +572,14 @@ int test_cbor_dump(){
     testrun(NULL == cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_DEC_FRACTION);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(cbor_dump(stdout, self));
     testrun(NULL == cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_BIGFLOAT);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(cbor_dump(stdout, self));
     testrun(NULL == cbor_free(self));
 
@@ -608,7 +608,7 @@ int test_cbor_dump(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_cbor_hash(){
+int test_cbor_hash() {
 
     dtn_cbor *self = dtn_cbor_create(DTN_CBOR_UNDEF);
     testrun(cbor_clear(self));
@@ -659,8 +659,8 @@ int test_cbor_hash(){
     testrun(NULL == cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_ARRAY);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     result = cbor_hash(self);
     testrun(result != 0);
     testrun(NULL == cbor_free(self));
@@ -699,15 +699,15 @@ int test_cbor_hash(){
     testrun(NULL == cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_DEC_FRACTION);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     result = cbor_hash(self);
     testrun(result != 0);
     testrun(NULL == cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_BIGFLOAT);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     result = cbor_hash(self);
     testrun(result != 0);
     testrun(NULL == cbor_free(self));
@@ -741,7 +741,7 @@ int test_cbor_hash(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_cbor_match(){
+int test_cbor_match() {
 
     dtn_cbor *one = dtn_cbor_create(DTN_CBOR_UNDEF);
     dtn_cbor *two = dtn_cbor_create(DTN_CBOR_UNDEF);
@@ -841,10 +841,10 @@ int test_cbor_match(){
 
     one = dtn_cbor_create(DTN_CBOR_ARRAY);
     two = dtn_cbor_create(DTN_CBOR_ARRAY);
-    one->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
-    two->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    one->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
+    two->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(cbor_match(one, two));
     testrun(dtn_list_push(one->data, dtn_cbor_create(DTN_CBOR_UNDEF)));
     testrun(!cbor_match(one, two));
@@ -862,14 +862,14 @@ int test_cbor_match(){
     dtn_cbor *key = dtn_cbor_create(DTN_CBOR_UINT64);
     key->nbr_uint = 1234;
     dtn_cbor *val = dtn_cbor_create(DTN_CBOR_UINT64);
-    val->nbr_uint = 12345;  
-    testrun(dtn_dict_set(one->data, key, val, NULL)); 
+    val->nbr_uint = 12345;
+    testrun(dtn_dict_set(one->data, key, val, NULL));
     testrun(!cbor_match(one, two));
     key = dtn_cbor_create(DTN_CBOR_UINT64);
     key->nbr_uint = 1234;
     val = dtn_cbor_create(DTN_CBOR_UINT64);
-    val->nbr_uint = 12345; 
-    testrun(dtn_dict_set(two->data, key, val, NULL)); 
+    val->nbr_uint = 12345;
+    testrun(dtn_dict_set(two->data, key, val, NULL));
     testrun(cbor_match(one, two));
     two = dtn_cbor_free(two);
     two = dtn_cbor_create(DTN_CBOR_UNDEF);
@@ -940,7 +940,7 @@ int test_cbor_match(){
     testrun(!cbor_match(one, two));
     one = cbor_free(one);
     two = cbor_free(two);
-    
+
     one = dtn_cbor_create(DTN_CBOR_DEC_FRACTION);
     two = dtn_cbor_create(DTN_CBOR_DEC_FRACTION);
     one->data = dtn_cbor_array();
@@ -1018,7 +1018,7 @@ int test_cbor_match(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_dict_config(){
+int test_dtn_cbor_dict_config() {
 
     dtn_dict_config config = dtn_cbor_dict_config(255);
     testrun(config.slots == 255);
@@ -1036,7 +1036,7 @@ int test_dtn_cbor_dict_config(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_create(){
+int test_dtn_cbor_create() {
 
     dtn_cbor *self = dtn_cbor_create(DTN_CBOR_UNDEF);
     testrun(self->type == DTN_CBOR_UNDEF);
@@ -1163,8 +1163,8 @@ int test_dtn_cbor_create(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_free(){
-    
+int test_dtn_cbor_free() {
+
     dtn_cbor *self = dtn_cbor_create(DTN_CBOR_UNDEF);
     testrun(cbor_clear(self));
     testrun(self->type == DTN_CBOR_UNDEF);
@@ -1196,8 +1196,8 @@ int test_dtn_cbor_free(){
     testrun(NULL == dtn_cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_ARRAY);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(NULL == dtn_cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_MAP);
@@ -1221,13 +1221,13 @@ int test_dtn_cbor_free(){
     testrun(NULL == dtn_cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_DEC_FRACTION);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(NULL == dtn_cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_BIGFLOAT);
-    self->data = dtn_linked_list_create(
-        (dtn_list_config){.item.free = cbor_free});
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(NULL == dtn_cbor_free(self));
 
     self = dtn_cbor_create(DTN_CBOR_TAG);
@@ -1252,7 +1252,7 @@ int test_dtn_cbor_free(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_decode_uint(){
+int test_decode_uint() {
 
     uint8_t buffer[100] = {0};
 
@@ -1260,18 +1260,17 @@ int test_decode_uint(){
     dtn_cbor *out = NULL;
     uint8_t *next = NULL;
 
-    for (int i = 0; i < 0x18; i++){
+    for (int i = 0; i < 0x18; i++) {
 
         buffer[0] = i;
         match = decode_uint(buffer, 1, &out, &next);
         testrun(match == DTN_CBOR_MATCH_FULL);
         testrun(out);
         testrun(out->type == DTN_CBOR_UINT64);
-        testrun(out->nbr_uint == (uint64_t) i);
+        testrun(out->nbr_uint == (uint64_t)i);
         testrun(next);
         testrun(next == buffer + 1);
         out = cbor_free(out);
-
     }
 
     buffer[0] = 0x18;
@@ -1279,18 +1278,17 @@ int test_decode_uint(){
     match = decode_uint(buffer, 1, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
 
-    for (int i = 0; i < 0xff; i++){
+    for (int i = 0; i < 0xff; i++) {
 
         buffer[1] = i;
         match = decode_uint(buffer, 2, &out, &next);
         testrun(match == DTN_CBOR_MATCH_FULL);
         testrun(out);
         testrun(out->type == DTN_CBOR_UINT64);
-        testrun(out->nbr_uint == (uint64_t) i);
+        testrun(out->nbr_uint == (uint64_t)i);
         testrun(next);
         testrun(next == buffer + 2);
         out = cbor_free(out);
-
     }
 
     next = NULL;
@@ -1304,7 +1302,7 @@ int test_decode_uint(){
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
     testrun(NULL == out);
 
-    for (int i = 0; i < 0xff; i++){
+    for (int i = 0; i < 0xff; i++) {
 
         buffer[1] = i;
         buffer[2] = i;
@@ -1318,7 +1316,6 @@ int test_decode_uint(){
         testrun(next);
         testrun(next == buffer + 3);
         out = cbor_free(out);
-
     }
 
     next = NULL;
@@ -1335,7 +1332,7 @@ int test_decode_uint(){
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
     testrun(NULL == out);
 
-    for (int i = 0; i < 0xff; i++){
+    for (int i = 0; i < 0xff; i++) {
 
         buffer[1] = i;
         buffer[2] = i;
@@ -1357,7 +1354,6 @@ int test_decode_uint(){
         testrun(next);
         testrun(next == buffer + 5);
         out = cbor_free(out);
-
     }
 
     next = NULL;
@@ -1382,8 +1378,8 @@ int test_decode_uint(){
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
     testrun(NULL == out);
 
-    for (int i = 0; i < 0xff; i++){
-        
+    for (int i = 0; i < 0xff; i++) {
+
         buffer[1] = i;
         buffer[2] = i;
         buffer[3] = i;
@@ -1416,14 +1412,13 @@ int test_decode_uint(){
         testrun(next);
         testrun(next == buffer + 9);
         out = cbor_free(out);
-
     }
     return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
-int test_decode_int(){
+int test_decode_int() {
 
     uint8_t buffer[100] = {0};
 
@@ -1431,18 +1426,17 @@ int test_decode_int(){
     dtn_cbor *out = NULL;
     uint8_t *next = NULL;
 
-    for (int i = 0x20; i < 0x38; i++){
+    for (int i = 0x20; i < 0x38; i++) {
 
         buffer[0] = i;
         match = decode_int(buffer, 1, &out, &next);
         testrun(match == DTN_CBOR_MATCH_FULL);
         testrun(out);
         testrun(out->type == DTN_CBOR_INT64);
-        testrun(out->nbr_int == -(int64_t) i);
+        testrun(out->nbr_int == -(int64_t)i);
         testrun(next);
         testrun(next == buffer + 1);
         out = cbor_free(out);
-
     }
 
     buffer[0] = 0x38;
@@ -1450,18 +1444,17 @@ int test_decode_int(){
     match = decode_int(buffer, 1, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
 
-    for (int i = 0; i < 0xff; i++){
+    for (int i = 0; i < 0xff; i++) {
 
         buffer[1] = i;
         match = decode_int(buffer, 2, &out, &next);
         testrun(match == DTN_CBOR_MATCH_FULL);
         testrun(out);
         testrun(out->type == DTN_CBOR_INT64);
-        testrun(out->nbr_int == -(int64_t) i);
+        testrun(out->nbr_int == -(int64_t)i);
         testrun(next);
         testrun(next == buffer + 2);
         out = cbor_free(out);
-
     }
 
     next = NULL;
@@ -1475,7 +1468,7 @@ int test_decode_int(){
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
     testrun(NULL == out);
 
-    for (int i = 0; i < 0xff; i++){
+    for (int i = 0; i < 0xff; i++) {
 
         buffer[1] = i;
         buffer[2] = i;
@@ -1489,7 +1482,6 @@ int test_decode_int(){
         testrun(next);
         testrun(next == buffer + 3);
         out = cbor_free(out);
-
     }
 
     next = NULL;
@@ -1506,7 +1498,7 @@ int test_decode_int(){
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
     testrun(NULL == out);
 
-    for (int i = 0; i < 0xff; i++){
+    for (int i = 0; i < 0xff; i++) {
 
         buffer[1] = i;
         buffer[2] = i;
@@ -1528,7 +1520,6 @@ int test_decode_int(){
         testrun(next);
         testrun(next == buffer + 5);
         out = cbor_free(out);
-
     }
 
     next = NULL;
@@ -1553,8 +1544,8 @@ int test_decode_int(){
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
     testrun(NULL == out);
 
-    for (int i = 0; i < 0xff; i++){
-        
+    for (int i = 0; i < 0xff; i++) {
+
         buffer[1] = i;
         buffer[2] = i;
         buffer[3] = i;
@@ -1587,15 +1578,13 @@ int test_decode_int(){
         testrun(next);
         testrun(next == buffer + 9);
         out = cbor_free(out);
-
     }
     return testrun_log_success();
 }
 
-
 /*----------------------------------------------------------------------------*/
 
-int test_decode_text_string(){
+int test_decode_text_string() {
 
     uint8_t buffer[0xFFFF] = {0};
 
@@ -1604,7 +1593,7 @@ int test_decode_text_string(){
     uint8_t *next = NULL;
     size_t strlen = 0;
 
-    for (int i = 0x40; i < 0x58; i++){
+    for (int i = 0x40; i < 0x58; i++) {
 
         buffer[0] = i;
         buffer[1] = 'a';
@@ -1636,9 +1625,9 @@ int test_decode_text_string(){
 
         strlen = buffer[0] & 0x1F;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i == 0x40){
+        if (i == 0x40) {
 
             match = decode_text_string(buffer, 1, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -1647,7 +1636,7 @@ int test_decode_text_string(){
             testrun(!out->string);
             testrun(out->nbr_uint == 0);
             out = cbor_free(out);
-        
+
         } else {
 
             match = decode_text_string(buffer, 1, &out, &next);
@@ -1658,12 +1647,11 @@ int test_decode_text_string(){
             testrun(out->type == DTN_CBOR_STRING);
             testrun(out->string);
             testrun(out->nbr_uint == strlen);
-            //fprintf(stdout, "%"PRIu64"|%s", out->nbr_uint, out->string);
-            testrun(0 == strncmp(out->string, (char*) buffer + 1, strlen));
+            // fprintf(stdout, "%"PRIu64"|%s", out->nbr_uint, out->string);
+            testrun(0 == strncmp(out->string, (char *)buffer + 1, strlen));
             testrun(next);
             testrun(next == buffer + strlen + 1);
             out = cbor_free(out);
-        
         }
     }
 
@@ -1671,7 +1659,7 @@ int test_decode_text_string(){
     match = decode_text_string(buffer, 1, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
 
-    for (int i = 0x00; i < 26; i++){
+    for (int i = 0x00; i < 26; i++) {
 
         buffer[1] = i;
         buffer[2] = 'a';
@@ -1703,9 +1691,9 @@ int test_decode_text_string(){
 
         strlen = i;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i == 0x00){
+        if (i == 0x00) {
 
             match = decode_text_string(buffer, 2, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -1714,7 +1702,7 @@ int test_decode_text_string(){
             testrun(!out->string);
             testrun(out->nbr_uint == 0);
             out = cbor_free(out);
-        
+
         } else {
 
             match = decode_text_string(buffer, 1, &out, &next);
@@ -1725,12 +1713,11 @@ int test_decode_text_string(){
             testrun(out->type == DTN_CBOR_STRING);
             testrun(out->string);
             testrun(out->nbr_uint == strlen);
-            //fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
-            testrun(0 == strncmp(out->string, (char*) buffer + 2, strlen));
+            // fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
+            testrun(0 == strncmp(out->string, (char *)buffer + 2, strlen));
             testrun(next);
             testrun(next == buffer + strlen + 2);
             out = cbor_free(out);
-        
         }
     }
 
@@ -1755,7 +1742,7 @@ int test_decode_text_string(){
     match = decode_text_string(buffer, 2, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
 
-    for (int i = 0x00; i < 26; i++){
+    for (int i = 0x00; i < 26; i++) {
 
         buffer[1] = 0;
         buffer[2] = i;
@@ -1787,9 +1774,9 @@ int test_decode_text_string(){
 
         strlen = i;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i == 0x00){
+        if (i == 0x00) {
 
             match = decode_text_string(buffer, 3, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -1798,7 +1785,7 @@ int test_decode_text_string(){
             testrun(!out->string);
             testrun(out->nbr_uint == 0);
             out = cbor_free(out);
-        
+
         } else {
 
             match = decode_text_string(buffer, 2 + i, &out, &next);
@@ -1807,12 +1794,11 @@ int test_decode_text_string(){
             testrun(out->type == DTN_CBOR_STRING);
             testrun(out->string);
             testrun(out->nbr_uint == strlen);
-            //fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
-            testrun(0 == strncmp(out->string, (char*) buffer + 3, strlen));
+            // fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
+            testrun(0 == strncmp(out->string, (char *)buffer + 3, strlen));
             testrun(next);
             testrun(next == buffer + strlen + 3);
             out = cbor_free(out);
-        
         }
     }
 
@@ -1842,7 +1828,7 @@ int test_decode_text_string(){
     match = decode_text_string(buffer, 4, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
 
-    for (int i = 0x00; i < 26; i++){
+    for (int i = 0x00; i < 26; i++) {
 
         buffer[1] = 0;
         buffer[2] = 0;
@@ -1874,9 +1860,9 @@ int test_decode_text_string(){
 
         strlen = i;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i == 0x00){
+        if (i == 0x00) {
 
             match = decode_text_string(buffer, 5, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -1885,7 +1871,7 @@ int test_decode_text_string(){
             testrun(!out->string);
             testrun(out->nbr_uint == 0);
             out = cbor_free(out);
-        
+
         } else {
 
             match = decode_text_string(buffer, 5 + i, &out, &next);
@@ -1894,35 +1880,34 @@ int test_decode_text_string(){
             testrun(out->type == DTN_CBOR_STRING);
             testrun(out->string);
             testrun(out->nbr_uint == strlen);
-            //fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
-            testrun(0 == strncmp(out->string, (char*) buffer + 5, strlen));
+            // fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
+            testrun(0 == strncmp(out->string, (char *)buffer + 5, strlen));
             testrun(next);
             testrun(next == buffer + strlen + 5);
             out = cbor_free(out);
-        
         }
     }
 
-/*
-    // test offline due to big buffer allocation
-    buffer[0] = 0x5A;
-    buffer[1] = 0xFF;
-    buffer[2] = 0xFF;
-    buffer[3] = 0xFF;
-    buffer[4] = 0xFF;
+    /*
+        // test offline due to big buffer allocation
+        buffer[0] = 0x5A;
+        buffer[1] = 0xFF;
+        buffer[2] = 0xFF;
+        buffer[3] = 0xFF;
+        buffer[4] = 0xFF;
 
-    strlen = 0xFFFFffff;
+        strlen = 0xFFFFffff;
 
-    match = decode_text_string(buffer, 2 + strlen, &out, &next);
-    testrun(match == DTN_CBOR_MATCH_FULL);
-    testrun(out);
-    testrun(out->type == DTN_CBOR_STRING);
-    testrun(out->string);
-    testrun(out->nbr_uint == strlen);
-    testrun(next);
-    testrun(next == buffer + strlen + 5);
-    out = cbor_free(out);
-*/
+        match = decode_text_string(buffer, 2 + strlen, &out, &next);
+        testrun(match == DTN_CBOR_MATCH_FULL);
+        testrun(out);
+        testrun(out->type == DTN_CBOR_STRING);
+        testrun(out->string);
+        testrun(out->nbr_uint == strlen);
+        testrun(next);
+        testrun(next == buffer + strlen + 5);
+        out = cbor_free(out);
+    */
 
     buffer[0] = 0x5B;
     match = decode_text_string(buffer, 1, &out, &next);
@@ -1942,7 +1927,7 @@ int test_decode_text_string(){
     match = decode_text_string(buffer, 8, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
 
-    for (int i = 0x00; i < 10; i++){
+    for (int i = 0x00; i < 10; i++) {
 
         buffer[1] = 0;
         buffer[2] = 0;
@@ -1974,9 +1959,9 @@ int test_decode_text_string(){
 
         strlen = i;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i == 0x00){
+        if (i == 0x00) {
 
             match = decode_text_string(buffer, 9, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -1985,7 +1970,7 @@ int test_decode_text_string(){
             testrun(!out->string);
             testrun(out->nbr_uint == 0);
             out = cbor_free(out);
-        
+
         } else {
 
             match = decode_text_string(buffer, 9 + i, &out, &next);
@@ -1994,12 +1979,11 @@ int test_decode_text_string(){
             testrun(out->type == DTN_CBOR_STRING);
             testrun(out->string);
             testrun(out->nbr_uint == strlen);
-            //fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
-            testrun(0 == strncmp(out->string, (char*) buffer + 9, strlen));
+            // fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
+            testrun(0 == strncmp(out->string, (char *)buffer + 9, strlen));
             testrun(next);
             testrun(next == buffer + strlen + 9);
             out = cbor_free(out);
-        
         }
     }
 
@@ -2033,8 +2017,8 @@ int test_decode_text_string(){
     buffer[27] = 'z';
     buffer[28] = 0xff;
 
-    for (int i = 1; i < 29; i++){
-    
+    for (int i = 1; i < 29; i++) {
+
         match = decode_text_string(buffer, i, &out, &next);
         testrun(match == DTN_CBOR_MATCH_PARTIAL);
     }
@@ -2042,11 +2026,11 @@ int test_decode_text_string(){
     match = decode_text_string(buffer, 29, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
     testrun(out);
-    //fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
+    // fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
     testrun(out->type == DTN_CBOR_STRING);
     testrun(out->string);
     testrun(out->nbr_uint == 27);
-    testrun(0 == strncmp(out->string, (char*) buffer + 1, strlen));
+    testrun(0 == strncmp(out->string, (char *)buffer + 1, strlen));
     testrun(next);
     testrun(next == buffer + 29);
     out = cbor_free(out);
@@ -2056,7 +2040,7 @@ int test_decode_text_string(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_decode_utf8_string(){
+int test_decode_utf8_string() {
 
     uint8_t buffer[0xffff] = {0};
 
@@ -2065,7 +2049,7 @@ int test_decode_utf8_string(){
     uint8_t *next = NULL;
     size_t strlen = 0;
 
-    for (int i = 0x60; i < 0x77; i++){
+    for (int i = 0x60; i < 0x77; i++) {
 
         buffer[0] = i;
         buffer[1] = 'a';
@@ -2097,9 +2081,9 @@ int test_decode_utf8_string(){
 
         strlen = buffer[0] & 0x1F;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i == 0x60){
+        if (i == 0x60) {
 
             match = decode_utf8_string(buffer, 1, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -2108,7 +2092,7 @@ int test_decode_utf8_string(){
             testrun(!out->string);
             testrun(out->nbr_uint == 0);
             out = cbor_free(out);
-        
+
         } else {
 
             match = decode_utf8_string(buffer, 1, &out, &next);
@@ -2119,12 +2103,11 @@ int test_decode_utf8_string(){
             testrun(out->type == DTN_CBOR_UTF8);
             testrun(out->string);
             testrun(out->nbr_uint == strlen);
-            //fprintf(stdout, "%"PRIu64"|%s", out->nbr_uint, out->string);
-            testrun(0 == strncmp(out->string, (char*) buffer + 1, strlen));
+            // fprintf(stdout, "%"PRIu64"|%s", out->nbr_uint, out->string);
+            testrun(0 == strncmp(out->string, (char *)buffer + 1, strlen));
             testrun(next);
             testrun(next == buffer + strlen + 1);
             out = cbor_free(out);
-        
         }
     }
 
@@ -2132,7 +2115,7 @@ int test_decode_utf8_string(){
     match = decode_utf8_string(buffer, 1, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
 
-    for (int i = 0x00; i < 26; i++){
+    for (int i = 0x00; i < 26; i++) {
 
         buffer[1] = i;
         buffer[2] = 'a';
@@ -2164,9 +2147,9 @@ int test_decode_utf8_string(){
 
         strlen = i;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i == 0x00){
+        if (i == 0x00) {
 
             match = decode_utf8_string(buffer, 2, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -2175,7 +2158,7 @@ int test_decode_utf8_string(){
             testrun(!out->string);
             testrun(out->nbr_uint == 0);
             out = cbor_free(out);
-        
+
         } else {
 
             match = decode_utf8_string(buffer, 1, &out, &next);
@@ -2186,23 +2169,21 @@ int test_decode_utf8_string(){
             testrun(out->type == DTN_CBOR_UTF8);
             testrun(out->string);
             testrun(out->nbr_uint == strlen);
-            //fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
-            testrun(0 == strncmp(out->string, (char*) buffer + 2, strlen));
+            // fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
+            testrun(0 == strncmp(out->string, (char *)buffer + 2, strlen));
             testrun(next);
             testrun(next == buffer + strlen + 2);
             out = cbor_free(out);
-        
         }
     }
 
     buffer[0] = 0x78;
     buffer[1] = 0xFF;
 
-    for (int i = 2; i < 0xffff; i++){
+    for (int i = 2; i < 0xffff; i++) {
 
         buffer[i] = 'a';
     }
-
 
     strlen = 0xFF;
 
@@ -2222,7 +2203,7 @@ int test_decode_utf8_string(){
     match = decode_utf8_string(buffer, 2, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
 
-    for (int i = 0x00; i < 26; i++){
+    for (int i = 0x00; i < 26; i++) {
 
         buffer[1] = 0;
         buffer[2] = i;
@@ -2254,9 +2235,9 @@ int test_decode_utf8_string(){
 
         strlen = i;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i == 0x00){
+        if (i == 0x00) {
 
             match = decode_utf8_string(buffer, 3, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -2265,7 +2246,7 @@ int test_decode_utf8_string(){
             testrun(!out->string);
             testrun(out->nbr_uint == 0);
             out = cbor_free(out);
-        
+
         } else {
 
             match = decode_utf8_string(buffer, 2 + i, &out, &next);
@@ -2274,12 +2255,11 @@ int test_decode_utf8_string(){
             testrun(out->type == DTN_CBOR_UTF8);
             testrun(out->string);
             testrun(out->nbr_uint == strlen);
-            //fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
-            testrun(0 == strncmp(out->string, (char*) buffer + 3, strlen));
+            // fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
+            testrun(0 == strncmp(out->string, (char *)buffer + 3, strlen));
             testrun(next);
             testrun(next == buffer + strlen + 3);
             out = cbor_free(out);
-        
         }
     }
 
@@ -2287,7 +2267,7 @@ int test_decode_utf8_string(){
     buffer[1] = 0xFF;
     buffer[2] = 0xF0;
 
-    for (int i = 3; i < 0xffff; i++){
+    for (int i = 3; i < 0xffff; i++) {
 
         buffer[i] = 'a';
     }
@@ -2314,7 +2294,7 @@ int test_decode_utf8_string(){
     match = decode_utf8_string(buffer, 4, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
 
-    for (int i = 0x00; i < 26; i++){
+    for (int i = 0x00; i < 26; i++) {
 
         buffer[1] = 0;
         buffer[2] = 0;
@@ -2346,9 +2326,9 @@ int test_decode_utf8_string(){
 
         strlen = i;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i == 0x00){
+        if (i == 0x00) {
 
             match = decode_utf8_string(buffer, 5, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -2357,7 +2337,7 @@ int test_decode_utf8_string(){
             testrun(!out->string);
             testrun(out->nbr_uint == 0);
             out = cbor_free(out);
-        
+
         } else {
 
             match = decode_utf8_string(buffer, 5 + i, &out, &next);
@@ -2366,35 +2346,34 @@ int test_decode_utf8_string(){
             testrun(out->type == DTN_CBOR_UTF8);
             testrun(out->string);
             testrun(out->nbr_uint == strlen);
-            //fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
-            testrun(0 == strncmp(out->string, (char*) buffer + 5, strlen));
+            // fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
+            testrun(0 == strncmp(out->string, (char *)buffer + 5, strlen));
             testrun(next);
             testrun(next == buffer + strlen + 5);
             out = cbor_free(out);
-        
         }
     }
 
-/*
-    // test offline due to big buffer allocation
-    buffer[0] = 0x7A;
-    buffer[1] = 0xFF;
-    buffer[2] = 0xFF;
-    buffer[3] = 0xFF;
-    buffer[4] = 0xFF;
+    /*
+        // test offline due to big buffer allocation
+        buffer[0] = 0x7A;
+        buffer[1] = 0xFF;
+        buffer[2] = 0xFF;
+        buffer[3] = 0xFF;
+        buffer[4] = 0xFF;
 
-    strlen = 0xFFFFffff;
+        strlen = 0xFFFFffff;
 
-    match = decode_utf8_string(buffer, 2 + strlen, &out, &next);
-    testrun(match == DTN_CBOR_MATCH_FULL);
-    testrun(out);
-    testrun(out->type == DTN_CBOR_UTF8);
-    testrun(out->string);
-    testrun(out->nbr_uint == strlen);
-    testrun(next);
-    testrun(next == buffer + strlen + 5);
-    out = cbor_free(out);
-*/
+        match = decode_utf8_string(buffer, 2 + strlen, &out, &next);
+        testrun(match == DTN_CBOR_MATCH_FULL);
+        testrun(out);
+        testrun(out->type == DTN_CBOR_UTF8);
+        testrun(out->string);
+        testrun(out->nbr_uint == strlen);
+        testrun(next);
+        testrun(next == buffer + strlen + 5);
+        out = cbor_free(out);
+    */
 
     buffer[0] = 0x7B;
     match = decode_utf8_string(buffer, 1, &out, &next);
@@ -2414,7 +2393,7 @@ int test_decode_utf8_string(){
     match = decode_utf8_string(buffer, 8, &out, &next);
     testrun(match == DTN_CBOR_MATCH_PARTIAL);
 
-    for (int i = 0x00; i < 10; i++){
+    for (int i = 0x00; i < 10; i++) {
 
         buffer[1] = 0;
         buffer[2] = 0;
@@ -2446,9 +2425,9 @@ int test_decode_utf8_string(){
 
         strlen = i;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i == 0x00){
+        if (i == 0x00) {
 
             match = decode_utf8_string(buffer, 9, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -2457,7 +2436,7 @@ int test_decode_utf8_string(){
             testrun(!out->string);
             testrun(out->nbr_uint == 0);
             out = cbor_free(out);
-        
+
         } else {
 
             match = decode_utf8_string(buffer, 9 + i, &out, &next);
@@ -2466,12 +2445,11 @@ int test_decode_utf8_string(){
             testrun(out->type == DTN_CBOR_UTF8);
             testrun(out->string);
             testrun(out->nbr_uint == strlen);
-            //fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
-            testrun(0 == strncmp(out->string, (char*) buffer + 9, strlen));
+            // fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
+            testrun(0 == strncmp(out->string, (char *)buffer + 9, strlen));
             testrun(next);
             testrun(next == buffer + strlen + 9);
             out = cbor_free(out);
-        
         }
     }
 
@@ -2505,8 +2483,8 @@ int test_decode_utf8_string(){
     buffer[27] = 'z';
     buffer[28] = 0xff;
 
-    for (int i = 1; i < 29; i++){
-    
+    for (int i = 1; i < 29; i++) {
+
         match = decode_utf8_string(buffer, i, &out, &next);
         testrun(match == DTN_CBOR_MATCH_PARTIAL);
     }
@@ -2514,28 +2492,26 @@ int test_decode_utf8_string(){
     match = decode_utf8_string(buffer, 29, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
     testrun(out);
-    //fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
+    // fprintf(stdout, "\n%"PRIu64"|%s", out->nbr_uint, out->string);
     testrun(out->type == DTN_CBOR_UTF8);
     testrun(out->string);
     testrun(out->nbr_uint == 27);
-    testrun(0 == strncmp(out->string, (char*) buffer + 1, strlen));
+    testrun(0 == strncmp(out->string, (char *)buffer + 1, strlen));
     testrun(next);
     testrun(next == buffer + 29);
     out = cbor_free(out);
 
     // check limits
-    testrun(dtn_cbor_configure((dtn_cbor_config){
-        .limits.utf8_string_size = 20
-    }));
+    testrun(
+        dtn_cbor_configure((dtn_cbor_config){.limits.utf8_string_size = 20}));
 
     match = decode_utf8_string(buffer, 29, &out, &next);
     testrun(match == DTN_CBOR_NO_MATCH);
 
-    testrun(dtn_cbor_configure((dtn_cbor_config){
-        .limits.utf8_string_size = 200
-    }));
+    testrun(
+        dtn_cbor_configure((dtn_cbor_config){.limits.utf8_string_size = 200}));
 
-    // check some valid utf8 
+    // check some valid utf8
 
     buffer[0] = 0x7F;
     buffer[1] = 0x00;
@@ -2575,7 +2551,7 @@ int test_decode_utf8_string(){
     testrun(next == buffer + 27);
     out = cbor_free(out);
 
-    // check some invalid utf8 
+    // check some invalid utf8
 
     buffer[0] = 0x7F;
     buffer[1] = 0xF0; // Gothic Letter Ahsa U+10330
@@ -2604,7 +2580,7 @@ int test_decode_utf8_string(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_decode_array(){
+int test_decode_array() {
 
     uint8_t buffer[0xffff] = {0};
 
@@ -2613,34 +2589,34 @@ int test_decode_array(){
     uint8_t *next = NULL;
     uint64_t count = 0;
 
-    for (int i = 0x80; i < 0x97; i++){
+    for (int i = 0x80; i < 0x97; i++) {
 
         count++;
         buffer[0] = i;
-        buffer[1] = 0x10;   
-        buffer[2] = 0x11;   
-        buffer[3] = 0x12;   
-        buffer[4] = 0x13;   
-        buffer[5] = 0x14;   
-        buffer[6] = 0x15;   
-        buffer[7] = 0x16;   
-        buffer[8] = 0x17;   
-        buffer[9] = 0x10;   
-        buffer[10] = 0x11;  
-        buffer[11] = 0x12;  
-        buffer[12] = 0x13;  
-        buffer[13] = 0x14;  
-        buffer[14] = 0x15;  
-        buffer[15] = 0x16;  
-        buffer[16] = 0x17;  
-        buffer[17] = 0x10;  
-        buffer[18] = 0x11;  
-        buffer[19] = 0x12;  
-        buffer[20] = 0x13;  
+        buffer[1] = 0x10;
+        buffer[2] = 0x11;
+        buffer[3] = 0x12;
+        buffer[4] = 0x13;
+        buffer[5] = 0x14;
+        buffer[6] = 0x15;
+        buffer[7] = 0x16;
+        buffer[8] = 0x17;
+        buffer[9] = 0x10;
+        buffer[10] = 0x11;
+        buffer[11] = 0x12;
+        buffer[12] = 0x13;
+        buffer[13] = 0x14;
+        buffer[14] = 0x15;
+        buffer[15] = 0x16;
+        buffer[16] = 0x17;
+        buffer[17] = 0x10;
+        buffer[18] = 0x11;
+        buffer[19] = 0x12;
+        buffer[20] = 0x13;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i == 0x80){
+        if (i == 0x80) {
 
             match = decode_array(buffer, 1, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -2650,7 +2626,7 @@ int test_decode_array(){
             testrun(dtn_list_is_empty(out->data));
             testrun(out->nbr_uint == 0);
             out = cbor_free(out);
-        
+
         } else {
 
             match = decode_array(buffer, 1, &out, &next);
@@ -2663,15 +2639,14 @@ int test_decode_array(){
             testrun(next);
             testrun(next == buffer + count);
             out = cbor_free(out);
-            //fprintf(stdout, "%i - %x\n", (int)count - 1, next[0]);
-        
+            // fprintf(stdout, "%i - %x\n", (int)count - 1, next[0]);
         }
     }
 
     buffer[0] = 0x98;
     count = 0;
 
-    for (int i = 0; i < 10; i++){
+    for (int i = 0; i < 10; i++) {
 
         buffer[1] = i;
         buffer[2] = 0x10;
@@ -2682,21 +2657,21 @@ int test_decode_array(){
         buffer[7] = 0x15;
         buffer[8] = 0x16;
         buffer[9] = 0x17;
-        buffer[10] = 0x10;   // integer 10
-        buffer[11] = 0x10;   // integer 10
-        buffer[12] = 0x10;   // integer 10
-        buffer[13] = 0x10;   // integer 10
-        buffer[14] = 0x10;   // integer 10
-        buffer[15] = 0x10;   // integer 10
-        buffer[16] = 0x10;   // integer 10
-        buffer[17] = 0x10;   // integer 10
-        buffer[18] = 0x10;   // integer 10
-        buffer[19] = 0x10;   // integer 10
-        buffer[20] = 0x10;   // integer 10
+        buffer[10] = 0x10; // integer 10
+        buffer[11] = 0x10; // integer 10
+        buffer[12] = 0x10; // integer 10
+        buffer[13] = 0x10; // integer 10
+        buffer[14] = 0x10; // integer 10
+        buffer[15] = 0x10; // integer 10
+        buffer[16] = 0x10; // integer 10
+        buffer[17] = 0x10; // integer 10
+        buffer[18] = 0x10; // integer 10
+        buffer[19] = 0x10; // integer 10
+        buffer[20] = 0x10; // integer 10
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i > 3){
+        if (i > 3) {
             match = decode_array(buffer, i - 2, &out, &next);
             testrun(match == DTN_CBOR_MATCH_PARTIAL);
             match = decode_array(buffer, i - 1, &out, &next);
@@ -2708,43 +2683,42 @@ int test_decode_array(){
         testrun(out->type == DTN_CBOR_ARRAY);
         testrun(count == dtn_list_count(out->data));
         testrun(next);
-        //fprintf(stdout, "%x|%li\n", next[0], next - buffer);
+        // fprintf(stdout, "%x|%li\n", next[0], next - buffer);
         testrun(next == buffer + count + 2);
         out = cbor_free(out);
 
         count++;
-
     }
 
     buffer[0] = 0x99;
     count = 0;
 
-    for (int i = 0; i < 10; i++){
-        
+    for (int i = 0; i < 10; i++) {
+
         buffer[1] = 0;
         buffer[2] = i;
-        buffer[3] = 0x10;   // integer 10
-        buffer[4] = 0x10;   // integer 10
-        buffer[5] = 0x10;   // integer 10
-        buffer[6] = 0x10;   // integer 10
-        buffer[7] = 0x10;   // integer 10
-        buffer[8] = 0x10;   // integer 10
-        buffer[9] = 0x10;   // integer 10
-        buffer[10] = 0x10;   // integer 10
-        buffer[11] = 0x10;   // integer 10
-        buffer[12] = 0x10;   // integer 10
-        buffer[13] = 0x10;   // integer 10
-        buffer[14] = 0x10;   // integer 10
-        buffer[15] = 0x10;   // integer 10
-        buffer[16] = 0x10;   // integer 10
-        buffer[17] = 0x10;   // integer 10
-        buffer[18] = 0x10;   // integer 10
-        buffer[19] = 0x10;   // integer 10
-        buffer[20] = 0x10;   // integer 10
+        buffer[3] = 0x10;  // integer 10
+        buffer[4] = 0x10;  // integer 10
+        buffer[5] = 0x10;  // integer 10
+        buffer[6] = 0x10;  // integer 10
+        buffer[7] = 0x10;  // integer 10
+        buffer[8] = 0x10;  // integer 10
+        buffer[9] = 0x10;  // integer 10
+        buffer[10] = 0x10; // integer 10
+        buffer[11] = 0x10; // integer 10
+        buffer[12] = 0x10; // integer 10
+        buffer[13] = 0x10; // integer 10
+        buffer[14] = 0x10; // integer 10
+        buffer[15] = 0x10; // integer 10
+        buffer[16] = 0x10; // integer 10
+        buffer[17] = 0x10; // integer 10
+        buffer[18] = 0x10; // integer 10
+        buffer[19] = 0x10; // integer 10
+        buffer[20] = 0x10; // integer 10
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i > 3){
+        if (i > 3) {
             match = decode_array(buffer, i - 2, &out, &next);
             testrun(match == DTN_CBOR_MATCH_PARTIAL);
             match = decode_array(buffer, i - 1, &out, &next);
@@ -2754,10 +2728,10 @@ int test_decode_array(){
         testrun(match == DTN_CBOR_MATCH_FULL);
         testrun(out);
         testrun(out->type == DTN_CBOR_ARRAY);
-        fprintf(stdout, "%li|%li\n",count, dtn_list_count(out->data));
+        fprintf(stdout, "%li|%li\n", count, dtn_list_count(out->data));
         testrun(count == dtn_list_count(out->data));
         testrun(next);
-        //fprintf(stdout, "%li\n", next - buffer);
+        // fprintf(stdout, "%li\n", next - buffer);
         testrun(next == buffer + count + 3);
         out = cbor_free(out);
 
@@ -2767,30 +2741,30 @@ int test_decode_array(){
     buffer[0] = 0x9A;
     count = 0;
 
-    for (int i = 0; i < 10; i++){
-        
+    for (int i = 0; i < 10; i++) {
+
         buffer[1] = 0;
         buffer[2] = 0;
-        buffer[3] = 0;  
+        buffer[3] = 0;
         buffer[4] = i;
-        buffer[5] = 0x10;   // integer 10
-        buffer[6] = 0x10;   // integer 10
-        buffer[7] = 0x10;   // integer 10
-        buffer[8] = 0x10;   // integer 10
-        buffer[9] = 0x10;   // integer 10
-        buffer[10] = 0x10;   // integer 10
-        buffer[11] = 0x10;   // integer 10
-        buffer[12] = 0x10;   // integer 10
-        buffer[13] = 0x10;   // integer 10
-        buffer[14] = 0x10;   // integer 10
-        buffer[15] = 0x10;   // integer 10
-        buffer[16] = 0x10;   // integer 10
-        buffer[17] = 0x10;   // integer 10
-        buffer[18] = 0x10;   // integer 10
-        buffer[19] = 0x10;   // integer 10
-        buffer[20] = 0x10;   // integer 10
+        buffer[5] = 0x10;  // integer 10
+        buffer[6] = 0x10;  // integer 10
+        buffer[7] = 0x10;  // integer 10
+        buffer[8] = 0x10;  // integer 10
+        buffer[9] = 0x10;  // integer 10
+        buffer[10] = 0x10; // integer 10
+        buffer[11] = 0x10; // integer 10
+        buffer[12] = 0x10; // integer 10
+        buffer[13] = 0x10; // integer 10
+        buffer[14] = 0x10; // integer 10
+        buffer[15] = 0x10; // integer 10
+        buffer[16] = 0x10; // integer 10
+        buffer[17] = 0x10; // integer 10
+        buffer[18] = 0x10; // integer 10
+        buffer[19] = 0x10; // integer 10
+        buffer[20] = 0x10; // integer 10
 
-        if (i > 3){
+        if (i > 3) {
             match = decode_array(buffer, i - 2, &out, &next);
             testrun(match == DTN_CBOR_MATCH_PARTIAL);
             match = decode_array(buffer, i - 1, &out, &next);
@@ -2811,30 +2785,30 @@ int test_decode_array(){
     buffer[0] = 0x9B;
     count = 0;
 
-    for (int i = 0; i < 10; i++){
-        
+    for (int i = 0; i < 10; i++) {
+
         buffer[1] = 0;
         buffer[2] = 0;
-        buffer[3] = 0;  
+        buffer[3] = 0;
         buffer[4] = 0;
-        buffer[5] = 0;  
-        buffer[6] = 0; 
-        buffer[7] = 0; 
-        buffer[8] = i; 
-        buffer[9] = 0x10;   // integer 10
-        buffer[10] = 0x10;   // integer 10
-        buffer[11] = 0x10;   // integer 10
-        buffer[12] = 0x10;   // integer 10
-        buffer[13] = 0x10;   // integer 10
-        buffer[14] = 0x10;   // integer 10
-        buffer[15] = 0x10;   // integer 10
-        buffer[16] = 0x10;   // integer 10
-        buffer[17] = 0x10;   // integer 10
-        buffer[18] = 0x10;   // integer 10
-        buffer[19] = 0x10;   // integer 10
-        buffer[20] = 0x10;   // integer 10
+        buffer[5] = 0;
+        buffer[6] = 0;
+        buffer[7] = 0;
+        buffer[8] = i;
+        buffer[9] = 0x10;  // integer 10
+        buffer[10] = 0x10; // integer 10
+        buffer[11] = 0x10; // integer 10
+        buffer[12] = 0x10; // integer 10
+        buffer[13] = 0x10; // integer 10
+        buffer[14] = 0x10; // integer 10
+        buffer[15] = 0x10; // integer 10
+        buffer[16] = 0x10; // integer 10
+        buffer[17] = 0x10; // integer 10
+        buffer[18] = 0x10; // integer 10
+        buffer[19] = 0x10; // integer 10
+        buffer[20] = 0x10; // integer 10
 
-        if (i > 3){
+        if (i > 3) {
             match = decode_array(buffer, i - 2, &out, &next);
             testrun(match == DTN_CBOR_MATCH_PARTIAL);
             match = decode_array(buffer, i - 1, &out, &next);
@@ -2852,16 +2826,12 @@ int test_decode_array(){
         count++;
     }
 
-
     // check limitation
 
-    testrun(dtn_cbor_configure((dtn_cbor_config){
-        .limits.array_size = 4
-    }));
+    testrun(dtn_cbor_configure((dtn_cbor_config){.limits.array_size = 4}));
 
-    match = decode_array(buffer, 10 , &out, &next);
+    match = decode_array(buffer, 10, &out, &next);
     testrun(match == DTN_CBOR_NO_MATCH);
-
 
     buffer[0] = 0x9F;
     buffer[1] = 0x01;
@@ -2874,7 +2844,7 @@ int test_decode_array(){
     buffer[8] = 0x08;
     buffer[9] = 0xff;
 
-    match = decode_array(buffer, 10 , &out, &next);
+    match = decode_array(buffer, 10, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
     testrun(out);
     testrun(out->type == DTN_CBOR_ARRAY);
@@ -2895,16 +2865,14 @@ int test_decode_array(){
     buffer[8] = 0xFF;
     buffer[9] = 0xff;
 
-    for(int i = 3; i < 9;i++){
+    for (int i = 3; i < 9; i++) {
 
         fprintf(stdout, "i == %i\n", i);
 
-        testrun(DTN_CBOR_MATCH_PARTIAL == 
-            decode_array(buffer, i , &out, &next));
-
+        testrun(DTN_CBOR_MATCH_PARTIAL == decode_array(buffer, i, &out, &next));
     }
 
-    match = decode_array(buffer, 10 , &out, &next);
+    match = decode_array(buffer, 10, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
     testrun(out);
     testrun(out->type == DTN_CBOR_ARRAY);
@@ -2915,38 +2883,35 @@ int test_decode_array(){
 
     // check limitation
 
-    testrun(dtn_cbor_configure((dtn_cbor_config){
-        .limits.undef_length_array = 4
-    }));
+    testrun(
+        dtn_cbor_configure((dtn_cbor_config){.limits.undef_length_array = 4}));
 
-    match = decode_array(buffer, 10 , &out, &next);
+    match = decode_array(buffer, 10, &out, &next);
     testrun(match == DTN_CBOR_NO_MATCH);
 
     buffer[0] = 0x82; // params
-    buffer[1] = 0x82;   // 2
-    buffer[2] = 0x01;   // id
-    buffer[3] = 0x06;   // variant
-    buffer[4] = 0x82;   // 2
-    buffer[5] = 0x03;   // id
-    buffer[6] = 0x07;   // all flags
+    buffer[1] = 0x82; // 2
+    buffer[2] = 0x01; // id
+    buffer[3] = 0x06; // variant
+    buffer[4] = 0x82; // 2
+    buffer[5] = 0x03; // id
+    buffer[6] = 0x07; // all flags
     buffer[7] = 0xFF;
 
-    testrun(DTN_CBOR_MATCH_FULL == 
-            decode_array(buffer, 7 , &out, &next));
+    testrun(DTN_CBOR_MATCH_FULL == decode_array(buffer, 7, &out, &next));
 
     testrun(2 == dtn_cbor_array_count(out));
-    testrun(dtn_cbor_is_array( dtn_cbor_array_get(out, 0)));
-    testrun(dtn_cbor_is_array( dtn_cbor_array_get(out, 1)));
+    testrun(dtn_cbor_is_array(dtn_cbor_array_get(out, 0)));
+    testrun(dtn_cbor_is_array(dtn_cbor_array_get(out, 1)));
     testrun(*next == 0xFF);
     out = dtn_cbor_free(out);
-
 
     return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
-int test_decode_map(){
+int test_decode_map() {
 
     uint8_t buffer[0xffff] = {0};
 
@@ -2956,35 +2921,35 @@ int test_decode_map(){
     int64_t count = 0;
     uint64_t two = 0;
 
-    for (int i = 0xA0; i < 0xB7; i++){
+    for (int i = 0xA0; i < 0xB7; i++) {
 
         two = i % 2;
 
         buffer[0] = i;
-        buffer[1] = 0x10;   
-        buffer[2] = 0x11;   
-        buffer[3] = 0x12;   
-        buffer[4] = 0x13;   
-        buffer[5] = 0x14;   
-        buffer[6] = 0x15;   
-        buffer[7] = 0x16;   
-        buffer[8] = 0x17;   
-        buffer[9] = 0x10;   
-        buffer[10] = 0x11;  
-        buffer[11] = 0x12;  
-        buffer[12] = 0x13;  
-        buffer[13] = 0x14;  
-        buffer[14] = 0x15;  
-        buffer[15] = 0x16;  
-        buffer[16] = 0x17;  
-        buffer[17] = 0x10;  
-        buffer[18] = 0x11;  
-        buffer[19] = 0x12;  
-        buffer[20] = 0x13;  
+        buffer[1] = 0x10;
+        buffer[2] = 0x11;
+        buffer[3] = 0x12;
+        buffer[4] = 0x13;
+        buffer[5] = 0x14;
+        buffer[6] = 0x15;
+        buffer[7] = 0x16;
+        buffer[8] = 0x17;
+        buffer[9] = 0x10;
+        buffer[10] = 0x11;
+        buffer[11] = 0x12;
+        buffer[12] = 0x13;
+        buffer[13] = 0x14;
+        buffer[14] = 0x15;
+        buffer[15] = 0x16;
+        buffer[16] = 0x17;
+        buffer[17] = 0x10;
+        buffer[18] = 0x11;
+        buffer[19] = 0x12;
+        buffer[20] = 0x13;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
-        if (i == 0xA0){
+        if (i == 0xA0) {
 
             match = decode_map(buffer, 1, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -2994,8 +2959,8 @@ int test_decode_map(){
             testrun(dtn_dict_is_empty(out->data));
             testrun(out->nbr_uint == 0);
             out = cbor_free(out);
-        
-        } else if (two == 0){
+
+        } else if (two == 0) {
 
             match = decode_map(buffer, 1 + i, &out, &next);
             testrun(match == DTN_CBOR_MATCH_FULL);
@@ -3004,8 +2969,7 @@ int test_decode_map(){
             testrun(!dtn_dict_is_empty(out->data));
             testrun(next);
             out = cbor_free(out);
-            
-            
+
         } else {
 
             match = decode_map(buffer, 1 + count, &out, &next);
@@ -3018,26 +2982,26 @@ int test_decode_map(){
     // check next
 
     buffer[0] = 0xA1;
-    buffer[1] = 0x10;   
-    buffer[2] = 0x11;   
-    buffer[3] = 0x12;   
-    buffer[4] = 0x13;   
-    buffer[5] = 0x14;   
-    buffer[6] = 0x15;   
-    buffer[7] = 0x16;   
-    buffer[8] = 0x17;   
-    buffer[9] = 0x10;   
-    buffer[10] = 0x11;  
-    buffer[11] = 0x12;  
-    buffer[12] = 0x13;  
-    buffer[13] = 0x14;  
-    buffer[14] = 0x15;  
-    buffer[15] = 0x16;  
-    buffer[16] = 0x17;  
-    buffer[17] = 0x10;  
-    buffer[18] = 0x11;  
-    buffer[19] = 0x12;  
-    buffer[20] = 0x13;  
+    buffer[1] = 0x10;
+    buffer[2] = 0x11;
+    buffer[3] = 0x12;
+    buffer[4] = 0x13;
+    buffer[5] = 0x14;
+    buffer[6] = 0x15;
+    buffer[7] = 0x16;
+    buffer[8] = 0x17;
+    buffer[9] = 0x10;
+    buffer[10] = 0x11;
+    buffer[11] = 0x12;
+    buffer[12] = 0x13;
+    buffer[13] = 0x14;
+    buffer[14] = 0x15;
+    buffer[15] = 0x16;
+    buffer[16] = 0x17;
+    buffer[17] = 0x10;
+    buffer[18] = 0x11;
+    buffer[19] = 0x12;
+    buffer[20] = 0x13;
 
     match = decode_map(buffer, 20, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
@@ -3045,31 +3009,31 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(1 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 3);
     out = cbor_free(out);
 
     buffer[0] = 0xA3;
-    buffer[1] = 0x10;   
-    buffer[2] = 0x11;   
-    buffer[3] = 0x12;   
-    buffer[4] = 0x13;   
-    buffer[5] = 0x14;   
-    buffer[6] = 0x15;   
-    buffer[7] = 0x16;   
-    buffer[8] = 0x17;   
-    buffer[9] = 0x10;   
-    buffer[10] = 0x11;  
-    buffer[11] = 0x12;  
-    buffer[12] = 0x13;  
-    buffer[13] = 0x14;  
-    buffer[14] = 0x15;  
-    buffer[15] = 0x16;  
-    buffer[16] = 0x17;  
-    buffer[17] = 0x10;  
-    buffer[18] = 0x11;  
-    buffer[19] = 0x12;  
-    buffer[20] = 0x13;  
+    buffer[1] = 0x10;
+    buffer[2] = 0x11;
+    buffer[3] = 0x12;
+    buffer[4] = 0x13;
+    buffer[5] = 0x14;
+    buffer[6] = 0x15;
+    buffer[7] = 0x16;
+    buffer[8] = 0x17;
+    buffer[9] = 0x10;
+    buffer[10] = 0x11;
+    buffer[11] = 0x12;
+    buffer[12] = 0x13;
+    buffer[13] = 0x14;
+    buffer[14] = 0x15;
+    buffer[15] = 0x16;
+    buffer[16] = 0x17;
+    buffer[17] = 0x10;
+    buffer[18] = 0x11;
+    buffer[19] = 0x12;
+    buffer[20] = 0x13;
 
     match = decode_map(buffer, 20, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
@@ -3081,26 +3045,26 @@ int test_decode_map(){
     out = cbor_free(out);
 
     buffer[0] = 0xB8;
-    buffer[1] = 0x00;   
-    buffer[2] = 0x11;   
-    buffer[3] = 0x12;   
-    buffer[4] = 0x13;   
-    buffer[5] = 0x14;   
-    buffer[6] = 0x15;   
-    buffer[7] = 0x16;   
-    buffer[8] = 0x17;   
-    buffer[9] = 0x10;   
-    buffer[10] = 0x11;  
-    buffer[11] = 0x12;  
-    buffer[12] = 0x13;  
-    buffer[13] = 0x14;  
-    buffer[14] = 0x15;  
-    buffer[15] = 0x16;  
-    buffer[16] = 0x17;  
-    buffer[17] = 0x10;  
-    buffer[18] = 0x11;  
-    buffer[19] = 0x12;  
-    buffer[20] = 0x13;  
+    buffer[1] = 0x00;
+    buffer[2] = 0x11;
+    buffer[3] = 0x12;
+    buffer[4] = 0x13;
+    buffer[5] = 0x14;
+    buffer[6] = 0x15;
+    buffer[7] = 0x16;
+    buffer[8] = 0x17;
+    buffer[9] = 0x10;
+    buffer[10] = 0x11;
+    buffer[11] = 0x12;
+    buffer[12] = 0x13;
+    buffer[13] = 0x14;
+    buffer[14] = 0x15;
+    buffer[15] = 0x16;
+    buffer[16] = 0x17;
+    buffer[17] = 0x10;
+    buffer[18] = 0x11;
+    buffer[19] = 0x12;
+    buffer[20] = 0x13;
 
     match = decode_map(buffer, 20, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
@@ -3118,7 +3082,7 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(1 == dtn_dict_count(out->data));
     testrun(next);
-    
+
     testrun(next == buffer + 4);
     out = cbor_free(out);
 
@@ -3129,7 +3093,7 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(2 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 6);
     out = cbor_free(out);
 
@@ -3140,31 +3104,31 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(3 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 8);
     out = cbor_free(out);
 
     buffer[0] = 0xB9;
-    buffer[1] = 0x00;   
-    buffer[2] = 0x00;   
-    buffer[3] = 0x12;   
-    buffer[4] = 0x13;   
-    buffer[5] = 0x14;   
-    buffer[6] = 0x15;   
-    buffer[7] = 0x16;   
-    buffer[8] = 0x17;   
-    buffer[9] = 0x10;   
-    buffer[10] = 0x11;  
-    buffer[11] = 0x12;  
-    buffer[12] = 0x13;  
-    buffer[13] = 0x14;  
-    buffer[14] = 0x15;  
-    buffer[15] = 0x16;  
-    buffer[16] = 0x17;  
-    buffer[17] = 0x10;  
-    buffer[18] = 0x11;  
-    buffer[19] = 0x12;  
-    buffer[20] = 0x13;  
+    buffer[1] = 0x00;
+    buffer[2] = 0x00;
+    buffer[3] = 0x12;
+    buffer[4] = 0x13;
+    buffer[5] = 0x14;
+    buffer[6] = 0x15;
+    buffer[7] = 0x16;
+    buffer[8] = 0x17;
+    buffer[9] = 0x10;
+    buffer[10] = 0x11;
+    buffer[11] = 0x12;
+    buffer[12] = 0x13;
+    buffer[13] = 0x14;
+    buffer[14] = 0x15;
+    buffer[15] = 0x16;
+    buffer[16] = 0x17;
+    buffer[17] = 0x10;
+    buffer[18] = 0x11;
+    buffer[19] = 0x12;
+    buffer[20] = 0x13;
 
     match = decode_map(buffer, 20, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
@@ -3192,7 +3156,7 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(2 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 7);
     out = cbor_free(out);
 
@@ -3203,31 +3167,31 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(3 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 9);
     out = cbor_free(out);
 
     buffer[0] = 0xBA;
-    buffer[1] = 0x00;   
-    buffer[2] = 0x00;   
-    buffer[3] = 0x00;   
-    buffer[4] = 0x00;   
-    buffer[5] = 0x14;   
-    buffer[6] = 0x15;   
-    buffer[7] = 0x16;   
-    buffer[8] = 0x17;   
-    buffer[9] = 0x10;   
-    buffer[10] = 0x11;  
-    buffer[11] = 0x12;  
-    buffer[12] = 0x13;  
-    buffer[13] = 0x14;  
-    buffer[14] = 0x15;  
-    buffer[15] = 0x16;  
-    buffer[16] = 0x17;  
-    buffer[17] = 0x10;  
-    buffer[18] = 0x11;  
-    buffer[19] = 0x12;  
-    buffer[20] = 0x13;  
+    buffer[1] = 0x00;
+    buffer[2] = 0x00;
+    buffer[3] = 0x00;
+    buffer[4] = 0x00;
+    buffer[5] = 0x14;
+    buffer[6] = 0x15;
+    buffer[7] = 0x16;
+    buffer[8] = 0x17;
+    buffer[9] = 0x10;
+    buffer[10] = 0x11;
+    buffer[11] = 0x12;
+    buffer[12] = 0x13;
+    buffer[13] = 0x14;
+    buffer[14] = 0x15;
+    buffer[15] = 0x16;
+    buffer[16] = 0x17;
+    buffer[17] = 0x10;
+    buffer[18] = 0x11;
+    buffer[19] = 0x12;
+    buffer[20] = 0x13;
 
     match = decode_map(buffer, 20, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
@@ -3255,7 +3219,7 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(2 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 9);
     out = cbor_free(out);
 
@@ -3266,31 +3230,31 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(3 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 11);
     out = cbor_free(out);
 
     buffer[0] = 0xBB;
-    buffer[1] = 0x00;   
-    buffer[2] = 0x00;   
-    buffer[3] = 0x00;   
-    buffer[4] = 0x00;   
-    buffer[5] = 0x00;   
-    buffer[6] = 0x00;   
-    buffer[7] = 0x00;   
-    buffer[8] = 0x00;   
-    buffer[9] = 0x10;   
-    buffer[10] = 0x11;  
-    buffer[11] = 0x12;  
-    buffer[12] = 0x13;  
-    buffer[13] = 0x14;  
-    buffer[14] = 0x15;  
-    buffer[15] = 0x16;  
-    buffer[16] = 0x17;  
-    buffer[17] = 0x10;  
-    buffer[18] = 0x11;  
-    buffer[19] = 0x12;  
-    buffer[20] = 0x13;  
+    buffer[1] = 0x00;
+    buffer[2] = 0x00;
+    buffer[3] = 0x00;
+    buffer[4] = 0x00;
+    buffer[5] = 0x00;
+    buffer[6] = 0x00;
+    buffer[7] = 0x00;
+    buffer[8] = 0x00;
+    buffer[9] = 0x10;
+    buffer[10] = 0x11;
+    buffer[11] = 0x12;
+    buffer[12] = 0x13;
+    buffer[13] = 0x14;
+    buffer[14] = 0x15;
+    buffer[15] = 0x16;
+    buffer[16] = 0x17;
+    buffer[17] = 0x10;
+    buffer[18] = 0x11;
+    buffer[19] = 0x12;
+    buffer[20] = 0x13;
 
     match = decode_map(buffer, 20, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
@@ -3318,7 +3282,7 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(2 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 13);
     out = cbor_free(out);
 
@@ -3329,31 +3293,31 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(3 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 15);
     out = cbor_free(out);
 
     buffer[0] = 0xBF;
-    buffer[1] = 0xFF;   
-    buffer[2] = 0x11;   
-    buffer[3] = 0x12;   
-    buffer[4] = 0x13;   
-    buffer[5] = 0x14;   
-    buffer[6] = 0x15;   
-    buffer[7] = 0x16;   
-    buffer[8] = 0x17;   
-    buffer[9] = 0x10;   
-    buffer[10] = 0x11;  
-    buffer[11] = 0x12;  
-    buffer[12] = 0x13;  
-    buffer[13] = 0x14;  
-    buffer[14] = 0x15;  
-    buffer[15] = 0x16;  
-    buffer[16] = 0x17;  
-    buffer[17] = 0x10;  
-    buffer[18] = 0x11;  
-    buffer[19] = 0x12;  
-    buffer[20] = 0x13;  
+    buffer[1] = 0xFF;
+    buffer[2] = 0x11;
+    buffer[3] = 0x12;
+    buffer[4] = 0x13;
+    buffer[5] = 0x14;
+    buffer[6] = 0x15;
+    buffer[7] = 0x16;
+    buffer[8] = 0x17;
+    buffer[9] = 0x10;
+    buffer[10] = 0x11;
+    buffer[11] = 0x12;
+    buffer[12] = 0x13;
+    buffer[13] = 0x14;
+    buffer[14] = 0x15;
+    buffer[15] = 0x16;
+    buffer[16] = 0x17;
+    buffer[17] = 0x10;
+    buffer[18] = 0x11;
+    buffer[19] = 0x12;
+    buffer[20] = 0x13;
 
     match = decode_map(buffer, 20, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
@@ -3361,56 +3325,56 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(0 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 2);
     out = cbor_free(out);
 
     buffer[0] = 0xBF;
-    buffer[1] = 0x10;   
-    buffer[2] = 0xFF;   
-    buffer[3] = 0x12;   
-    buffer[4] = 0x13;   
-    buffer[5] = 0x14;   
-    buffer[6] = 0x15;   
-    buffer[7] = 0x16;   
-    buffer[8] = 0x17;   
-    buffer[9] = 0x10;   
-    buffer[10] = 0x11;  
-    buffer[11] = 0x12;  
-    buffer[12] = 0x13;  
-    buffer[13] = 0x14;  
-    buffer[14] = 0x15;  
-    buffer[15] = 0x16;  
-    buffer[16] = 0x17;  
-    buffer[17] = 0x10;  
-    buffer[18] = 0x11;  
-    buffer[19] = 0x12;  
-    buffer[20] = 0x13;  
+    buffer[1] = 0x10;
+    buffer[2] = 0xFF;
+    buffer[3] = 0x12;
+    buffer[4] = 0x13;
+    buffer[5] = 0x14;
+    buffer[6] = 0x15;
+    buffer[7] = 0x16;
+    buffer[8] = 0x17;
+    buffer[9] = 0x10;
+    buffer[10] = 0x11;
+    buffer[11] = 0x12;
+    buffer[12] = 0x13;
+    buffer[13] = 0x14;
+    buffer[14] = 0x15;
+    buffer[15] = 0x16;
+    buffer[16] = 0x17;
+    buffer[17] = 0x10;
+    buffer[18] = 0x11;
+    buffer[19] = 0x12;
+    buffer[20] = 0x13;
 
     match = decode_map(buffer, 20, &out, &next);
     testrun(match == DTN_CBOR_NO_MATCH);
 
     buffer[0] = 0xBF;
-    buffer[1] = 0x01;   
-    buffer[2] = 0x11;   
-    buffer[3] = 0xFF;   
-    buffer[4] = 0x13;   
-    buffer[5] = 0x14;   
-    buffer[6] = 0x15;   
-    buffer[7] = 0x16;   
-    buffer[8] = 0x17;   
-    buffer[9] = 0x10;   
-    buffer[10] = 0x11;  
-    buffer[11] = 0x12;  
-    buffer[12] = 0x13;  
-    buffer[13] = 0x14;  
-    buffer[14] = 0x15;  
-    buffer[15] = 0x16;  
-    buffer[16] = 0x17;  
-    buffer[17] = 0x10;  
-    buffer[18] = 0x11;  
-    buffer[19] = 0x12;  
-    buffer[20] = 0x13;  
+    buffer[1] = 0x01;
+    buffer[2] = 0x11;
+    buffer[3] = 0xFF;
+    buffer[4] = 0x13;
+    buffer[5] = 0x14;
+    buffer[6] = 0x15;
+    buffer[7] = 0x16;
+    buffer[8] = 0x17;
+    buffer[9] = 0x10;
+    buffer[10] = 0x11;
+    buffer[11] = 0x12;
+    buffer[12] = 0x13;
+    buffer[13] = 0x14;
+    buffer[14] = 0x15;
+    buffer[15] = 0x16;
+    buffer[16] = 0x17;
+    buffer[17] = 0x10;
+    buffer[18] = 0x11;
+    buffer[19] = 0x12;
+    buffer[20] = 0x13;
 
     match = decode_map(buffer, 20, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
@@ -3418,56 +3382,56 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(1 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 4);
     out = cbor_free(out);
 
     buffer[0] = 0xBF;
-    buffer[1] = 0x01;   
-    buffer[2] = 0x11;   
-    buffer[3] = 0x10;   
-    buffer[4] = 0xff;   
-    buffer[5] = 0x14;   
-    buffer[6] = 0x15;   
-    buffer[7] = 0x16;   
-    buffer[8] = 0x17;   
-    buffer[9] = 0x10;   
-    buffer[10] = 0x11;  
-    buffer[11] = 0x12;  
-    buffer[12] = 0x13;  
-    buffer[13] = 0x14;  
-    buffer[14] = 0x15;  
-    buffer[15] = 0x16;  
-    buffer[16] = 0x17;  
-    buffer[17] = 0x10;  
-    buffer[18] = 0x11;  
-    buffer[19] = 0x12;  
-    buffer[20] = 0x13;  
+    buffer[1] = 0x01;
+    buffer[2] = 0x11;
+    buffer[3] = 0x10;
+    buffer[4] = 0xff;
+    buffer[5] = 0x14;
+    buffer[6] = 0x15;
+    buffer[7] = 0x16;
+    buffer[8] = 0x17;
+    buffer[9] = 0x10;
+    buffer[10] = 0x11;
+    buffer[11] = 0x12;
+    buffer[12] = 0x13;
+    buffer[13] = 0x14;
+    buffer[14] = 0x15;
+    buffer[15] = 0x16;
+    buffer[16] = 0x17;
+    buffer[17] = 0x10;
+    buffer[18] = 0x11;
+    buffer[19] = 0x12;
+    buffer[20] = 0x13;
 
     match = decode_map(buffer, 20, &out, &next);
     testrun(match == DTN_CBOR_NO_MATCH);
 
     buffer[0] = 0xBF;
-    buffer[1] = 0x01;   
-    buffer[2] = 0x11;   
-    buffer[3] = 0x10;   
-    buffer[4] = 0x10;   
-    buffer[5] = 0xff;   
-    buffer[6] = 0x15;   
-    buffer[7] = 0x16;   
-    buffer[8] = 0x17;   
-    buffer[9] = 0x10;   
-    buffer[10] = 0x11;  
-    buffer[11] = 0x12;  
-    buffer[12] = 0x13;  
-    buffer[13] = 0x14;  
-    buffer[14] = 0x15;  
-    buffer[15] = 0x16;  
-    buffer[16] = 0x17;  
-    buffer[17] = 0x10;  
-    buffer[18] = 0x11;  
-    buffer[19] = 0x12;  
-    buffer[20] = 0x13;  
+    buffer[1] = 0x01;
+    buffer[2] = 0x11;
+    buffer[3] = 0x10;
+    buffer[4] = 0x10;
+    buffer[5] = 0xff;
+    buffer[6] = 0x15;
+    buffer[7] = 0x16;
+    buffer[8] = 0x17;
+    buffer[9] = 0x10;
+    buffer[10] = 0x11;
+    buffer[11] = 0x12;
+    buffer[12] = 0x13;
+    buffer[13] = 0x14;
+    buffer[14] = 0x15;
+    buffer[15] = 0x16;
+    buffer[16] = 0x17;
+    buffer[17] = 0x10;
+    buffer[18] = 0x11;
+    buffer[19] = 0x12;
+    buffer[20] = 0x13;
 
     match = decode_map(buffer, 20, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
@@ -3475,31 +3439,31 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(2 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 6);
     out = cbor_free(out);
 
     buffer[0] = 0xBF;
-    buffer[1] = 0x01;  // key 
-    buffer[2] = 0x18;  // val 
-    buffer[3] = 0xff;   
-    buffer[4] = 0x10;  // key 
-    buffer[5] = 0x18;  // val 
-    buffer[6] = 0xFF;   
-    buffer[7] = 0xFF;   
-    buffer[8] = 0x00;   
-    buffer[9] = 0x10;   
-    buffer[10] = 0x11;  
-    buffer[11] = 0x12;  
-    buffer[12] = 0x13;  
-    buffer[13] = 0x14;  
-    buffer[14] = 0x15;  
-    buffer[15] = 0x16;  
-    buffer[16] = 0x17;  
-    buffer[17] = 0x10;  
-    buffer[18] = 0x11;  
-    buffer[19] = 0x12;  
-    buffer[20] = 0x13;  
+    buffer[1] = 0x01; // key
+    buffer[2] = 0x18; // val
+    buffer[3] = 0xff;
+    buffer[4] = 0x10; // key
+    buffer[5] = 0x18; // val
+    buffer[6] = 0xFF;
+    buffer[7] = 0xFF;
+    buffer[8] = 0x00;
+    buffer[9] = 0x10;
+    buffer[10] = 0x11;
+    buffer[11] = 0x12;
+    buffer[12] = 0x13;
+    buffer[13] = 0x14;
+    buffer[14] = 0x15;
+    buffer[15] = 0x16;
+    buffer[16] = 0x17;
+    buffer[17] = 0x10;
+    buffer[18] = 0x11;
+    buffer[19] = 0x12;
+    buffer[20] = 0x13;
 
     match = decode_map(buffer, 20, &out, &next);
     testrun(match == DTN_CBOR_MATCH_FULL);
@@ -3507,16 +3471,16 @@ int test_decode_map(){
     testrun(out->type == DTN_CBOR_MAP);
     testrun(2 == dtn_dict_count(out->data));
     testrun(next);
-    //fprintf(stdout, "%li|%x", next-buffer, next[0]);
+    // fprintf(stdout, "%li|%x", next-buffer, next[0]);
     testrun(next == buffer + 8);
     out = cbor_free(out);
-    
+
     return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
-int test_decode_tag(){
+int test_decode_tag() {
 
     uint8_t buffer[0xffff] = {0};
 
@@ -3661,11 +3625,11 @@ int test_decode_tag(){
     testrun(next == buffer + 2);
     out = cbor_free(out);
 
-    for (int i = 0xc6; i <= 0xd4; i++){
+    for (int i = 0xc6; i <= 0xd4; i++) {
 
         buffer[0] = i;
 
-        //testrun_log("%x\n", i);
+        // testrun_log("%x\n", i);
 
         match = decode_tag(buffer, 1, &out, &next);
         testrun(match == DTN_CBOR_MATCH_FULL);
@@ -3837,7 +3801,7 @@ int test_decode_tag(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_decode_simple(){
+int test_decode_simple() {
 
     uint8_t buffer[0xffff] = {0};
 
@@ -3845,7 +3809,7 @@ int test_decode_simple(){
     dtn_cbor *out = NULL;
     uint8_t *next = NULL;
 
-    for (int i = 0xE0; i <= 0xF3; i++){
+    for (int i = 0xE0; i <= 0xF3; i++) {
 
         buffer[0] = i;
 
@@ -3856,7 +3820,6 @@ int test_decode_simple(){
         testrun(out->nbr_uint == (i & 0x1F));
         testrun(next == buffer + 1);
         out = cbor_free(out);
-
     }
 
     buffer[0] = 0xf4;
@@ -3893,7 +3856,7 @@ int test_decode_simple(){
 
     buffer[0] = 0xF8;
 
-    for (int i = 0; i <= 0xFF; i++){
+    for (int i = 0; i <= 0xFF; i++) {
 
         buffer[1] = i;
 
@@ -3904,12 +3867,11 @@ int test_decode_simple(){
         testrun(out->nbr_uint == (uint64_t)i);
         testrun(next == buffer + 2);
         out = cbor_free(out);
-
     }
 
     buffer[0] = 0xF9;
 
-    for (int i = 0; i <= 0xFF; i++){
+    for (int i = 0; i <= 0xFF; i++) {
 
         buffer[1] = 0x00;
         buffer[2] = i;
@@ -3920,12 +3882,11 @@ int test_decode_simple(){
         testrun(out->type == DTN_CBOR_FLOAT);
         testrun(next == buffer + 3);
         out = cbor_free(out);
-
     }
 
     buffer[0] = 0xFA;
 
-    for (int i = 0; i <= 0xFF; i++){
+    for (int i = 0; i <= 0xFF; i++) {
 
         buffer[1] = 0x00;
         buffer[2] = 0x00;
@@ -3938,12 +3899,11 @@ int test_decode_simple(){
         testrun(out->type == DTN_CBOR_FLOAT);
         testrun(next == buffer + 5);
         out = cbor_free(out);
-
     }
 
     buffer[0] = 0xfB;
 
-    for (int i = 0; i <= 0xFF; i++){
+    for (int i = 0; i <= 0xFF; i++) {
 
         buffer[1] = 0x00;
         buffer[2] = 0x00;
@@ -3961,7 +3921,6 @@ int test_decode_simple(){
         testrun(out->type == DTN_CBOR_DOUBLE);
         testrun(next == buffer + 9);
         out = cbor_free(out);
-
     }
 
     return testrun_log_success();
@@ -3969,7 +3928,7 @@ int test_decode_simple(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_decode(){
+int test_dtn_cbor_decode() {
 
     uint8_t buffer[100] = {0};
 
@@ -4056,8 +4015,8 @@ int test_dtn_cbor_decode(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_cbor_encoding_size(){
-    
+int test_cbor_encoding_size() {
+
     dtn_cbor *self = dtn_cbor_create(DTN_CBOR_UNDEF);
     testrun(1 == cbor_encoding_size(self));
     self = cbor_free(self);
@@ -4128,65 +4087,64 @@ int test_cbor_encoding_size(){
 
     self = dtn_cbor_create(DTN_CBOR_ARRAY);
     testrun(1 == cbor_encoding_size(self));
-    self->data = dtn_linked_list_create((dtn_list_config){
-        .item.free = cbor_free
-    });
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(2 == cbor_encoding_size(self));
+        testrun(2 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(3 == cbor_encoding_size(self));
+        testrun(3 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(4 == cbor_encoding_size(self));
+        testrun(4 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(5 == cbor_encoding_size(self));
+        testrun(5 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(6 == cbor_encoding_size(self));
+        testrun(6 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(7 == cbor_encoding_size(self));
+        testrun(7 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(8 == cbor_encoding_size(self));
+        testrun(8 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(9 == cbor_encoding_size(self));
+        testrun(9 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(10 == cbor_encoding_size(self));
+        testrun(10 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(11 == cbor_encoding_size(self));
+        testrun(11 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(12 == cbor_encoding_size(self));
+        testrun(12 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(13 == cbor_encoding_size(self));
+        testrun(13 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(14 == cbor_encoding_size(self));
+        testrun(14 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(15 == cbor_encoding_size(self));
+        testrun(15 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(16 == cbor_encoding_size(self));
+        testrun(16 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(17 == cbor_encoding_size(self));
+        testrun(17 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(18 == cbor_encoding_size(self));
+        testrun(18 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(19 == cbor_encoding_size(self));
+        testrun(19 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(20 == cbor_encoding_size(self));
+        testrun(20 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(21 == cbor_encoding_size(self));
+        testrun(21 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(22 == cbor_encoding_size(self));
+        testrun(22 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(23 == cbor_encoding_size(self));
+        testrun(23 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(24 == cbor_encoding_size(self));
+        testrun(24 == cbor_encoding_size(self));
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(26 == cbor_encoding_size(self));
+        testrun(26 == cbor_encoding_size(self));
     self = cbor_free(self);
 
     self = dtn_cbor_create(DTN_CBOR_MAP);
     testrun(0 == cbor_encoding_size(self));
     self->data = dtn_dict_create(dtn_cbor_dict_config(255));
     testrun(1 == cbor_encoding_size(self));
-    testrun(dtn_dict_set(self->data,
-        dtn_cbor_create(DTN_CBOR_UINT64),dtn_cbor_create(DTN_CBOR_UINT64), NULL));
+    testrun(dtn_dict_set(self->data, dtn_cbor_create(DTN_CBOR_UINT64),
+                         dtn_cbor_create(DTN_CBOR_UINT64), NULL));
     testrun(3 == cbor_encoding_size(self));
     self = cbor_free(self);
 
@@ -4242,14 +4200,14 @@ int test_cbor_encoding_size(){
     testrun(1 == cbor_encoding_size(self));
     self->data = dtn_cbor_array();
     testrun(dtn_cbor_array_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(3 == cbor_encoding_size(self));
+        testrun(3 == cbor_encoding_size(self));
     self = cbor_free(self);
 
     self = dtn_cbor_create(DTN_CBOR_BIGFLOAT);
     testrun(1 == cbor_encoding_size(self));
-    self->data =  dtn_cbor_array();
+    self->data = dtn_cbor_array();
     testrun(dtn_cbor_array_push(self->data, dtn_cbor_create(DTN_CBOR_FALSE)))
-    testrun(3 == cbor_encoding_size(self));
+        testrun(3 == cbor_encoding_size(self));
     self = cbor_free(self);
 
     dtn_cbor *child = dtn_cbor_create(DTN_CBOR_STRING);
@@ -4299,7 +4257,7 @@ int test_cbor_encoding_size(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_uint(){
+int test_encode_uint() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -4410,7 +4368,7 @@ int test_encode_uint(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_int(){
+int test_encode_int() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -4510,7 +4468,7 @@ int test_encode_int(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_string(){
+int test_encode_string() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -4549,31 +4507,31 @@ int test_encode_string(){
     testrun(encode_string(self, buffer, size, &next));
     testrun(next == buffer + 2 + strlen(self->string));
     testrun(buffer[0] == 0x58);
-    for (size_t i = 0; i < strlen(self->string); i++){
+    for (size_t i = 0; i < strlen(self->string); i++) {
         testrun(buffer[2 + i] != 0x00);
     }
     testrun(next[0] == 0x00);
 
-/*
-    // commented due to very large sizes
-    self->string = dtn_data_pointer_free(self->string);
-    testrun(dtn_random_string(&self->string, 0xffFF, NULL));
-    self->nbr_uint = strlen(self->string);
+    /*
+        // commented due to very large sizes
+        self->string = dtn_data_pointer_free(self->string);
+        testrun(dtn_random_string(&self->string, 0xffFF, NULL));
+        self->nbr_uint = strlen(self->string);
 
 
-    dtn_buffer *buf = dtn_buffer_create(0xffffFFF);
-    testrun(buf);
+        dtn_buffer *buf = dtn_buffer_create(0xffffFFF);
+        testrun(buf);
 
-    testrun(encode_string(self, buf->start, buf->capacity, &next));
-    testrun(next == buf->start + 3 + strlen(self->string));
-    testrun(buf->start[0] == 0x59);
-    for (size_t i = 0; i < strlen(self->string); i++){
-        testrun(buf->start[3 + i] != 0x00);
-    }
-    testrun(next[0] == 0x00);
-    buf = dtn_buffer_free(buf);
-*/
-   
+        testrun(encode_string(self, buf->start, buf->capacity, &next));
+        testrun(next == buf->start + 3 + strlen(self->string));
+        testrun(buf->start[0] == 0x59);
+        for (size_t i = 0; i < strlen(self->string); i++){
+            testrun(buf->start[3 + i] != 0x00);
+        }
+        testrun(next[0] == 0x00);
+        buf = dtn_buffer_free(buf);
+    */
+
     self = cbor_free(self);
 
     return testrun_log_success();
@@ -4581,7 +4539,7 @@ int test_encode_string(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_uft8(){
+int test_encode_uft8() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -4620,7 +4578,7 @@ int test_encode_uft8(){
     testrun(encode_uft8(self, buffer, size, &next));
     testrun(next == buffer + 2 + strlen(self->string));
     testrun(buffer[0] == 0x78);
-    for (size_t i = 0; i < strlen(self->string); i++){
+    for (size_t i = 0; i < strlen(self->string); i++) {
         testrun(buffer[2 + i] != 0x00);
     }
     testrun(next[0] == 0x00);
@@ -4632,20 +4590,19 @@ int test_encode_uft8(){
     testrun(encode_uft8(self, buffer, size, &next));
     testrun(next == buffer + 3 + strlen(self->string));
     testrun(buffer[0] == 0x79);
-    for (size_t i = 0; i < strlen(self->string); i++){
+    for (size_t i = 0; i < strlen(self->string); i++) {
         testrun(buffer[2 + i] != 0x00);
     }
     testrun(next[0] == 0x00);
 
     memset(buffer, 0, size);
     self->string = dtn_data_pointer_free(self->string);
-    testrun(dtn_utf8_generate_random_buffer(
-        &self->bytes, &self->nbr_uint, 30));
+    testrun(dtn_utf8_generate_random_buffer(&self->bytes, &self->nbr_uint, 30));
 
     testrun(encode_uft8(self, buffer, size, &next));
     testrun(buffer[0] == 0x78);
     testrun(next[0] == 0x00);
-   
+
     self = cbor_free(self);
 
     return testrun_log_success();
@@ -4653,7 +4610,7 @@ int test_encode_uft8(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_array(){
+int test_encode_array() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -4668,9 +4625,8 @@ int test_encode_array(){
     testrun(buffer[0] == 0x80);
     testrun(buffer[1] == 0x00);
 
-    self->data = dtn_linked_list_create((dtn_list_config){
-        .item.free = cbor_free
-    });
+    self->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
 
     testrun(dtn_list_push(self->data, dtn_cbor_create(DTN_CBOR_TRUE)));
 
@@ -4705,7 +4661,7 @@ int test_encode_array(){
     testrun(dtn_list_push(self->data, string));
 
     testrun(encode_array(self, buffer, size, &next));
-    dtn_dump_binary_as_hex(stdout, buffer, 10 );
+    dtn_dump_binary_as_hex(stdout, buffer, 10);
     testrun(buffer[0] == 0x83);
     testrun(buffer[1] == 0xf5);
     testrun(buffer[2] == 0x44);
@@ -4723,7 +4679,7 @@ int test_encode_array(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_map(){
+int test_encode_map() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -4798,9 +4754,8 @@ int test_encode_map(){
     self = dtn_cbor_create(DTN_CBOR_MAP);
     self->data = dtn_dict_create(dtn_cbor_dict_config(255));
     key = dtn_cbor_create(DTN_CBOR_ARRAY);
-    key->data = dtn_linked_list_create((dtn_list_config){
-        .item.free = cbor_free
-    });
+    key->data =
+        dtn_linked_list_create((dtn_list_config){.item.free = cbor_free});
     val = dtn_cbor_create(DTN_CBOR_UINT64);
     val->nbr_uint = 1;
     testrun(dtn_dict_set(self->data, key, val, NULL));
@@ -4828,7 +4783,7 @@ int test_encode_map(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_date_time(){
+int test_encode_date_time() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -4871,7 +4826,7 @@ int test_encode_date_time(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_date_time_epoch(){
+int test_encode_date_time_epoch() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -4982,7 +4937,7 @@ int test_encode_date_time_epoch(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_ubignum(){
+int test_encode_ubignum() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -5007,8 +4962,7 @@ int test_encode_ubignum(){
     self->nbr_uint = strlen(self->string);
     testrun(encode_ubignum(self, buffer, size, &next));
     testrun(next == buffer + 6);
-    testrun(buffer[0] == 0xC2)
-    testrun(buffer[1] == 0x44);
+    testrun(buffer[0] == 0xC2) testrun(buffer[1] == 0x44);
     testrun(buffer[2] == 't');
     testrun(buffer[3] == 'e');
     testrun(buffer[4] == 's');
@@ -5022,11 +4976,11 @@ int test_encode_ubignum(){
     testrun(encode_ubignum(self, buffer, size, &next));
     testrun(next == buffer + 3 + strlen(self->string));
     testrun(buffer[0] == 0xC2);
-    for (size_t i = 0; i < strlen(self->string); i++){
+    for (size_t i = 0; i < strlen(self->string); i++) {
         testrun(buffer[2 + i] != 0x00);
     }
     testrun(next[0] == 0x00);
-   
+
     self = cbor_free(self);
 
     return testrun_log_success();
@@ -5034,7 +4988,7 @@ int test_encode_ubignum(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_ibignum(){
+int test_encode_ibignum() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -5059,8 +5013,7 @@ int test_encode_ibignum(){
     self->nbr_uint = strlen(self->string);
     testrun(encode_ibignum(self, buffer, size, &next));
     testrun(next == buffer + 6);
-    testrun(buffer[0] == 0xc3)
-    testrun(buffer[1] == 0x44);
+    testrun(buffer[0] == 0xc3) testrun(buffer[1] == 0x44);
     testrun(buffer[2] == 't');
     testrun(buffer[3] == 'e');
     testrun(buffer[4] == 's');
@@ -5074,11 +5027,11 @@ int test_encode_ibignum(){
     testrun(encode_ibignum(self, buffer, size, &next));
     testrun(next == buffer + 3 + strlen(self->string));
     testrun(buffer[0] == 0xc3);
-    for (size_t i = 0; i < strlen(self->string); i++){
+    for (size_t i = 0; i < strlen(self->string); i++) {
         testrun(buffer[2 + i] != 0x00);
     }
     testrun(next[0] == 0x00);
-   
+
     self = cbor_free(self);
 
     return testrun_log_success();
@@ -5086,7 +5039,7 @@ int test_encode_ibignum(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_fraction(){
+int test_encode_fraction() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -5107,8 +5060,7 @@ int test_encode_fraction(){
 
     testrun(encode_fraction(self, buffer, size, &next));
     testrun(next == buffer + 3);
-    testrun(buffer[0] == 0xC4)
-    testrun(buffer[1] == 0x81);
+    testrun(buffer[0] == 0xC4) testrun(buffer[1] == 0x81);
     testrun(buffer[2] == 0xf5);
     testrun(buffer[3] == 0x00);
 
@@ -5118,8 +5070,7 @@ int test_encode_fraction(){
     memset(buffer, 0, size);
     testrun(encode_fraction(self, buffer, size, &next));
     testrun(next == buffer + 8);
-    testrun(buffer[0] == 0xC4)
-    testrun(buffer[1] == 0x86);
+    testrun(buffer[0] == 0xC4) testrun(buffer[1] == 0x86);
     testrun(buffer[2] == 0xf5);
     testrun(buffer[3] == 0x44);
     testrun(buffer[4] == 't');
@@ -5137,7 +5088,7 @@ int test_encode_fraction(){
     testrun(dtn_cbor_array_push(self->data, string));
 
     testrun(encode_fraction(self, buffer, size, &next));
-    testrun(next == buffer + 4 + 1 + 5 + 2+ string->nbr_uint);
+    testrun(next == buffer + 4 + 1 + 5 + 2 + string->nbr_uint);
     testrun(buffer[0] == 0xC4);
     testrun(buffer[1] == 0x99);
     testrun(buffer[2] == 0x01);
@@ -5158,7 +5109,7 @@ int test_encode_fraction(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_bigfloat(){
+int test_encode_bigfloat() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -5179,8 +5130,7 @@ int test_encode_bigfloat(){
 
     testrun(encode_bigfloat(self, buffer, size, &next));
     testrun(next == buffer + 3);
-    testrun(buffer[0] == 0xC5)
-    testrun(buffer[1] == 0x81);
+    testrun(buffer[0] == 0xC5) testrun(buffer[1] == 0x81);
     testrun(buffer[2] == 0xf5);
     testrun(buffer[3] == 0x00);
 
@@ -5189,8 +5139,7 @@ int test_encode_bigfloat(){
 
     testrun(encode_bigfloat(self, buffer, size, &next));
     testrun(next == buffer + 8);
-    testrun(buffer[0] == 0xC5)
-    testrun(buffer[1] == 0x86);
+    testrun(buffer[0] == 0xC5) testrun(buffer[1] == 0x86);
     testrun(buffer[2] == 0xf5);
     testrun(buffer[3] == 0x44);
     testrun(buffer[4] == 't');
@@ -5208,7 +5157,7 @@ int test_encode_bigfloat(){
     testrun(dtn_cbor_array_push(self->data, string));
 
     testrun(encode_bigfloat(self, buffer, size, &next));
-    testrun(next == buffer + 4 + 1 + 5 + 2+ string->nbr_uint);
+    testrun(next == buffer + 4 + 1 + 5 + 2 + string->nbr_uint);
     testrun(buffer[0] == 0xC5);
     testrun(buffer[1] == 0x99);
     testrun(buffer[2] == 0x01);
@@ -5229,7 +5178,7 @@ int test_encode_bigfloat(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_tag(){
+int test_encode_tag() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -5241,22 +5190,21 @@ int test_encode_tag(){
 
     testrun(!encode_tag(self, buffer, size, &next));
 
-    for (size_t i = 0xc6; i < 0xd4; i++){
-        
+    for (size_t i = 0xc6; i < 0xd4; i++) {
+
         self->tag = i;
         self->nbr_uint = 1;
 
         testrun(encode_tag(self, buffer, size, &next));
         testrun(next == buffer + 1);
         testrun(buffer[0] == (self->tag | 0x01));
-
     }
 
     dtn_cbor *string = dtn_cbor_create(DTN_CBOR_STRING);
     string->string = dtn_string_dup("test");
     string->nbr_uint = strlen(string->string);
     self->data = string;
-    
+
     self->tag = 0xD5;
     testrun(encode_tag(self, buffer, size, &next));
     testrun(next == buffer + 6);
@@ -5314,7 +5262,7 @@ int test_encode_tag(){
     self->tag = 0xdA;
     self->nbr_uint = 0x1f12;
     testrun(encode_tag(self, buffer, size, &next));
-    
+
     testrun(next == buffer + 7 + string->nbr_uint);
     testrun(buffer[0] == 0xDA);
     testrun(buffer[1] == 0x00);
@@ -5347,7 +5295,7 @@ int test_encode_tag(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_encode_simple(){
+int test_encode_encode_simple() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t *next = 0;
@@ -5359,17 +5307,16 @@ int test_encode_encode_simple(){
 
     testrun(!encode_simple(self, buffer, size, &next));
 
-    for (size_t i = 0xE0; i < 0xF3; i++){
-        
+    for (size_t i = 0xE0; i < 0xF3; i++) {
+
         self->tag = i;
         self->nbr_uint = 1;
 
         testrun(encode_simple(self, buffer, size, &next));
         testrun(next == buffer + 1);
         testrun(buffer[0] == (self->tag | 0x01));
-
     }
-    
+
     self->tag = 0xF8;
     self->nbr_uint = 0x1234;
     testrun(encode_simple(self, buffer, size, &next));
@@ -5419,7 +5366,7 @@ int test_encode_encode_simple(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_encode_float(){
+int test_encode_encode_float() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t value[0xffff] = {0};
@@ -5430,19 +5377,19 @@ int test_encode_encode_float(){
     self->nbr_float = 0;
     self->tag = 0;
 
-    uint64_t len = snprintf((char*)value, 100, "%f", self->nbr_float);
+    uint64_t len = snprintf((char *)value, 100, "%f", self->nbr_float);
     testrun(encode_float(self, buffer, size, &next));
     testrun(buffer[0] == 0xFA);
-    for (uint64_t i = 0; i < len; i++){
-        testrun(buffer[i+1] == value[i]);
+    for (uint64_t i = 0; i < len; i++) {
+        testrun(buffer[i + 1] == value[i]);
     }
 
     self->nbr_float = 123.4567;
-    len = snprintf((char*)value, 100, "%f", self->nbr_float);
+    len = snprintf((char *)value, 100, "%f", self->nbr_float);
     testrun(encode_float(self, buffer, size, &next));
     testrun(buffer[0] == 0xFA);
-    for (uint64_t i = 0; i < len; i++){
-        testrun(buffer[i+1] == value[i]);
+    for (uint64_t i = 0; i < len; i++) {
+        testrun(buffer[i + 1] == value[i]);
     }
 
     self = cbor_free(self);
@@ -5452,7 +5399,7 @@ int test_encode_encode_float(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_encode_encode_double(){
+int test_encode_encode_double() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t value[0xffff] = {0};
@@ -5463,19 +5410,19 @@ int test_encode_encode_double(){
     self->nbr_float = 0;
     self->tag = 0;
 
-    uint64_t len = snprintf((char*)value, 100, "%g", self->nbr_float);
+    uint64_t len = snprintf((char *)value, 100, "%g", self->nbr_float);
     testrun(encode_double(self, buffer, size, &next));
     testrun(buffer[0] == 0xfb);
-    for (uint64_t i = 0; i < len; i++){
-        testrun(buffer[i+1] == value[i]);
+    for (uint64_t i = 0; i < len; i++) {
+        testrun(buffer[i + 1] == value[i]);
     }
 
     self->nbr_float = 123.4567;
-    len = snprintf((char*)value, 100, "%g", self->nbr_float);
+    len = snprintf((char *)value, 100, "%g", self->nbr_float);
     testrun(encode_double(self, buffer, size, &next));
     testrun(buffer[0] == 0xfb);
-    for (uint64_t i = 0; i < len; i++){
-        testrun(buffer[i+1] == value[i]);
+    for (uint64_t i = 0; i < len; i++) {
+        testrun(buffer[i + 1] == value[i]);
     }
 
     self = cbor_free(self);
@@ -5485,7 +5432,7 @@ int test_encode_encode_double(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_cbor_encode(){
+int test_cbor_encode() {
 
     uint8_t buffer[0xffff] = {0};
     uint8_t value[0xffff] = {0};
@@ -5494,30 +5441,30 @@ int test_cbor_encode(){
 
     dtn_cbor *self = dtn_cbor_create(DTN_CBOR_DOUBLE);
 
-    uint64_t len = snprintf((char*)value, 100, "%g", self->nbr_float);
+    uint64_t len = snprintf((char *)value, 100, "%g", self->nbr_float);
     testrun(dtn_cbor_encode(self, buffer, size, &next));
     testrun(buffer[0] == 0xfb);
-    for (uint64_t i = 0; i < len; i++){
-        testrun(buffer[i+1] == value[i]);
+    for (uint64_t i = 0; i < len; i++) {
+        testrun(buffer[i + 1] == value[i]);
     }
 
     self->nbr_float = 123.4567;
-    len = snprintf((char*)value, 100, "%g", self->nbr_float);
+    len = snprintf((char *)value, 100, "%g", self->nbr_float);
     testrun(dtn_cbor_encode(self, buffer, size, &next));
     testrun(buffer[0] == 0xfb);
-    for (uint64_t i = 0; i < len; i++){
-        testrun(buffer[i+1] == value[i]);
+    for (uint64_t i = 0; i < len; i++) {
+        testrun(buffer[i + 1] == value[i]);
     }
 
     self = cbor_free(self);
 
     self = dtn_cbor_create(DTN_CBOR_FLOAT);
     self->nbr_float = 123.4567;
-    len = snprintf((char*)value, 100, "%f", self->nbr_float);
+    len = snprintf((char *)value, 100, "%f", self->nbr_float);
     testrun(dtn_cbor_encode(self, buffer, size, &next));
     testrun(buffer[0] == 0xfa);
-    for (uint64_t i = 0; i < len; i++){
-        testrun(buffer[i+1] == value[i]);
+    for (uint64_t i = 0; i < len; i++) {
+        testrun(buffer[i + 1] == value[i]);
     }
 
     self = cbor_free(self);
@@ -5669,7 +5616,7 @@ int test_cbor_encode(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_map(){
+int test_dtn_cbor_map() {
 
     dtn_cbor *self = dtn_cbor_map();
     testrun(self->type == DTN_CBOR_MAP);
@@ -5682,7 +5629,7 @@ int test_dtn_cbor_map(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_map_set(){
+int test_dtn_cbor_map_set() {
 
     dtn_cbor *self = dtn_cbor_map();
 
@@ -5708,7 +5655,7 @@ int test_dtn_cbor_map_set(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_map_set_string(){
+int test_dtn_cbor_map_set_string() {
 
     dtn_cbor *self = dtn_cbor_map();
 
@@ -5734,7 +5681,7 @@ int test_dtn_cbor_map_set_string(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_map_get_string(){
+int test_dtn_cbor_map_get_string() {
 
     dtn_cbor *self = dtn_cbor_map();
 
@@ -5754,7 +5701,7 @@ int test_dtn_cbor_map_get_string(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_map_get(){
+int test_dtn_cbor_map_get() {
 
     dtn_cbor *self = dtn_cbor_map();
 
@@ -5778,7 +5725,7 @@ int test_dtn_cbor_map_get(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_map_count(){
+int test_dtn_cbor_map_count() {
 
     dtn_cbor *self = dtn_cbor_map();
 
@@ -5806,19 +5753,20 @@ int test_dtn_cbor_map_count(){
 
 /*----------------------------------------------------------------------------*/
 
-static bool count_true(const void *key, void *val, void *data){
+static bool count_true(const void *key, void *val, void *data) {
 
-    if (!key) return true;
-    dtn_cbor *v = (dtn_cbor*) val;
-    uint64_t *counter = (uint64_t*) data;
+    if (!key)
+        return true;
+    dtn_cbor *v = (dtn_cbor *)val;
+    uint64_t *counter = (uint64_t *)data;
     if (dtn_cbor_is_true(v))
-        *counter = *counter +1;
+        *counter = *counter + 1;
     return true;
 }
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_map_for_each(){
+int test_dtn_cbor_map_for_each() {
 
     dtn_cbor *self = dtn_cbor_map();
 
@@ -5842,7 +5790,7 @@ int test_dtn_cbor_map_for_each(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_array(){
+int test_dtn_cbor_array() {
 
     dtn_cbor *self = dtn_cbor_array();
     testrun(self->type == DTN_CBOR_ARRAY);
@@ -5855,7 +5803,7 @@ int test_dtn_cbor_array(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_array_push(){
+int test_dtn_cbor_array_push() {
 
     dtn_cbor *self = dtn_cbor_array();
 
@@ -5873,7 +5821,7 @@ int test_dtn_cbor_array_push(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_array_count(){
+int test_dtn_cbor_array_count() {
 
     dtn_cbor *self = dtn_cbor_array();
 
@@ -5891,7 +5839,7 @@ int test_dtn_cbor_array_count(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_array_get(){
+int test_dtn_cbor_array_get() {
 
     dtn_cbor *self = dtn_cbor_array();
 
@@ -5914,7 +5862,7 @@ int test_dtn_cbor_array_get(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_array_pop_queue(){
+int test_dtn_cbor_array_pop_queue() {
 
     dtn_cbor *self = dtn_cbor_array();
 
@@ -5947,7 +5895,7 @@ int test_dtn_cbor_array_pop_queue(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_array_pop_stack(){
+int test_dtn_cbor_array_pop_stack() {
 
     dtn_cbor *self = dtn_cbor_array();
 
@@ -5980,9 +5928,9 @@ int test_dtn_cbor_array_pop_stack(){
 
 /*----------------------------------------------------------------------------*/
 
-static bool array_count_true(void *item, void *data){
+static bool array_count_true(void *item, void *data) {
 
-    uint64_t *counter = (uint64_t*) data;
+    uint64_t *counter = (uint64_t *)data;
     if (dtn_cbor_is_true(item))
         *counter = *counter + 1;
     return true;
@@ -5990,7 +5938,7 @@ static bool array_count_true(void *item, void *data){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_array_for_each(){
+int test_dtn_cbor_array_for_each() {
 
     dtn_cbor *self = dtn_cbor_array();
 
@@ -6016,7 +5964,7 @@ int test_dtn_cbor_array_for_each(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_string(){
+int test_dtn_cbor_string() {
 
     dtn_cbor *self = dtn_cbor_string(NULL);
     testrun(self->type == DTN_CBOR_STRING);
@@ -6035,7 +5983,7 @@ int test_dtn_cbor_string(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_string(){
+int test_dtn_cbor_get_string() {
 
     dtn_cbor *self = dtn_cbor_string(NULL);
     testrun(self->type == DTN_CBOR_STRING);
@@ -6053,7 +6001,7 @@ int test_dtn_cbor_get_string(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_string(){
+int test_dtn_cbor_set_string() {
 
     dtn_cbor *self = dtn_cbor_string(NULL);
     testrun(self->type == DTN_CBOR_STRING);
@@ -6074,7 +6022,7 @@ int test_dtn_cbor_set_string(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_utf8(){
+int test_dtn_cbor_utf8() {
 
     dtn_cbor *self = dtn_cbor_utf8(NULL, 0);
     testrun(self->type == DTN_CBOR_UTF8);
@@ -6082,7 +6030,7 @@ int test_dtn_cbor_utf8(){
     testrun(dtn_cbor_is_utf8(self));
     self = cbor_free(self);
 
-    self = dtn_cbor_utf8((uint8_t*)"test", 4);
+    self = dtn_cbor_utf8((uint8_t *)"test", 4);
     testrun(self->type == DTN_CBOR_UTF8);
     testrun(NULL != self->string);
     testrun(0 == strncmp("test", self->string, self->nbr_uint));
@@ -6093,9 +6041,9 @@ int test_dtn_cbor_utf8(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_utf8(){
+int test_dtn_cbor_get_utf8() {
 
-    dtn_cbor *self = dtn_cbor_utf8((uint8_t*)"test", 4);
+    dtn_cbor *self = dtn_cbor_utf8((uint8_t *)"test", 4);
     testrun(self->type == DTN_CBOR_UTF8);
 
     uint8_t *bytes = NULL;
@@ -6111,9 +6059,9 @@ int test_dtn_cbor_get_utf8(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_utf8(){
+int test_dtn_cbor_set_utf8() {
 
-    dtn_cbor *self = dtn_cbor_utf8((uint8_t*)"test", 4);
+    dtn_cbor *self = dtn_cbor_utf8((uint8_t *)"test", 4);
     testrun(self->type == DTN_CBOR_UTF8);
 
     uint8_t *bytes = NULL;
@@ -6123,11 +6071,11 @@ int test_dtn_cbor_set_utf8(){
     testrun(size == 4);
     testrun(0 == memcmp(bytes, "test", 4));
 
-    testrun(dtn_cbor_set_utf8(self, (uint8_t*)"some", 4));
+    testrun(dtn_cbor_set_utf8(self, (uint8_t *)"some", 4));
 
     testrun(dtn_cbor_get_utf8(self, &bytes, &size));
     testrun(size == 4);
-    testrun(0 == memcmp(bytes, (uint8_t*)"some", 4));
+    testrun(0 == memcmp(bytes, (uint8_t *)"some", 4));
 
     self = cbor_free(self);
 
@@ -6136,7 +6084,7 @@ int test_dtn_cbor_set_utf8(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_true(){
+int test_dtn_cbor_true() {
 
     dtn_cbor *self = dtn_cbor_true();
     testrun(self->type == DTN_CBOR_TRUE);
@@ -6147,7 +6095,7 @@ int test_dtn_cbor_true(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_is_true(){
+int test_dtn_cbor_is_true() {
 
     dtn_cbor *self = dtn_cbor_true();
     testrun(self->type == DTN_CBOR_TRUE);
@@ -6161,7 +6109,7 @@ int test_dtn_cbor_is_true(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_false(){
+int test_dtn_cbor_false() {
 
     dtn_cbor *self = dtn_cbor_false();
     testrun(self->type == DTN_CBOR_FALSE);
@@ -6172,7 +6120,7 @@ int test_dtn_cbor_false(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_is_false(){
+int test_dtn_cbor_is_false() {
 
     dtn_cbor *self = dtn_cbor_false();
     testrun(self->type == DTN_CBOR_FALSE);
@@ -6186,7 +6134,7 @@ int test_dtn_cbor_is_false(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_null(){
+int test_dtn_cbor_null() {
 
     dtn_cbor *self = dtn_cbor_null();
     testrun(self->type == DTN_CBOR_NULL);
@@ -6197,7 +6145,7 @@ int test_dtn_cbor_null(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_is_null(){
+int test_dtn_cbor_is_null() {
 
     dtn_cbor *self = dtn_cbor_null();
     testrun(self->type == DTN_CBOR_NULL);
@@ -6211,7 +6159,7 @@ int test_dtn_cbor_is_null(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_undef(){
+int test_dtn_cbor_undef() {
 
     dtn_cbor *self = dtn_cbor_undef();
     testrun(self->type == DTN_CBOR_UNDEF);
@@ -6222,7 +6170,7 @@ int test_dtn_cbor_undef(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_is_undef(){
+int test_dtn_cbor_is_undef() {
 
     dtn_cbor *self = dtn_cbor_undef();
     testrun(self->type == DTN_CBOR_UNDEF);
@@ -6236,7 +6184,7 @@ int test_dtn_cbor_is_undef(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_uint(){
+int test_dtn_cbor_uint() {
 
     dtn_cbor *self = dtn_cbor_uint(0);
     testrun(self->type == DTN_CBOR_UINT64);
@@ -6254,7 +6202,7 @@ int test_dtn_cbor_uint(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_uint(){
+int test_dtn_cbor_get_uint() {
 
     dtn_cbor *self = dtn_cbor_uint(0);
     testrun(self->type == DTN_CBOR_UINT64);
@@ -6271,7 +6219,7 @@ int test_dtn_cbor_get_uint(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_uint(){
+int test_dtn_cbor_set_uint() {
 
     dtn_cbor *self = dtn_cbor_uint(0);
     testrun(self->type == DTN_CBOR_UINT64);
@@ -6285,7 +6233,7 @@ int test_dtn_cbor_set_uint(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_int(){
+int test_dtn_cbor_int() {
 
     dtn_cbor *self = dtn_cbor_int(0);
     testrun(self->type == DTN_CBOR_INT64);
@@ -6305,7 +6253,7 @@ int test_dtn_cbor_int(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_int(){
+int test_dtn_cbor_get_int() {
 
     dtn_cbor *self = dtn_cbor_int(0);
     testrun(self->type == DTN_CBOR_INT64);
@@ -6319,7 +6267,7 @@ int test_dtn_cbor_get_int(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_int(){
+int test_dtn_cbor_set_int() {
 
     dtn_cbor *self = dtn_cbor_int(0);
     testrun(self->type == DTN_CBOR_INT64);
@@ -6333,7 +6281,7 @@ int test_dtn_cbor_set_int(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_time(){
+int test_dtn_cbor_time() {
 
     dtn_cbor *self = dtn_cbor_time(NULL);
     testrun(self->type == DTN_CBOR_DATE_TIME);
@@ -6352,7 +6300,7 @@ int test_dtn_cbor_time(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_time(){
+int test_dtn_cbor_get_time() {
 
     dtn_cbor *self = dtn_cbor_time("test");
     testrun(self->type == DTN_CBOR_DATE_TIME);
@@ -6366,7 +6314,7 @@ int test_dtn_cbor_get_time(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_time(){
+int test_dtn_cbor_set_time() {
 
     dtn_cbor *self = dtn_cbor_time("test");
     testrun(self->type == DTN_CBOR_DATE_TIME);
@@ -6383,7 +6331,7 @@ int test_dtn_cbor_set_time(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_time_epoch(){
+int test_dtn_cbor_time_epoch() {
 
     dtn_cbor *self = dtn_cbor_time_epoch(0);
     testrun(self->type == DTN_CBOR_DATE_TIME_EPOCH);
@@ -6401,7 +6349,7 @@ int test_dtn_cbor_time_epoch(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_time_epoch(){
+int test_dtn_cbor_get_time_epoch() {
 
     dtn_cbor *self = dtn_cbor_time_epoch(0);
     testrun(self->type == DTN_CBOR_DATE_TIME_EPOCH);
@@ -6418,7 +6366,7 @@ int test_dtn_cbor_get_time_epoch(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_time_epoch(){
+int test_dtn_cbor_set_time_epoch() {
 
     dtn_cbor *self = dtn_cbor_time_epoch(0);
     testrun(self->type == DTN_CBOR_DATE_TIME_EPOCH);
@@ -6432,7 +6380,7 @@ int test_dtn_cbor_set_time_epoch(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_ubignum(){
+int test_dtn_cbor_ubignum() {
 
     dtn_cbor *self = dtn_cbor_ubignum(NULL);
     testrun(self->type == DTN_CBOR_UBIGNUM);
@@ -6451,7 +6399,7 @@ int test_dtn_cbor_ubignum(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_ubignum(){
+int test_dtn_cbor_get_ubignum() {
 
     dtn_cbor *self = dtn_cbor_ubignum("test");
     testrun(self->type == DTN_CBOR_UBIGNUM);
@@ -6465,7 +6413,7 @@ int test_dtn_cbor_get_ubignum(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_ubignum(){
+int test_dtn_cbor_set_ubignum() {
 
     dtn_cbor *self = dtn_cbor_ubignum("test");
     testrun(self->type == DTN_CBOR_UBIGNUM);
@@ -6482,7 +6430,7 @@ int test_dtn_cbor_set_ubignum(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_ibignum(){
+int test_dtn_cbor_ibignum() {
 
     dtn_cbor *self = dtn_cbor_ibignum(NULL);
     testrun(self->type == DTN_CBOR_IBIGNUM);
@@ -6501,7 +6449,7 @@ int test_dtn_cbor_ibignum(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_ibignum(){
+int test_dtn_cbor_get_ibignum() {
 
     dtn_cbor *self = dtn_cbor_ibignum("test");
     testrun(self->type == DTN_CBOR_IBIGNUM);
@@ -6515,7 +6463,7 @@ int test_dtn_cbor_get_ibignum(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_ibignum(){
+int test_dtn_cbor_set_ibignum() {
 
     dtn_cbor *self = dtn_cbor_ibignum("test");
     testrun(self->type == DTN_CBOR_IBIGNUM);
@@ -6532,7 +6480,7 @@ int test_dtn_cbor_set_ibignum(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_dec_fraction(){
+int test_dtn_cbor_dec_fraction() {
 
     dtn_cbor *self = dtn_cbor_dec_fraction(NULL);
     testrun(self->type == DTN_CBOR_DEC_FRACTION);
@@ -6550,7 +6498,7 @@ int test_dtn_cbor_dec_fraction(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_dec_fraction(){
+int test_dtn_cbor_get_dec_fraction() {
 
     dtn_cbor *self = dtn_cbor_dec_fraction(NULL);
     testrun(self->type == DTN_CBOR_DEC_FRACTION);
@@ -6569,7 +6517,7 @@ int test_dtn_cbor_get_dec_fraction(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_dec_fraction(){
+int test_dtn_cbor_set_dec_fraction() {
 
     dtn_cbor *self = dtn_cbor_dec_fraction(dtn_cbor_array());
     testrun(self->type == DTN_CBOR_DEC_FRACTION);
@@ -6582,7 +6530,7 @@ int test_dtn_cbor_set_dec_fraction(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_bigfloat(){
+int test_dtn_cbor_bigfloat() {
 
     dtn_cbor *self = dtn_cbor_bigfloat(NULL);
     testrun(self->type == DTN_CBOR_BIGFLOAT);
@@ -6600,7 +6548,7 @@ int test_dtn_cbor_bigfloat(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_bigfloat(){
+int test_dtn_cbor_get_bigfloat() {
 
     dtn_cbor *self = dtn_cbor_bigfloat(NULL);
     testrun(self->type == DTN_CBOR_BIGFLOAT);
@@ -6619,7 +6567,7 @@ int test_dtn_cbor_get_bigfloat(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_bigfloat(){
+int test_dtn_cbor_set_bigfloat() {
 
     dtn_cbor *self = dtn_cbor_bigfloat(dtn_cbor_array());
     testrun(self->type == DTN_CBOR_BIGFLOAT);
@@ -6632,7 +6580,7 @@ int test_dtn_cbor_set_bigfloat(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_tag(){
+int test_dtn_cbor_tag() {
 
     dtn_cbor *self = dtn_cbor_tag(0);
     testrun(self->type == DTN_CBOR_TAG);
@@ -6650,7 +6598,7 @@ int test_dtn_cbor_tag(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_tag(){
+int test_dtn_cbor_get_tag() {
 
     dtn_cbor *self = dtn_cbor_tag(123);
     testrun(123 == dtn_cbor_get_tag(self));
@@ -6661,7 +6609,7 @@ int test_dtn_cbor_get_tag(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_tag_value(){
+int test_dtn_cbor_get_tag_value() {
 
     dtn_cbor *self = dtn_cbor_tag(123);
     testrun(123 == dtn_cbor_get_tag(self));
@@ -6675,7 +6623,7 @@ int test_dtn_cbor_get_tag_value(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_tag_data(){
+int test_dtn_cbor_get_tag_data() {
 
     dtn_cbor *self = dtn_cbor_tag(123);
     testrun(123 == dtn_cbor_get_tag(self));
@@ -6689,11 +6637,11 @@ int test_dtn_cbor_get_tag_data(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_tag(){
+int test_dtn_cbor_set_tag() {
 
     dtn_cbor *self = dtn_cbor_tag(123);
     testrun(123 == dtn_cbor_get_tag(self));
-    testrun(dtn_cbor_set_tag(self,456));
+    testrun(dtn_cbor_set_tag(self, 456));
     testrun(456 == dtn_cbor_get_tag(self));
     self = cbor_free(self);
 
@@ -6702,7 +6650,7 @@ int test_dtn_cbor_set_tag(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_tag_data(){
+int test_dtn_cbor_set_tag_data() {
 
     dtn_cbor *self = dtn_cbor_tag(123);
     testrun(NULL == dtn_cbor_get_tag_data(self));
@@ -6715,11 +6663,11 @@ int test_dtn_cbor_set_tag_data(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_tag_value(){
+int test_dtn_cbor_set_tag_value() {
 
     dtn_cbor *self = dtn_cbor_tag(123);
     testrun(0 == dtn_cbor_get_tag_value(self));
-    testrun(dtn_cbor_set_tag_value(self,456));
+    testrun(dtn_cbor_set_tag_value(self, 456));
     testrun(456 == dtn_cbor_get_tag_value(self));
     self = cbor_free(self);
 
@@ -6728,7 +6676,7 @@ int test_dtn_cbor_set_tag_value(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_simple(){
+int test_dtn_cbor_simple() {
 
     dtn_cbor *self = dtn_cbor_simple(0);
     testrun(self->type == DTN_CBOR_SIMPLE);
@@ -6746,7 +6694,7 @@ int test_dtn_cbor_simple(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_simple(){
+int test_dtn_cbor_get_simple() {
 
     dtn_cbor *self = dtn_cbor_simple(123);
     testrun(123 == dtn_cbor_get_simple(self));
@@ -6757,7 +6705,7 @@ int test_dtn_cbor_get_simple(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_simple_value(){
+int test_dtn_cbor_get_simple_value() {
 
     dtn_cbor *self = dtn_cbor_simple(123);
     testrun(123 == dtn_cbor_get_simple(self));
@@ -6771,11 +6719,11 @@ int test_dtn_cbor_get_simple_value(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_simple(){
+int test_dtn_cbor_set_simple() {
 
     dtn_cbor *self = dtn_cbor_simple(123);
     testrun(123 == dtn_cbor_get_simple(self));
-    testrun(dtn_cbor_set_simple(self,456));
+    testrun(dtn_cbor_set_simple(self, 456));
     testrun(456 == dtn_cbor_get_simple(self));
     self = cbor_free(self);
 
@@ -6784,11 +6732,11 @@ int test_dtn_cbor_set_simple(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_simple_value(){
+int test_dtn_cbor_set_simple_value() {
 
     dtn_cbor *self = dtn_cbor_simple(123);
     testrun(0 == dtn_cbor_get_simple_value(self));
-    testrun(dtn_cbor_set_simple_value(self,456));
+    testrun(dtn_cbor_set_simple_value(self, 456));
     testrun(456 == dtn_cbor_get_simple_value(self));
     self = cbor_free(self);
 
@@ -6797,7 +6745,7 @@ int test_dtn_cbor_set_simple_value(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_float(){
+int test_dtn_cbor_float() {
 
     dtn_cbor *self = dtn_cbor_float(0);
     testrun(self->type == DTN_CBOR_FLOAT);
@@ -6815,7 +6763,7 @@ int test_dtn_cbor_float(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_float(){
+int test_dtn_cbor_get_float() {
 
     dtn_cbor *self = dtn_cbor_float(123);
     testrun(123 == dtn_cbor_get_float(self));
@@ -6826,7 +6774,7 @@ int test_dtn_cbor_get_float(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_float(){
+int test_dtn_cbor_set_float() {
 
     dtn_cbor *self = dtn_cbor_float(123);
     testrun(123 == dtn_cbor_get_float(self));
@@ -6839,7 +6787,7 @@ int test_dtn_cbor_set_float(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_double(){
+int test_dtn_cbor_double() {
 
     dtn_cbor *self = dtn_cbor_double(0);
     testrun(self->type == DTN_CBOR_DOUBLE);
@@ -6857,7 +6805,7 @@ int test_dtn_cbor_double(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_get_double(){
+int test_dtn_cbor_get_double() {
 
     dtn_cbor *self = dtn_cbor_double(0.123);
     testrun(0.123 == dtn_cbor_get_double(self));
@@ -6868,7 +6816,7 @@ int test_dtn_cbor_get_double(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_set_double(){
+int test_dtn_cbor_set_double() {
 
     dtn_cbor *self = dtn_cbor_double(0.123);
     testrun(0.123 == dtn_cbor_get_double(self));
@@ -6881,18 +6829,20 @@ int test_dtn_cbor_set_double(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_cbor_encode_array_of_indefinite_length(){
+int test_dtn_cbor_encode_array_of_indefinite_length() {
 
     uint8_t buffer[0xffff] = {0};
     size_t size = 0xffff;
     uint8_t *next = NULL;
 
     dtn_cbor *self = dtn_cbor_double(0.123);
-    testrun(!dtn_cbor_encode_array_of_indefinite_length(self, buffer, size, &next));
+    testrun(
+        !dtn_cbor_encode_array_of_indefinite_length(self, buffer, size, &next));
     self = cbor_free(self);
 
     self = dtn_cbor_array();
-    testrun(dtn_cbor_encode_array_of_indefinite_length(self, buffer, size, &next));
+    testrun(
+        dtn_cbor_encode_array_of_indefinite_length(self, buffer, size, &next));
     testrun(next == buffer + 2);
     testrun(buffer[0] == 0x9F);
     testrun(buffer[1] == 0xFF);
@@ -6902,10 +6852,12 @@ int test_dtn_cbor_encode_array_of_indefinite_length(){
     testrun(buffer[0] == 0x9F);
     testrun(buffer[1] == 0xFF);
 
-    testrun(!dtn_cbor_encode_array_of_indefinite_length(self, buffer,1, &next));
-    
+    testrun(
+        !dtn_cbor_encode_array_of_indefinite_length(self, buffer, 1, &next));
+
     testrun(dtn_cbor_array_push(self, dtn_cbor_true()));
-    testrun(!dtn_cbor_encode_array_of_indefinite_length(self, buffer, 2, &next));
+    testrun(
+        !dtn_cbor_encode_array_of_indefinite_length(self, buffer, 2, &next));
     testrun(dtn_cbor_encode_array_of_indefinite_length(self, buffer, 3, &next));
     testrun(next == buffer + 3);
     testrun(buffer[0] == 0x9F);
@@ -6913,8 +6865,10 @@ int test_dtn_cbor_encode_array_of_indefinite_length(){
     testrun(buffer[2] == 0xFF);
 
     testrun(dtn_cbor_array_push(self, dtn_cbor_uint(1)));
-    testrun(!dtn_cbor_encode_array_of_indefinite_length(self,buffer, 2, &next));
-    testrun(!dtn_cbor_encode_array_of_indefinite_length(self,buffer, 3, &next));
+    testrun(
+        !dtn_cbor_encode_array_of_indefinite_length(self, buffer, 2, &next));
+    testrun(
+        !dtn_cbor_encode_array_of_indefinite_length(self, buffer, 3, &next));
     testrun(dtn_cbor_encode_array_of_indefinite_length(self, buffer, 4, &next));
     testrun(next == buffer + 4);
     testrun(buffer[0] == 0x9F);
@@ -6928,7 +6882,7 @@ int test_dtn_cbor_encode_array_of_indefinite_length(){
 
 /*----------------------------------------------------------------------------*/
 
-int check_string(){
+int check_string() {
 
     uint8_t buffer[0xffff] = {0};
     size_t size = 0xffff;
@@ -6954,9 +6908,7 @@ int check_string(){
     char *string = "dtn://test/two/text.data";
     self = dtn_cbor_string(string);
     testrun(encode_string(self, buffer, size, &next));
-    testrun(buffer[0] == 0x58)
-    testrun(buffer[1] == strlen(string));
-
+    testrun(buffer[0] == 0x58) testrun(buffer[1] == strlen(string));
 
     out = NULL;
     testrun(decode_text_string(buffer, size, &out, &next));
@@ -6967,7 +6919,6 @@ int check_string(){
     self = cbor_free(self);
     return testrun_log_success();
 }
-
 
 /*
  *      ------------------------------------------------------------------------

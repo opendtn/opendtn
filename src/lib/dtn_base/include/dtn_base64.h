@@ -66,7 +66,7 @@
         @returns true if the source was encoded and written to destination.
 */
 bool dtn_base64_encode(const uint8_t *source, size_t src_length,
-                      uint8_t **destination, size_t *dest_length);
+                       uint8_t **destination, size_t *dest_length);
 
 /*----------------------------------------------------------------------------*/
 
@@ -75,7 +75,7 @@ bool dtn_base64_encode(const uint8_t *source, size_t src_length,
         For @mode and @param @see dtn_base64_encode
 */
 bool dtn_base64_url_encode(const uint8_t *buffer, size_t length,
-                          uint8_t **result, size_t *result_length);
+                           uint8_t **result, size_t *result_length);
 
 /*
  *      ------------------------------------------------------------------------
@@ -91,7 +91,7 @@ bool dtn_base64_url_encode(const uint8_t *buffer, size_t length,
         For @mode and @param @see dtn_base64_encode
 */
 bool dtn_base64_decode(const uint8_t *buffer, size_t length, uint8_t **result,
-                      size_t *result_length);
+                       size_t *result_length);
 
 /*----------------------------------------------------------------------------*/
 
@@ -100,6 +100,6 @@ bool dtn_base64_decode(const uint8_t *buffer, size_t length, uint8_t **result,
         For @mode and @param @see dtn_base64_encode
 */
 bool dtn_base64_url_decode(const uint8_t *buffer, size_t length,
-                          uint8_t **result, size_t *result_length);
+                           uint8_t **result, size_t *result_length);
 
 #endif /* dtn_base64_h */

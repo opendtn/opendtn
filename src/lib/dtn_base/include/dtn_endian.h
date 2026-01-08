@@ -71,7 +71,7 @@
         @param number   number to write in network byte order.
 */
 bool dtn_endian_write_uint16_be(uint8_t *buffer, size_t length, uint8_t **next,
-                               uint16_t number);
+                                uint16_t number);
 
 /*----------------------------------------------------------------------------*/
 
@@ -84,7 +84,7 @@ bool dtn_endian_write_uint16_be(uint8_t *buffer, size_t length, uint8_t **next,
         @param number   number to write in network byte order.
 */
 bool dtn_endian_write_uint32_be(uint8_t *buffer, size_t length, uint8_t **next,
-                               uint32_t number);
+                                uint32_t number);
 
 /*----------------------------------------------------------------------------*/
 
@@ -97,7 +97,7 @@ bool dtn_endian_write_uint32_be(uint8_t *buffer, size_t length, uint8_t **next,
         @param number   number to write in network byte order.
 */
 bool dtn_endian_write_uint64_be(uint8_t *buffer, size_t length, uint8_t **next,
-                               uint64_t number);
+                                uint64_t number);
 
 /*
  *      ------------------------------------------------------------------------
@@ -115,7 +115,7 @@ bool dtn_endian_write_uint64_be(uint8_t *buffer, size_t length, uint8_t **next,
         @param number   pointer to number
 */
 bool dtn_endian_read_uint16_be(const uint8_t *buffer, size_t length,
-                              uint16_t *number);
+                               uint16_t *number);
 
 /*----------------------------------------------------------------------------*/
 
@@ -127,7 +127,7 @@ bool dtn_endian_read_uint16_be(const uint8_t *buffer, size_t length,
         @param number   pointer to number
 */
 bool dtn_endian_read_uint32_be(const uint8_t *buffer, size_t length,
-                              uint32_t *number);
+                               uint32_t *number);
 
 /*----------------------------------------------------------------------------*/
 
@@ -139,6 +139,6 @@ bool dtn_endian_read_uint32_be(const uint8_t *buffer, size_t length,
         @param number   pointer to number
 */
 bool dtn_endian_read_uint64_be(const uint8_t *buffer, size_t length,
-                              uint64_t *number);
+                               uint64_t *number);
 
 #endif /* dtn_endian_h */

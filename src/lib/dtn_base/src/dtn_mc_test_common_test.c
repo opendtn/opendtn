@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include "dtn_mc_test_common.c"
 #include "../include/testrun.h"
+#include "dtn_mc_test_common.c"
 
 /*
  *      ------------------------------------------------------------------------
@@ -40,24 +40,25 @@
 
 int test_dtn_mc_test_common_open_socket() {
 
-  int socket[20] = {0};
+    int socket[20] = {0};
 
-  for (size_t i = 0; i < 10; i++) {
+    for (size_t i = 0; i < 10; i++) {
 
-    socket[i] = dtn_mc_test_common_open_socket(AF_INET);
-    testrun(-1 != socket[i]);
+        socket[i] = dtn_mc_test_common_open_socket(AF_INET);
+        testrun(-1 != socket[i]);
 
-    dtn_socket_data data = {0};
-    testrun(dtn_socket_get_data(socket[i], &data, NULL));
-    dtn_log_debug("opened socket %i %s:%i", socket[i], data.host, data.port);
-  }
+        dtn_socket_data data = {0};
+        testrun(dtn_socket_get_data(socket[i], &data, NULL));
+        dtn_log_debug("opened socket %i %s:%i", socket[i], data.host,
+                      data.port);
+    }
 
-  for (size_t i = 0; i < 10; i++) {
+    for (size_t i = 0; i < 10; i++) {
 
-    close(socket[i]);
-  }
+        close(socket[i]);
+    }
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -72,10 +73,10 @@ int test_dtn_mc_test_common_open_socket() {
 
 int all_tests() {
 
-  testrun_init();
-  testrun_test(test_dtn_mc_test_common_open_socket);
+    testrun_init();
+    testrun_test(test_dtn_mc_test_common_open_socket);
 
-  return testrun_counter;
+    return testrun_counter;
 }
 
 /*

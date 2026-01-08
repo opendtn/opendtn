@@ -39,14 +39,14 @@ Copyright   2018        German Aerospace Center DLR e.V.,
 
 #define DTN_THREAD_MESSAGE_MAGIC_BYTES 0x744D
 
-#define DTN_THREAD_MESSAGE_VALID(x)                                             \
-  ((0 != x) && (x)->magic_bytes == DTN_THREAD_MESSAGE_MAGIC_BYTES)
+#define DTN_THREAD_MESSAGE_VALID(x)                                            \
+    ((0 != x) && (x)->magic_bytes == DTN_THREAD_MESSAGE_MAGIC_BYTES)
 
 typedef enum {
 
-  DTN_THREAD_MESSAGE_TYPE_ENSURE_SIGNED_INT_TYPE = -1,
-  DTN_GENERIC_MESSAGE,
-  DTN_THREAD_MESSAGE_START_USER_TYPES /* Last entry to allow this */
+    DTN_THREAD_MESSAGE_TYPE_ENSURE_SIGNED_INT_TYPE = -1,
+    DTN_GENERIC_MESSAGE,
+    DTN_THREAD_MESSAGE_START_USER_TYPES /* Last entry to allow this */
 
 } dtn_thread_message_type;
 
@@ -60,29 +60,29 @@ typedef struct dtn_thread_message_struct dtn_thread_message;
 
 struct dtn_thread_message_struct {
 
-  uint16_t magic_bytes;
+    uint16_t magic_bytes;
 
-  /**
-   * Sub-type to distinguish different thread messages
-   * Must be int to ensure enum constants fit in here ...
-   */
-  int type;
+    /**
+     * Sub-type to distinguish different thread messages
+     * Must be int to ensure enum constants fit in here ...
+     */
+    int type;
 
-  /**
-   * Original message received over signaling connection
-   */
-  dtn_item *message;
+    /**
+     * Original message received over signaling connection
+     */
+    dtn_item *message;
 
-  /**
-   * Hack
-   */
-  int socket;
+    /**
+     * Hack
+     */
+    int socket;
 
-  /**
-   * Free this message.
-   * Prefer dtn_thread_message_free() instead of calling this method directly
-   */
-  dtn_thread_message *(*free)(dtn_thread_message *);
+    /**
+     * Free this message.
+     * Prefer dtn_thread_message_free() instead of calling this method directly
+     */
+    dtn_thread_message *(*free)(dtn_thread_message *);
 };
 
 /******************************************************************************
@@ -101,7 +101,7 @@ struct dtn_thread_message_struct {
  */
 dtn_thread_message *
 dtn_thread_message_standard_create(dtn_thread_message_type type,
-                                  dtn_item *message);
+                                   dtn_item *message);
 
 /*----------------------------------------------------------------------------*/
 

@@ -76,7 +76,6 @@ struct dtn_async_data {
         void (*callback)(void *userdata, int socket, dtn_item *message);
 
     } callback;
-
 };
 
 /*
@@ -105,18 +104,15 @@ void dtn_async_data_clear(dtn_async_data *data);
  *  Set some data for a min lifetime.
  *  @NOTE the message item set MUST NOT BE FREED
  */
-bool dtn_async_set(dtn_async_store *self,
-                         const char *id,
-                         dtn_async_data data,
-                         uint64_t min_lifetime_usec);
+bool dtn_async_set(dtn_async_store *self, const char *id, dtn_async_data data,
+                   uint64_t min_lifetime_usec);
 
 /*---------------------------------------------------------------------------*/
 
 /**
  *  Get some asnyc data for id
  */
-dtn_async_data dtn_async_get(dtn_async_store *self,
-                                   const char *id);
+dtn_async_data dtn_async_get(dtn_async_store *self, const char *id);
 
 /*---------------------------------------------------------------------------*/
 
@@ -124,6 +120,5 @@ dtn_async_data dtn_async_get(dtn_async_store *self,
  *  Drop all async data for some socket
  */
 bool dtn_async_drop(dtn_async_store *self, int socket);
-
 
 #endif /* dtn_async_store_h */

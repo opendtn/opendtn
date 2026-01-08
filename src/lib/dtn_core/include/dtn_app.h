@@ -32,8 +32,8 @@
 
 /*----------------------------------------------------------------------------*/
 
-#include <dtn_base/dtn_event_loop.h>
 #include "dtn_io.h"
+#include <dtn_base/dtn_event_loop.h>
 
 /*----------------------------------------------------------------------------*/
 
@@ -85,7 +85,8 @@ dtn_app_config dtn_app_config_from_item(const dtn_item *item);
  */
 
 int dtn_app_open_listener(dtn_app *self, dtn_socket_configuration config);
-int dtn_app_open_connection(dtn_app *self, dtn_socket_configuration config, dtn_io_ssl_config ssl);
+int dtn_app_open_connection(dtn_app *self, dtn_socket_configuration config,
+                            dtn_io_ssl_config ssl);
 bool dtn_app_close(dtn_app *self, int socket);
 
 /*
@@ -96,7 +97,8 @@ bool dtn_app_close(dtn_app *self, int socket);
  *      ------------------------------------------------------------------------
  */
 
-bool dtn_app_send(dtn_app *self, int socket, const uint8_t *buffer, size_t size);
+bool dtn_app_send(dtn_app *self, int socket, const uint8_t *buffer,
+                  size_t size);
 bool dtn_app_send_json(dtn_app *self, int socket, const dtn_item *output);
 
 /*
@@ -107,25 +109,23 @@ bool dtn_app_send_json(dtn_app *self, int socket, const dtn_item *output);
  *      ------------------------------------------------------------------------
  */
 
-bool dtn_app_register(dtn_app *self, 
-        const char *event,
-        bool (*callback)(void *userdata, int socket, dtn_item *input),
-        void *userdata);
+bool dtn_app_register(dtn_app *self, const char *event,
+                      bool (*callback)(void *userdata, int socket,
+                                       dtn_item *input),
+                      void *userdata);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_app_deregister(dtn_app *self,
-        const char *event);
+bool dtn_app_deregister(dtn_app *self, const char *event);
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_app_register_close(dtn_app *self, void *userdata, 
-        void (callback)(void *userdata, int socket));
+bool dtn_app_register_close(dtn_app *self, void *userdata,
+                            void(callback)(void *userdata, int socket));
 
 /*----------------------------------------------------------------------------*/
 
-bool dtn_app_register_connected(dtn_app *self, void *userdata, 
-        void (callback)(void *userdata, int socket));
-
+bool dtn_app_register_connected(dtn_app *self, void *userdata,
+                                void(callback)(void *userdata, int socket));
 
 #endif /* dtn_app_h */

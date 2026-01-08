@@ -27,11 +27,11 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_webserver.c"
+#include <dtn_base/testrun.h>
 
-#include "../include/dtn_websocket_message.h"
 #include "../include/dtn_event_api.h"
+#include "../include/dtn_websocket_message.h"
 #include <dtn_base/dtn_dump.h>
 #include <openssl/conf.h>
 #include <openssl/err.h>
@@ -72,85 +72,84 @@ static const char *domain_config_file = 0;
 static const char *domain_config_file_one = 0;
 static const char *domain_config_file_two = 0;
 
-
 /*----------------------------------------------------------------------------*/
 
 int domains_deinit() {
 
-  testrun(0 != domain_config_file);
+    testrun(0 != domain_config_file);
 
-  unlink(domain_config_file);
-  domain_config_file = 0;
+    unlink(domain_config_file);
+    domain_config_file = 0;
 
-  testrun(0 != domain_config_file_one);
-  unlink(domain_config_file_one);
-  domain_config_file_one = 0;
+    testrun(0 != domain_config_file_one);
+    unlink(domain_config_file_one);
+    domain_config_file_one = 0;
 
-  testrun(0 != domain_config_file_two);
-  unlink(domain_config_file_two);
-  domain_config_file_two = 0;
+    testrun(0 != domain_config_file_two);
+    unlink(domain_config_file_two);
+    domain_config_file_two = 0;
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
 int domains_init() {
 
-  test_resource_dir = DTN_TEST_RESOURCE_DIR;
+    test_resource_dir = DTN_TEST_RESOURCE_DIR;
 
-  domain_config_file = DTN_TEST_RESOURCE_DIR"/" TEST_DOMAIN_NAME;
-  domain_config_file_one =DTN_TEST_RESOURCE_DIR"/" TEST_DOMAIN_NAME_ONE;
-  domain_config_file_two = DTN_TEST_RESOURCE_DIR"/" TEST_DOMAIN_NAME_TWO;
+    domain_config_file = DTN_TEST_RESOURCE_DIR "/" TEST_DOMAIN_NAME;
+    domain_config_file_one = DTN_TEST_RESOURCE_DIR "/" TEST_DOMAIN_NAME_ONE;
+    domain_config_file_two = DTN_TEST_RESOURCE_DIR "/" TEST_DOMAIN_NAME_TWO;
 
-  /* Delete possibly remaining files from previous test run */
-  domains_deinit();
+    /* Delete possibly remaining files from previous test run */
+    domains_deinit();
 
-  /* Since strings have been freed, reinit */
-  test_resource_dir = DTN_TEST_RESOURCE_DIR;
+    /* Since strings have been freed, reinit */
+    test_resource_dir = DTN_TEST_RESOURCE_DIR;
 
-  domain_config_file = DTN_TEST_RESOURCE_DIR"/" TEST_DOMAIN_NAME;
-  domain_config_file_one =DTN_TEST_RESOURCE_DIR"/" TEST_DOMAIN_NAME_ONE;
-  domain_config_file_two =DTN_TEST_RESOURCE_DIR"/" TEST_DOMAIN_NAME_TWO;
+    domain_config_file = DTN_TEST_RESOURCE_DIR "/" TEST_DOMAIN_NAME;
+    domain_config_file_one = DTN_TEST_RESOURCE_DIR "/" TEST_DOMAIN_NAME_ONE;
+    domain_config_file_two = DTN_TEST_RESOURCE_DIR "/" TEST_DOMAIN_NAME_TWO;
 
-  dtn_item *conf = dtn_item_object();
-  dtn_item *cert = dtn_item_object();
-  testrun(dtn_item_object_set(conf, "certificate", cert));
+    dtn_item *conf = dtn_item_object();
+    dtn_item *cert = dtn_item_object();
+    testrun(dtn_item_object_set(conf, "certificate", cert));
 
-  dtn_item *val = NULL;
-  val = dtn_item_string(TEST_DOMAIN_NAME);
-  testrun(dtn_item_object_set(conf, "name", val));
-  val = dtn_item_string(test_resource_dir);
-  testrun(dtn_item_object_set(conf, "path", val));
-  val = dtn_item_string(DTN_TEST_CERT);
-  testrun(dtn_item_object_set(cert, "file", val));
-  val = dtn_item_string(DTN_TEST_CERT_KEY);
-  testrun(dtn_item_object_set(cert, "key", val));
-  testrun(dtn_item_json_write_file(domain_config_file, conf));
+    dtn_item *val = NULL;
+    val = dtn_item_string(TEST_DOMAIN_NAME);
+    testrun(dtn_item_object_set(conf, "name", val));
+    val = dtn_item_string(test_resource_dir);
+    testrun(dtn_item_object_set(conf, "path", val));
+    val = dtn_item_string(DTN_TEST_CERT);
+    testrun(dtn_item_object_set(cert, "file", val));
+    val = dtn_item_string(DTN_TEST_CERT_KEY);
+    testrun(dtn_item_object_set(cert, "key", val));
+    testrun(dtn_item_json_write_file(domain_config_file, conf));
 
-  val = dtn_item_string(TEST_DOMAIN_NAME_ONE);
-  testrun(dtn_item_object_set(conf, "name", val));
-  val = dtn_item_string(test_resource_dir);
-  testrun(dtn_item_object_set(conf, "path", val));
-  val = dtn_item_string(DTN_TEST_CERT_ONE);
-  testrun(dtn_item_object_set(cert, "file", val));
-  val = dtn_item_string(DTN_TEST_CERT_ONE_KEY);
-  testrun(dtn_item_object_set(cert, "key", val));
-  testrun(dtn_item_json_write_file(domain_config_file_one, conf));
+    val = dtn_item_string(TEST_DOMAIN_NAME_ONE);
+    testrun(dtn_item_object_set(conf, "name", val));
+    val = dtn_item_string(test_resource_dir);
+    testrun(dtn_item_object_set(conf, "path", val));
+    val = dtn_item_string(DTN_TEST_CERT_ONE);
+    testrun(dtn_item_object_set(cert, "file", val));
+    val = dtn_item_string(DTN_TEST_CERT_ONE_KEY);
+    testrun(dtn_item_object_set(cert, "key", val));
+    testrun(dtn_item_json_write_file(domain_config_file_one, conf));
 
-  val = dtn_item_string(TEST_DOMAIN_NAME_TWO);
-  testrun(dtn_item_object_set(conf, "name", val));
-  val = dtn_item_string(test_resource_dir);
-  testrun(dtn_item_object_set(conf, "path", val));
-  val = dtn_item_string(DTN_TEST_CERT_TWO);
-  testrun(dtn_item_object_set(cert, "file", val));
-  val = dtn_item_string(DTN_TEST_CERT_TWO_KEY);
-  testrun(dtn_item_object_set(cert, "key", val));
-  testrun(dtn_item_json_write_file(domain_config_file_two, conf));
+    val = dtn_item_string(TEST_DOMAIN_NAME_TWO);
+    testrun(dtn_item_object_set(conf, "name", val));
+    val = dtn_item_string(test_resource_dir);
+    testrun(dtn_item_object_set(conf, "path", val));
+    val = dtn_item_string(DTN_TEST_CERT_TWO);
+    testrun(dtn_item_object_set(cert, "file", val));
+    val = dtn_item_string(DTN_TEST_CERT_TWO_KEY);
+    testrun(dtn_item_object_set(cert, "key", val));
+    testrun(dtn_item_json_write_file(domain_config_file_two, conf));
 
-  conf = dtn_item_free(conf);
+    conf = dtn_item_free(conf);
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -163,14 +162,14 @@ int domains_init() {
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_webserver_create(){
-    
+int test_dtn_webserver_create() {
+
     dtn_event_loop *loop = dtn_event_loop_default(
-      (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
+        (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
     testrun(loop);
 
     // server is running on TLS only, so we need some TLS IO config
-    dtn_io_config io_config = (dtn_io_config) {.loop = loop};
+    dtn_io_config io_config = (dtn_io_config){.loop = loop};
     strncpy(io_config.domain.path, test_resource_dir, PATH_MAX);
 
     dtn_io *io = dtn_io_create(io_config);
@@ -179,11 +178,8 @@ int test_dtn_webserver_create(){
     dtn_webserver_config config = (dtn_webserver_config){
         .loop = loop,
         .io = io,
-        .socket = dtn_socket_load_dynamic_port((dtn_socket_configuration){
-            .host = "localhost",
-            .type = TCP
-        })
-    };
+        .socket = dtn_socket_load_dynamic_port(
+            (dtn_socket_configuration){.host = "localhost", .type = TCP})};
 
     dtn_webserver *self = dtn_webserver_create(config);
 
@@ -202,14 +198,14 @@ int test_dtn_webserver_create(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_webserver_free(){
-    
+int test_dtn_webserver_free() {
+
     dtn_event_loop *loop = dtn_event_loop_default(
-      (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
+        (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
     testrun(loop);
 
     // server is running on TLS only, so we need some TLS IO config
-    dtn_io_config io_config = (dtn_io_config) {.loop = loop};
+    dtn_io_config io_config = (dtn_io_config){.loop = loop};
     strncpy(io_config.domain.path, test_resource_dir, PATH_MAX);
 
     dtn_io *io = dtn_io_create(io_config);
@@ -218,11 +214,8 @@ int test_dtn_webserver_free(){
     dtn_webserver_config config = (dtn_webserver_config){
         .loop = loop,
         .io = io,
-        .socket = dtn_socket_load_dynamic_port((dtn_socket_configuration){
-            .host = "localhost",
-            .type = TCP
-        })
-    };
+        .socket = dtn_socket_load_dynamic_port(
+            (dtn_socket_configuration){.host = "localhost", .type = TCP})};
 
     dtn_webserver *self = dtn_webserver_create(config);
 
@@ -235,14 +228,14 @@ int test_dtn_webserver_free(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_webserver_set_debug(){
-    
+int test_dtn_webserver_set_debug() {
+
     dtn_event_loop *loop = dtn_event_loop_default(
-      (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
+        (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
     testrun(loop);
 
     // server is running on TLS only, so we need some TLS IO config
-    dtn_io_config io_config = (dtn_io_config) {.loop = loop};
+    dtn_io_config io_config = (dtn_io_config){.loop = loop};
     strncpy(io_config.domain.path, test_resource_dir, PATH_MAX);
 
     dtn_io *io = dtn_io_create(io_config);
@@ -251,11 +244,8 @@ int test_dtn_webserver_set_debug(){
     dtn_webserver_config config = (dtn_webserver_config){
         .loop = loop,
         .io = io,
-        .socket = dtn_socket_load_dynamic_port((dtn_socket_configuration){
-            .host = "localhost",
-            .type = TCP
-        })
-    };
+        .socket = dtn_socket_load_dynamic_port(
+            (dtn_socket_configuration){.host = "localhost", .type = TCP})};
 
     dtn_webserver *self = dtn_webserver_create(config);
 
@@ -281,9 +271,9 @@ struct dummy {
 
 /*----------------------------------------------------------------------------*/
 
-static void dummy_callback(void *userdata, int socket, dtn_item *msg){
+static void dummy_callback(void *userdata, int socket, dtn_item *msg) {
 
-    struct dummy *dummy = (struct dummy*) userdata;
+    struct dummy *dummy = (struct dummy *)userdata;
     dummy->socket = socket;
     dummy->item = msg;
     return;
@@ -291,16 +281,16 @@ static void dummy_callback(void *userdata, int socket, dtn_item *msg){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_webserver_enable_callback(){
-    
+int test_dtn_webserver_enable_callback() {
+
     struct dummy dummy = {0};
 
     dtn_event_loop *loop = dtn_event_loop_default(
-      (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
+        (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
     testrun(loop);
 
     // server is running on TLS only, so we need some TLS IO config
-    dtn_io_config io_config = (dtn_io_config) {.loop = loop};
+    dtn_io_config io_config = (dtn_io_config){.loop = loop};
     strncpy(io_config.domain.path, test_resource_dir, PATH_MAX);
 
     dtn_io *io = dtn_io_create(io_config);
@@ -309,18 +299,15 @@ int test_dtn_webserver_enable_callback(){
     dtn_webserver_config config = (dtn_webserver_config){
         .loop = loop,
         .io = io,
-        .socket = dtn_socket_load_dynamic_port((dtn_socket_configuration){
-            .host = "localhost",
-            .type = TCP
-        })
-    };
+        .socket = dtn_socket_load_dynamic_port(
+            (dtn_socket_configuration){.host = "localhost", .type = TCP})};
 
     dtn_webserver *self = dtn_webserver_create(config);
 
     testrun(0 == dtn_dict_count(self->callbacks));
     testrun(dtn_webserver_enable_callback(self, "one", &dummy, dummy_callback));
     testrun(1 == dtn_dict_count(self->callbacks));
-    
+
     testrun(NULL == dtn_io_free(io));
     testrun(NULL == dtn_webserver_free(self));
     testrun(NULL == dtn_event_loop_free(loop));
@@ -330,14 +317,14 @@ int test_dtn_webserver_enable_callback(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_webserver_enable_domains(){
+int test_dtn_webserver_enable_domains() {
 
     dtn_event_loop *loop = dtn_event_loop_default(
-      (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
+        (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
     testrun(loop);
 
     // server is running on TLS only, so we need some TLS IO config
-    dtn_io_config io_config = (dtn_io_config) {.loop = loop};
+    dtn_io_config io_config = (dtn_io_config){.loop = loop};
     strncpy(io_config.domain.path, test_resource_dir, PATH_MAX);
 
     dtn_io *io = dtn_io_create(io_config);
@@ -346,18 +333,16 @@ int test_dtn_webserver_enable_domains(){
     dtn_webserver_config config = (dtn_webserver_config){
         .loop = loop,
         .io = io,
-        .socket = dtn_socket_load_dynamic_port((dtn_socket_configuration){
-            .host = "localhost",
-            .type = TCP
-        })
-    };
+        .socket = dtn_socket_load_dynamic_port(
+            (dtn_socket_configuration){.host = "localhost", .type = TCP})};
 
     dtn_webserver *self = dtn_webserver_create(config);
 
     dtn_item *overall_config = dtn_item_object();
     dtn_item *web_server_config = dtn_item_object();
     dtn_item *domain_config = dtn_item_array();
-    testrun(dtn_item_object_set(overall_config, "webserver", web_server_config));
+    testrun(
+        dtn_item_object_set(overall_config, "webserver", web_server_config));
     testrun(dtn_item_object_set(web_server_config, "domains", domain_config));
     dtn_item *domain1 = dtn_item_object();
     dtn_item *domain2 = dtn_item_object();
@@ -371,7 +356,7 @@ int test_dtn_webserver_enable_domains(){
     testrun(dtn_webserver_enable_domains(self, overall_config));
     testrun(2 == dtn_dict_count(self->domains));
     testrun(NULL == dtn_item_free(overall_config));
-    
+
     testrun(NULL == dtn_io_free(io));
     testrun(NULL == dtn_webserver_free(self));
     testrun(NULL == dtn_event_loop_free(loop));
@@ -384,109 +369,109 @@ int test_dtn_webserver_enable_domains(){
 static int run_client_handshake(dtn_event_loop *loop, SSL *ssl, int *err,
                                 int *errorcode) {
 
-  testrun(loop);
-  testrun(ssl);
-  testrun(err);
-  testrun(errorcode);
+    testrun(loop);
+    testrun(ssl);
+    testrun(err);
+    testrun(errorcode);
 
-  int r = 0;
-  int n = 0;
+    int r = 0;
+    int n = 0;
 
-  bool run = true;
-  while (run) {
+    bool run = true;
+    while (run) {
 
-    loop->run(loop, TEST_RUNTIME_USECS);
+        loop->run(loop, TEST_RUNTIME_USECS);
 
-    n = 0;
-    r = SSL_connect(ssl);
+        n = 0;
+        r = SSL_connect(ssl);
 
-    switch (r) {
+        switch (r) {
 
-    case 1:
-      /* SUCCESS */
-      run = false;
-      break;
+        case 1:
+            /* SUCCESS */
+            run = false;
+            break;
 
-    default:
+        default:
 
-      n = SSL_get_error(ssl, r);
+            n = SSL_get_error(ssl, r);
 
-      switch (n) {
+            switch (n) {
 
-      case SSL_ERROR_NONE:
-        /* SHOULD not be returned in 0 */
-        break;
+            case SSL_ERROR_NONE:
+                /* SHOULD not be returned in 0 */
+                break;
 
-      case SSL_ERROR_ZERO_RETURN:
-        /* close */
-        run = false;
-        break;
+            case SSL_ERROR_ZERO_RETURN:
+                /* close */
+                run = false;
+                break;
 
-      case SSL_ERROR_WANT_READ:
-      case SSL_ERROR_WANT_WRITE:
-      case SSL_ERROR_WANT_CONNECT:
-      case SSL_ERROR_WANT_X509_LOOKUP:
-      case SSL_ERROR_WANT_ASYNC:
-      case SSL_ERROR_WANT_ASYNC_JOB:
-      case SSL_ERROR_WANT_CLIENT_HELLO_CB:
-        /* try async again */
-        break;
+            case SSL_ERROR_WANT_READ:
+            case SSL_ERROR_WANT_WRITE:
+            case SSL_ERROR_WANT_CONNECT:
+            case SSL_ERROR_WANT_X509_LOOKUP:
+            case SSL_ERROR_WANT_ASYNC:
+            case SSL_ERROR_WANT_ASYNC_JOB:
+            case SSL_ERROR_WANT_CLIENT_HELLO_CB:
+                /* try async again */
+                break;
 
-      case SSL_ERROR_SYSCALL:
-        /* nonrecoverable IO error */
-        *errorcode = ERR_get_error();
-        run = false;
-        break;
+            case SSL_ERROR_SYSCALL:
+                /* nonrecoverable IO error */
+                *errorcode = ERR_get_error();
+                run = false;
+                break;
 
-      case SSL_ERROR_SSL:
-        *errorcode = ERR_get_error();
-        run = false;
-        break;
+            case SSL_ERROR_SSL:
+                *errorcode = ERR_get_error();
+                run = false;
+                break;
 
-      case SSL_ERROR_WANT_ACCEPT:
-        run = false;
-        break;
-      }
-      break;
+            case SSL_ERROR_WANT_ACCEPT:
+                run = false;
+                break;
+            }
+            break;
+        }
+
+        // fprintf(stdout, "\nr %i n %i\n", r, n);
     }
 
-    // fprintf(stdout, "\nr %i n %i\n", r, n);
-  }
-
-  *err = n;
-  return r;
+    *err = n;
+    return r;
 }
 
 /*----------------------------------------------------------------------------*/
 
 static int dummy_client_hello_cb(SSL *s, int *al, void *arg) {
 
-  /*
-   *      At some point @perform_ssl_client_handshake
-   *      may stop with SSL_ERROR_WANT_CLIENT_HELLO_CB,
-   *      so we add some dummy callback, to resume
-   *      standard SSL operation.
-   */
-  if (!s)
-    return SSL_CLIENT_HELLO_ERROR;
+    /*
+     *      At some point @perform_ssl_client_handshake
+     *      may stop with SSL_ERROR_WANT_CLIENT_HELLO_CB,
+     *      so we add some dummy callback, to resume
+     *      standard SSL operation.
+     */
+    if (!s)
+        return SSL_CLIENT_HELLO_ERROR;
 
-  if (al || arg) { /* ignored */
-  };
-  return SSL_CLIENT_HELLO_SUCCESS;
+    if (al || arg) { /* ignored */
+    };
+    return SSL_CLIENT_HELLO_SUCCESS;
 }
 
 /*----------------------------------------------------------------------------*/
 
-int check_websocket(){
+int check_websocket() {
 
     struct dummy dummy = {0};
 
     dtn_event_loop *loop = dtn_event_loop_default(
-      (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
+        (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
     testrun(loop);
 
     // server is running on TLS only, so we need some TLS IO config
-    dtn_io_config io_config = (dtn_io_config) {.loop = loop};
+    dtn_io_config io_config = (dtn_io_config){.loop = loop};
     strncpy(io_config.domain.path, test_resource_dir, PATH_MAX);
 
     dtn_io *io = dtn_io_create(io_config);
@@ -495,11 +480,8 @@ int check_websocket(){
     dtn_webserver_config config = (dtn_webserver_config){
         .loop = loop,
         .io = io,
-        .socket = dtn_socket_load_dynamic_port((dtn_socket_configuration){
-            .host = "localhost",
-            .type = TCP
-        })
-    };
+        .socket = dtn_socket_load_dynamic_port(
+            (dtn_socket_configuration){.host = "localhost", .type = TCP})};
 
     dtn_webserver *self = dtn_webserver_create(config);
     testrun(dtn_webserver_set_debug(self, true));
@@ -516,84 +498,81 @@ int check_websocket(){
     SSL_CTX_set_client_hello_cb(ctx, dummy_client_hello_cb, NULL);
     testrun(1 == SSL_set_fd(ssl, client));
     SSL_set_connect_state(ssl);
-    
+
     int errorcode = -1;
     int err = 0;
     int r = run_client_handshake(loop, ssl, &err, &errorcode);
     testrun(r == 1);
     testrun(loop->run(loop, TEST_RUNTIME_USECS));
 
-    // SSL handshake done, client connected 
+    // SSL handshake done, client connected
 
     uint8_t secure_key[1024] = {0};
     testrun(dtn_websocket_generate_secure_websocket_key(secure_key, 1024));
 
     dtn_http_message *upgrade = dtn_websocket_upgrade_request(
-        "one", "/", (dtn_memory_pointer){
-            .start = secure_key,
-            .length = strlen((char*)secure_key)
-        });
+        "one", "/",
+        (dtn_memory_pointer){.start = secure_key,
+                             .length = strlen((char *)secure_key)});
     testrun(upgrade);
 
-    ssize_t bytes = SSL_write(ssl, upgrade->buffer->start, upgrade->buffer->length);
-    testrun(bytes == (int64_t) upgrade->buffer->length);
+    ssize_t bytes =
+        SSL_write(ssl, upgrade->buffer->start, upgrade->buffer->length);
+    testrun(bytes == (int64_t)upgrade->buffer->length);
     upgrade = dtn_http_message_free(upgrade);
 
     uint8_t buffer[2028] = {0};
 
     bytes = -1;
-    
-    while(-1 == bytes){
+
+    while (-1 == bytes) {
 
         bytes = SSL_read(ssl, buffer, 2048);
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
-
     }
 
-    dtn_http_message_config http_config = dtn_http_message_config_init(
-        (dtn_http_message_config){0});
-    
+    dtn_http_message_config http_config =
+        dtn_http_message_config_init((dtn_http_message_config){0});
+
     upgrade = dtn_http_message_create(http_config);
     testrun(upgrade);
     memcpy(upgrade->buffer->start, buffer, bytes);
     upgrade->buffer->length = bytes;
     uint8_t *next = NULL;
 
-    testrun(DTN_HTTP_PARSER_SUCCESS == dtn_http_pointer_parse_message(upgrade, &next));
-    testrun(dtn_websocket_is_upgrade_response(upgrade, (dtn_memory_pointer){
-        .start = secure_key,
-        .length = strlen((char*)secure_key)
-    }));                   
+    testrun(DTN_HTTP_PARSER_SUCCESS ==
+            dtn_http_pointer_parse_message(upgrade, &next));
+    testrun(dtn_websocket_is_upgrade_response(
+        upgrade, (dtn_memory_pointer){.start = secure_key,
+                                      .length = strlen((char *)secure_key)}));
 
     upgrade = dtn_http_message_free(upgrade);
 
     // websocket connection enabled
 
-    dtn_websocket_frame *frame = dtn_websocket_frame_create(
-        (dtn_websocket_frame_config){0});
+    dtn_websocket_frame *frame =
+        dtn_websocket_frame_create((dtn_websocket_frame_config){0});
     testrun(frame);
 
     frame->buffer->start[0] = 0x80 | DTN_WEBSOCKET_OPCODE_PING;
     frame->buffer->start[1] = 0x00;
 
     bytes = -1;
-    
-    while(-1 == bytes){
+
+    while (-1 == bytes) {
 
         bytes = SSL_write(ssl, frame->buffer->start, 2);
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
-
     }
 
     dtn_event_loop_run(loop, DTN_RUN_ONCE);
 
     bytes = -1;
     memset(buffer, 0, 2028);
-    while(-1 == bytes){
+    while (-1 == bytes) {
 
         bytes = SSL_read(ssl, buffer, 2028);
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
-
     }
 
     // check pong received
@@ -604,34 +583,34 @@ int check_websocket(){
 
     // check websocket reception with JSON messages
 
-    testrun(dtn_webserver_enable_callback(
-        self, "openvocs.test", &dummy, dummy_callback));
+    testrun(dtn_webserver_enable_callback(self, "openvocs.test", &dummy,
+                                          dummy_callback));
 
     dtn_item *json = dtn_item_object();
     testrun(dtn_item_object_set(json, "event", dtn_item_string("test")));
     char *string = dtn_item_to_json(json);
     testrun(string);
 
-    frame->buffer->start[0] = 0x80 | DTN_WEBSOCKET_FRAGMENTATION_NONE | DTN_WEBSOCKET_OPCODE_TEXT;
-    testrun(dtn_websocket_set_data(frame,
-        (uint8_t*)string, strlen(string), true));
+    frame->buffer->start[0] =
+        0x80 | DTN_WEBSOCKET_FRAGMENTATION_NONE | DTN_WEBSOCKET_OPCODE_TEXT;
+    testrun(
+        dtn_websocket_set_data(frame, (uint8_t *)string, strlen(string), true));
 
     json = dtn_item_free(json);
     string = dtn_data_pointer_free(string);
 
     bytes = -1;
-    while(-1 == bytes){
+    while (-1 == bytes) {
 
         bytes = SSL_write(ssl, frame->buffer->start, frame->buffer->length);
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
-
     }
 
     testrun(dummy.socket > 0);
     testrun(dummy.item);
-    testrun(0 == dtn_string_compare("test",dtn_event_get_event(dummy.item)));
+    testrun(0 == dtn_string_compare("test", dtn_event_get_event(dummy.item)));
     dummy.item = dtn_item_free(dummy.item);
-    
+
     // check incomplete JSON delivery
 
     json = dtn_item_object();
@@ -639,117 +618,107 @@ int check_websocket(){
     string = dtn_item_to_json(json);
     testrun(string);
 
-    frame->buffer->start[0] = 0x80 | DTN_WEBSOCKET_FRAGMENTATION_NONE | DTN_WEBSOCKET_OPCODE_TEXT;
-    testrun(dtn_websocket_set_data(frame,
-        (uint8_t*)string, 5, true));
+    frame->buffer->start[0] =
+        0x80 | DTN_WEBSOCKET_FRAGMENTATION_NONE | DTN_WEBSOCKET_OPCODE_TEXT;
+    testrun(dtn_websocket_set_data(frame, (uint8_t *)string, 5, true));
 
     bytes = -1;
-    while(-1 == bytes){
+    while (-1 == bytes) {
 
         bytes = SSL_write(ssl, frame->buffer->start, frame->buffer->length);
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
-
     }
 
     testrun(!dummy.item);
 
-    frame->buffer->start[0] = 0x80 | DTN_WEBSOCKET_FRAGMENTATION_NONE | DTN_WEBSOCKET_OPCODE_TEXT;
-    testrun(dtn_websocket_set_data(frame,
-        (uint8_t*)string + 5, strlen(string) - 5, true));
+    frame->buffer->start[0] =
+        0x80 | DTN_WEBSOCKET_FRAGMENTATION_NONE | DTN_WEBSOCKET_OPCODE_TEXT;
+    testrun(dtn_websocket_set_data(frame, (uint8_t *)string + 5,
+                                   strlen(string) - 5, true));
 
     dummy.socket = 0;
 
     bytes = -1;
-    while(-1 == bytes){
+    while (-1 == bytes) {
 
         bytes = SSL_write(ssl, frame->buffer->start, frame->buffer->length);
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
-
     }
 
     // we need to run the loop a while after writing (dont know exactely why)
-    while(dummy.socket == 0){
+    while (dummy.socket == 0) {
 
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
-
     }
 
     testrun(dummy.socket > 0);
     testrun(dummy.item);
-    testrun(0 == dtn_string_compare("test",dtn_event_get_event(dummy.item)));
+    testrun(0 == dtn_string_compare("test", dtn_event_get_event(dummy.item)));
     dummy.item = dtn_item_free(dummy.item);
 
     // check fragmented websocket delivery
 
     frame->buffer->start[0] = 0x00 | DTN_WEBSOCKET_OPCODE_TEXT;
-    testrun(dtn_websocket_set_data(frame,
-        (uint8_t*)string, 4, true));
+    testrun(dtn_websocket_set_data(frame, (uint8_t *)string, 4, true));
 
     bytes = -1;
-    while(-1 == bytes){
+    while (-1 == bytes) {
 
         bytes = SSL_write(ssl, frame->buffer->start, frame->buffer->length);
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
-
     }
 
     testrun(!dummy.item);
 
     testrun(dtn_websocket_frame_clear(frame));
     frame->buffer->start[0] = 0x00;
-    testrun(dtn_websocket_set_data(frame,
-        (uint8_t*)string + 4, 4, true));
+    testrun(dtn_websocket_set_data(frame, (uint8_t *)string + 4, 4, true));
 
     bytes = -1;
-    while(-1 == bytes){
+    while (-1 == bytes) {
 
         bytes = SSL_write(ssl, frame->buffer->start, frame->buffer->length);
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
-
     }
 
     testrun(!dummy.item);
 
     testrun(dtn_websocket_frame_clear(frame));
     frame->buffer->start[0] = 0x00;
-    testrun(dtn_websocket_set_data(frame,
-        (uint8_t*)string + 8, 4, true));
+    testrun(dtn_websocket_set_data(frame, (uint8_t *)string + 8, 4, true));
 
     bytes = -1;
-    while(-1 == bytes){
+    while (-1 == bytes) {
 
         bytes = SSL_write(ssl, frame->buffer->start, frame->buffer->length);
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
-
     }
 
     testrun(!dummy.item);
 
     testrun(dtn_websocket_frame_clear(frame));
     frame->buffer->start[0] = 0x80;
-    testrun(dtn_websocket_set_data(frame,
-        (uint8_t*)string + 12, strlen(string) - 12, true));
+    testrun(dtn_websocket_set_data(frame, (uint8_t *)string + 12,
+                                   strlen(string) - 12, true));
 
     dummy.socket = 0;
 
     bytes = -1;
-    while(-1 == bytes){
+    while (-1 == bytes) {
 
         bytes = SSL_write(ssl, frame->buffer->start, frame->buffer->length);
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
-
     }
-     
+
     // we need to run the loop a while after writing (dont know exactely why)
-    while(dummy.socket == 0){
+    while (dummy.socket == 0) {
 
         dtn_event_loop_run(loop, DTN_RUN_ONCE);
-
     }
 
     testrun(dummy.socket > 0);
     testrun(dummy.item);
-    testrun(0 == dtn_string_compare("test",dtn_event_get_event(dummy.item)));
+    testrun(0 == dtn_string_compare("test", dtn_event_get_event(dummy.item)));
     dummy.item = dtn_item_free(dummy.item);
 
     frame = dtn_websocket_frame_free(frame);
@@ -758,7 +727,7 @@ int check_websocket(){
 
     SSL_CTX_free(ctx);
     SSL_free(ssl);
-    
+
     testrun(NULL == dtn_io_free(io));
     testrun(NULL == dtn_webserver_free(self));
     testrun(NULL == dtn_event_loop_free(loop));
@@ -768,7 +737,7 @@ int check_websocket(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_webserver_config_from_item(){
+int test_dtn_webserver_config_from_item() {
 
     dtn_item *overall_config = dtn_item_object();
     dtn_item *config = dtn_item_object();
@@ -778,10 +747,8 @@ int test_dtn_webserver_config_from_item(){
     dtn_item *socket = NULL;
     testrun(dtn_socket_configuration_to_item(
         (dtn_socket_configuration){
-            .host = "localhost",
-            .port = 443,
-            .type = TLS},
-            &socket));
+            .host = "localhost", .port = 443, .type = TLS},
+        &socket));
 
     testrun(dtn_item_object_set(config, "socket", socket));
 
@@ -795,7 +762,6 @@ int test_dtn_webserver_config_from_item(){
 
     return testrun_log_success();
 }
-
 
 /*
  *      ------------------------------------------------------------------------

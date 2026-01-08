@@ -41,16 +41,15 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_garbadge_colloctor_create(){
-    
+int test_dtn_garbadge_colloctor_create() {
+
     dtn_event_loop *loop = dtn_event_loop_default(
         (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
-    
+
     testrun(loop);
 
-    dtn_garbadge_colloctor_config config = (dtn_garbadge_colloctor_config){
-        .loop = loop
-    };
+    dtn_garbadge_colloctor_config config =
+        (dtn_garbadge_colloctor_config){.loop = loop};
 
     dtn_garbadge_colloctor *self = dtn_garbadge_colloctor_create(config);
     testrun(self);
@@ -66,19 +65,18 @@ int test_dtn_garbadge_colloctor_create(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_garbadge_colloctor_free(){
-    
+int test_dtn_garbadge_colloctor_free() {
+
     dtn_event_loop *loop = dtn_event_loop_default(
         (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
-    
+
     testrun(loop);
 
-    dtn_garbadge_colloctor_config config = (dtn_garbadge_colloctor_config){
-        .loop = loop
-    };
+    dtn_garbadge_colloctor_config config =
+        (dtn_garbadge_colloctor_config){.loop = loop};
 
     dtn_garbadge_colloctor *self = dtn_garbadge_colloctor_create(config);
-    
+
     char *string = dtn_string_dup("test");
 
     testrun(dtn_garbadge_colloctor_push(self, string, dtn_data_pointer_free));
@@ -91,19 +89,18 @@ int test_dtn_garbadge_colloctor_free(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_garbadge_colloctor_push(){
-    
+int test_dtn_garbadge_colloctor_push() {
+
     dtn_event_loop *loop = dtn_event_loop_default(
         (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
-    
+
     testrun(loop);
 
-    dtn_garbadge_colloctor_config config = (dtn_garbadge_colloctor_config){
-        .loop = loop
-    };
+    dtn_garbadge_colloctor_config config =
+        (dtn_garbadge_colloctor_config){.loop = loop};
 
     dtn_garbadge_colloctor *self = dtn_garbadge_colloctor_create(config);
-    
+
     char *string = dtn_string_dup("test");
 
     testrun(!dtn_garbadge_colloctor_push(NULL, string, dtn_data_pointer_free));
@@ -121,20 +118,18 @@ int test_dtn_garbadge_colloctor_push(){
 
 /*----------------------------------------------------------------------------*/
 
-int check_garbadge_collection(){
-    
+int check_garbadge_collection() {
+
     dtn_event_loop *loop = dtn_event_loop_default(
         (dtn_event_loop_config){.max.sockets = 100, .max.timers = 100});
-    
+
     testrun(loop);
 
     dtn_garbadge_colloctor_config config = (dtn_garbadge_colloctor_config){
-        .loop = loop,
-        .limits.run_cleanup_usec = 10000
-    };
+        .loop = loop, .limits.run_cleanup_usec = 10000};
 
     dtn_garbadge_colloctor *self = dtn_garbadge_colloctor_create(config);
-    
+
     char *string = dtn_string_dup("test");
 
     testrun(dtn_garbadge_colloctor_push(self, string, dtn_data_pointer_free));
@@ -155,9 +150,6 @@ int check_garbadge_collection(){
 }
 
 /*----------------------------------------------------------------------------*/
-
-
-
 
 /*
  *      ------------------------------------------------------------------------

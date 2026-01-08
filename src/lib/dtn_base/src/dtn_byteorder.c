@@ -35,65 +35,65 @@
 #endif
 
 #define __UNUSED(x)                                                            \
-  do {                                                                         \
-    (void)(x);                                                                 \
-  } while (0)
+    do {                                                                       \
+        (void)(x);                                                             \
+    } while (0)
 
 /*---------------------------------------------------------------------------*/
 
 bool dtn_byteorder_swap_bytes_16_bit(int16_t *array,
-                                    size_t number_16_bit_words) {
+                                     size_t number_16_bit_words) {
 
-  if (0 == array)
-    goto error;
+    if (0 == array)
+        goto error;
 
-  for (size_t i = 0; i < number_16_bit_words; i++) {
+    for (size_t i = 0; i < number_16_bit_words; i++) {
 
-    array[i] = DTN_SWAP_16(array[i]);
-  };
+        array[i] = DTN_SWAP_16(array[i]);
+    };
 
-  return true;
+    return true;
 
 error:
 
-  return false;
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
 
 bool dtn_byteorder_swap_bytes_64_bit(int64_t *array,
-                                    size_t number_64_bit_words) {
+                                     size_t number_64_bit_words) {
 
-  if (0 == array)
-    goto error;
+    if (0 == array)
+        goto error;
 
-  for (size_t i = 0; i < number_64_bit_words; i++) {
+    for (size_t i = 0; i < number_64_bit_words; i++) {
 
-    array[i] = DTN_SWAP_64(array[i]);
-  };
+        array[i] = DTN_SWAP_64(array[i]);
+    };
 
-  return true;
+    return true;
 
 error:
 
-  return false;
+    return false;
 }
 
 /*---------------------------------------------------------------------------*/
 
 bool dtn_byteorder_from_little_endian_16_bit(int16_t *array,
-                                            size_t number_16_bit_words) {
+                                             size_t number_16_bit_words) {
 
 #if DTN_BYTE_ORDER == DTN_BIG_ENDIAN
 
-  return dtn_byteorder_swap_bytes_16_bit(array, number_16_bit_words);
+    return dtn_byteorder_swap_bytes_16_bit(array, number_16_bit_words);
 
 #else
 
-  __UNUSED(array);
-  __UNUSED(number_16_bit_words);
+    __UNUSED(array);
+    __UNUSED(number_16_bit_words);
 
-  return true;
+    return true;
 
 #endif
 }
@@ -101,18 +101,18 @@ bool dtn_byteorder_from_little_endian_16_bit(int16_t *array,
 /*---------------------------------------------------------------------------*/
 
 bool dtn_byteorder_from_big_endian_16_bit(int16_t *array,
-                                         size_t number_16_bit_words) {
+                                          size_t number_16_bit_words) {
 
 #if DTN_BYTE_ORDER == DTN_LITTLE_ENDIAN
 
-  return dtn_byteorder_swap_bytes_16_bit(array, number_16_bit_words);
+    return dtn_byteorder_swap_bytes_16_bit(array, number_16_bit_words);
 
 #else
 
-  __UNUSED(array);
-  __UNUSED(number_16_bit_words);
+    __UNUSED(array);
+    __UNUSED(number_16_bit_words);
 
-  return true;
+    return true;
 
 #endif
 }
@@ -120,18 +120,18 @@ bool dtn_byteorder_from_big_endian_16_bit(int16_t *array,
 /*---------------------------------------------------------------------------*/
 
 bool dtn_byteorder_to_little_endian_16_bit(int16_t *array,
-                                          size_t number_16_bit_words) {
+                                           size_t number_16_bit_words) {
 
 #if DTN_BYTE_ORDER == DTN_BIG_ENDIAN
 
-  return dtn_byteorder_swap_bytes_16_bit(array, number_16_bit_words);
+    return dtn_byteorder_swap_bytes_16_bit(array, number_16_bit_words);
 
 #else
 
-  __UNUSED(array);
-  __UNUSED(number_16_bit_words);
+    __UNUSED(array);
+    __UNUSED(number_16_bit_words);
 
-  return true;
+    return true;
 
 #endif
 }
@@ -139,18 +139,18 @@ bool dtn_byteorder_to_little_endian_16_bit(int16_t *array,
 /*---------------------------------------------------------------------------*/
 
 bool dtn_byteorder_to_big_endian_16_bit(int16_t *array,
-                                       size_t number_16_bit_words) {
+                                        size_t number_16_bit_words) {
 
 #if DTN_BYTE_ORDER == DTN_LITTLE_ENDIAN
 
-  return dtn_byteorder_swap_bytes_16_bit(array, number_16_bit_words);
+    return dtn_byteorder_swap_bytes_16_bit(array, number_16_bit_words);
 
 #else
 
-  __UNUSED(array);
-  __UNUSED(number_16_bit_words);
+    __UNUSED(array);
+    __UNUSED(number_16_bit_words);
 
-  return true;
+    return true;
 
 #endif
 }

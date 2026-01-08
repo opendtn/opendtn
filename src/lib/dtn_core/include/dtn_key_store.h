@@ -31,9 +31,9 @@
 #ifndef dtn_key_store_h
 #define dtn_key_store_h
 
-#include <stdbool.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #include <dtn_base/dtn_buffer.h>
 
@@ -47,7 +47,7 @@ typedef struct dtn_key_store dtn_key_store;
 
 /*----------------------------------------------------------------------------*/
 
-typedef struct dtn_key_store_config{
+typedef struct dtn_key_store_config {
 
     char path[PATH_MAX];
 
@@ -92,29 +92,25 @@ bool dtn_key_store_save(dtn_key_store *self, const char *optional_path);
 /**
  *  Get a key for some dtn_destination of form:
  *      reg_name/node_name
- * 
+ *
  *  @param self         instance pointer,
  *  @param destination  destination key
- * 
+ *
  *  @returns copy of the key, buffer MUST be deleted by the caller
  */
-dtn_buffer *dtn_key_store_get(
-    dtn_key_store *self, 
-    const char *destination);
+dtn_buffer *dtn_key_store_get(dtn_key_store *self, const char *destination);
 
 /*----------------------------------------------------------------------------*/
 
 /**
  *  Set a key for some destination of form:
  *      reg_name/node_name
- * 
+ *
  *  @param self         instance pointer
  *  @param destiantion  destination key
  *  @param key          key buffer to be set (will be consumed do not delete)
  */
-bool dtn_key_store_set(
-    dtn_key_store *self, 
-    const char *destination, 
-    dtn_buffer *key);
+bool dtn_key_store_set(dtn_key_store *self, const char *destination,
+                       dtn_buffer *key);
 
 #endif /* dtn_key_store_h */

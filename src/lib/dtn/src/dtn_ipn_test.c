@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_ipn.c"
+#include <dtn_base/testrun.h>
 /*
  *      ------------------------------------------------------------------------
  *
@@ -37,8 +37,8 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_ipn_create(){
-    
+int test_dtn_ipn_create() {
+
     dtn_ipn *self = dtn_ipn_create();
     testrun(self);
 
@@ -48,8 +48,8 @@ int test_dtn_ipn_create(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_ipn_free(){
-    
+int test_dtn_ipn_free() {
+
     dtn_ipn *self = dtn_ipn_create();
     testrun(self);
 
@@ -68,8 +68,8 @@ int test_dtn_ipn_free(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_ipn_clear(){
-    
+int test_dtn_ipn_clear() {
+
     dtn_ipn *self = dtn_ipn_create();
     testrun(self);
 
@@ -91,8 +91,8 @@ int test_dtn_ipn_clear(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_ipn_dump(){
-    
+int test_dtn_ipn_dump() {
+
     dtn_ipn *self = dtn_ipn_create();
     testrun(self);
 
@@ -114,13 +114,13 @@ int test_dtn_ipn_dump(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_ipn_copy(){
-        
+int test_dtn_ipn_copy() {
+
     dtn_ipn *copy = NULL;
     dtn_ipn *self = dtn_ipn_create();
     testrun(self);
 
-    testrun(dtn_ipn_copy((void**)&copy, self));
+    testrun(dtn_ipn_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->node == NULL);
     testrun(copy->scheme == NULL);
@@ -130,7 +130,7 @@ int test_dtn_ipn_copy(){
     self->scheme = dtn_string_dup("scheme");
     self->node = dtn_string_dup("node");
     self->service = dtn_string_dup("service");
-    testrun(dtn_ipn_copy((void**)&copy, self));
+    testrun(dtn_ipn_copy((void **)&copy, self));
     testrun(copy);
     testrun(copy->node != NULL);
     testrun(copy->scheme != NULL);
@@ -147,8 +147,8 @@ int test_dtn_ipn_copy(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_ipn_decode(){
-        
+int test_dtn_ipn_decode() {
+
     dtn_ipn *self = NULL;
 
     self = dtn_ipn_decode("ipn:1.2");
@@ -182,7 +182,7 @@ int test_dtn_ipn_decode(){
 
 /*----------------------------------------------------------------------------*/
 
-int test_dtn_ipn_encode(){
+int test_dtn_ipn_encode() {
 
     dtn_ipn *self = dtn_ipn_create();
 
@@ -197,8 +197,6 @@ int test_dtn_ipn_encode(){
     self = dtn_ipn_free(self);
     return testrun_log_success();
 }
-
-
 
 /*
  *      ------------------------------------------------------------------------

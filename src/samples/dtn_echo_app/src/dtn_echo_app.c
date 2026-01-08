@@ -32,33 +32,32 @@
         ------------------------------------------------------------------------
 */
 
-#include <dtn_base/dtn_event_loop.h>
 #include <dtn_base/dtn_config.h>
 #include <dtn_base/dtn_config_log.h>
-#include <dtn_core/dtn_io.h>
+#include <dtn_base/dtn_event_loop.h>
 #include <dtn_core/dtn_app.h>
+#include <dtn_core/dtn_io.h>
 #include <dtn_os/dtn_os.h>
 #include <dtn_os/dtn_os_event_loop.h>
 
 /*----------------------------------------------------------------------------*/
 
 #define CONFIG_PATH                                                            \
-  DTN_ROOT                                                                \
-  "/src/samples/dtn_echo_app/config/server_config.json"
+    DTN_ROOT                                                                   \
+    "/src/samples/dtn_echo_app/config/server_config.json"
 
 /*----------------------------------------------------------------------------*/
 
-static bool echo_callback(void *userdata, int socket, dtn_item *input){
+static bool echo_callback(void *userdata, int socket, dtn_item *input) {
 
     dtn_app *app = dtn_app_cast(userdata);
 
     sleep(1);
 
-    if (!dtn_app_send_json(app, socket, input)){
+    if (!dtn_app_send_json(app, socket, input)) {
 
         dtn_log_error("Failed to send echo at %i", socket);
         goto error;
-
     }
 
     dtn_item_free(input);
@@ -81,20 +80,21 @@ int main(int argc, char **argv) {
     dtn_item *config = NULL;
 
     dtn_event_loop_config loop_config = (dtn_event_loop_config){
-      .max.sockets = dtn_socket_get_max_supported_runtime_sockets(0),
-      .max.timers  = dtn_socket_get_max_supported_runtime_sockets(0)
-    };
+        .max.sockets = dtn_socket_get_max_supported_runtime_sockets(0),
+        .max.timers = dtn_socket_get_max_supported_runtime_sockets(0)};
 
     dtn_log_debug("support for %i socket connections", loop_config.max.sockets);
 
     const char *path = dtn_config_path_from_command_line(argc, argv);
-    if (!path) path = CONFIG_PATH;
+    if (!path)
+        path = CONFIG_PATH;
 
-    if (path == VERSION_REQUEST_ONLY) goto error;
+    if (path == VERSION_REQUEST_ONLY)
+        goto error;
 
     config = dtn_config_load(path);
 
-    if (!config){
+    if (!config) {
 
         dtn_log_error("Failed to load config from path %s", path);
         goto error;
@@ -102,10 +102,10 @@ int main(int argc, char **argv) {
     } else {
 
         dtn_log_debug("Loaded config from path %s", path);
-
     }
 
-    if (!dtn_config_log_from_json(config)) goto error;
+    if (!dtn_config_log_from_json(config))
+        goto error;
 
     loop = dtn_event_loop_default(loop_config);
 
@@ -114,14 +114,15 @@ int main(int argc, char **argv) {
         goto error;
     }
 
-    if (!dtn_event_loop_setup_signals(loop)) goto error;
+    if (!dtn_event_loop_setup_signals(loop))
+        goto error;
 
     dtn_io_config io_config = dtn_io_config_from_item(config);
     io_config.loop = loop;
 
     io = dtn_io_create(io_config);
-    
-    if (!io){
+
+    if (!io) {
         dtn_log_error("Failed to create io layer. Abort.");
         goto error;
     }
@@ -135,12 +136,12 @@ int main(int argc, char **argv) {
 
     dtn_app_set_debug(app, true);
 
-    if (!app){
+    if (!app) {
         dtn_log_error("Failed to create app layer. Abort.");
         goto error;
     }
 
-    if (!dtn_app_register(app, "register", echo_callback, app)){
+    if (!dtn_app_register(app, "register", echo_callback, app)) {
 
         dtn_log_error("Failed to initiate event callback. Abort.");
         goto error;
@@ -148,26 +149,23 @@ int main(int argc, char **argv) {
 
     int socket = 0;
 
-    if (dtn_item_is_true(dtn_item_get(config, "/as_client"))){
+    if (dtn_item_is_true(dtn_item_get(config, "/as_client"))) {
 
-        socket = dtn_app_open_connection(app, 
-            dtn_socket_configuration_from_item(
-                    dtn_item_get(config, "/socket")),
-            (dtn_io_ssl_config){0}
-            );
-    
+        socket = dtn_app_open_connection(
+            app,
+            dtn_socket_configuration_from_item(dtn_item_get(config, "/socket")),
+            (dtn_io_ssl_config){0});
+
     } else {
 
-        socket = dtn_app_open_listener(app, 
-            dtn_socket_configuration_from_item(
-                    dtn_item_get(config, "/socket"))
-            );
+        socket =
+            dtn_app_open_listener(app, dtn_socket_configuration_from_item(
+                                           dtn_item_get(config, "/socket")));
 
-        if (socket < 1){
+        if (socket < 1) {
             dtn_log_error("Failed to open server socket. Abort.");
             goto error;
         }
-
     }
 
     loop->run(loop, DTN_RUN_MAX);

@@ -27,8 +27,8 @@
 
         ------------------------------------------------------------------------
 */
-#include <dtn_base/testrun.h>
 #include "dtn_bpsec.c"
+#include <dtn_base/testrun.h>
 
 /*
  *      ------------------------------------------------------------------------
@@ -38,32 +38,32 @@
  *      ------------------------------------------------------------------------
  */
 
-int test_dtn_bpsec_asb_decode(){
+int test_dtn_bpsec_asb_decode() {
 
     uint8_t buffer[1024] = {0};
 
-    buffer[0]  = 0x81; // target
-    buffer[1]  = 0x01;
-    buffer[2]  = 0x01; // id
-    buffer[3]  = 0x01; // flags
-    buffer[4]  = 0x82; // source
-    buffer[5]  = 0x02;  // ipn
-    buffer[6]  = 0x82;  // 
-    buffer[7]  = 0x02;  // 2
-    buffer[8]  = 0x01;  // 1
-    buffer[9]  = 0x82; // params
-    buffer[10] = 0x82;   // 2
-    buffer[11] = 0x01;   // id
-    buffer[12] = 0x06;   // variant
-    buffer[13] = 0x82;   // 2
-    buffer[14] = 0x03;   // id
-    buffer[15] = 0x07;   // all flags
+    buffer[0] = 0x81; // target
+    buffer[1] = 0x01;
+    buffer[2] = 0x01;  // id
+    buffer[3] = 0x01;  // flags
+    buffer[4] = 0x82;  // source
+    buffer[5] = 0x02;  // ipn
+    buffer[6] = 0x82;  //
+    buffer[7] = 0x02;  // 2
+    buffer[8] = 0x01;  // 1
+    buffer[9] = 0x82;  // params
+    buffer[10] = 0x82; // 2
+    buffer[11] = 0x01; // id
+    buffer[12] = 0x06; // variant
+    buffer[13] = 0x82; // 2
+    buffer[14] = 0x03; // id
+    buffer[15] = 0x07; // all flags
     buffer[16] = 0x81; // security results
-    buffer[17] = 0x81;   // 1 item
-    buffer[18] = 0x82;   // 2 items
-    buffer[19] = 0x01;   // id 1
-    buffer[20] = 0x58;   // string
-    buffer[21] = 0x30;   // 30 length
+    buffer[17] = 0x81; // 1 item
+    buffer[18] = 0x82; // 2 items
+    buffer[19] = 0x01; // id 1
+    buffer[20] = 0x58; // string
+    buffer[21] = 0x30; // 30 length
     buffer[22] = 0xf7;
     buffer[23] = 0x5f;
     buffer[24] = 0xe4;

@@ -35,8 +35,8 @@
  * pthread_mutex_timedwait is not available on all platforms.
  * Therefore, abstract it here and provide surrogate if necessary.
  */
-#define DTN_ARCH_PTHREAD_MUTEX_TIMEDLOCK(m, t)                                  \
-  INTERNAL_DTN_ARCH_PTHREAD_MUTEX_TIMEDLOCK(m, t)
+#define DTN_ARCH_PTHREAD_MUTEX_TIMEDLOCK(m, t)                                 \
+    INTERNAL_DTN_ARCH_PTHREAD_MUTEX_TIMEDLOCK(m, t)
 
 /******************************************************************************
  *                                 INTERNALS
@@ -44,8 +44,8 @@
 
 #if DTN_ARCH == DTN_LINUX
 
-#define INTERNAL_DTN_ARCH_PTHREAD_MUTEX_TIMEDLOCK(m, t)                         \
-  pthread_mutex_timedlock(m, t)
+#define INTERNAL_DTN_ARCH_PTHREAD_MUTEX_TIMEDLOCK(m, t)                        \
+    pthread_mutex_timedlock(m, t)
 
 #endif
 
@@ -54,10 +54,10 @@
 #ifndef INTERNAL_DTN_ARCH_PTHREAD_MUTEX_TIMEDLOCK
 
 int dtn_arch_pthread_mutex_timedlock(pthread_mutex_t *restrict mutex,
-                                    const struct timespec *restrict abstime);
+                                     const struct timespec *restrict abstime);
 
-#define INTERNAL_DTN_ARCH_PTHREAD_MUTEX_TIMEDLOCK(m, t)                         \
-  dtn_arch_pthread_mutex_timedlock(m, t)
+#define INTERNAL_DTN_ARCH_PTHREAD_MUTEX_TIMEDLOCK(m, t)                        \
+    dtn_arch_pthread_mutex_timedlock(m, t)
 
 #endif
 

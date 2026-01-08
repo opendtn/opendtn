@@ -33,78 +33,77 @@
 
 static int test_dtn_result_set() {
 
-  dtn_result result = {0};
+    dtn_result result = {0};
 
-  testrun(!dtn_result_set(0, 0, 0));
-  testrun(dtn_result_set(&result, DTN_ERROR_NO_ERROR, 0));
+    testrun(!dtn_result_set(0, 0, 0));
+    testrun(dtn_result_set(&result, DTN_ERROR_NO_ERROR, 0));
 
-  testrun(DTN_ERROR_NO_ERROR == result.error_code);
-  testrun(0 == result.message);
+    testrun(DTN_ERROR_NO_ERROR == result.error_code);
+    testrun(0 == result.message);
 
-  testrun(!dtn_result_set(0, 100, 0));
-  testrun(!dtn_result_set(&result, 100, 0));
+    testrun(!dtn_result_set(0, 100, 0));
+    testrun(!dtn_result_set(&result, 100, 0));
 
-  char const *TEST_MSG = "fensalir";
+    char const *TEST_MSG = "fensalir";
 
-  testrun(dtn_result_set(&result, 100, TEST_MSG));
+    testrun(dtn_result_set(&result, 100, TEST_MSG));
 
-  testrun(100 == result.error_code);
-  testrun(0 != result.message);
-  testrun(0 == strcmp(TEST_MSG, result.message));
+    testrun(100 == result.error_code);
+    testrun(0 != result.message);
+    testrun(0 == strcmp(TEST_MSG, result.message));
 
-  testrun(dtn_result_set(&result, 200,
-                        "200"));
-  testrun(200 == result.error_code);
-  testrun(0 == strcmp("200", result.message));
+    testrun(dtn_result_set(&result, 200, "200"));
+    testrun(200 == result.error_code);
+    testrun(0 == strcmp("200", result.message));
 
-  dtn_result_clear(&result);
+    dtn_result_clear(&result);
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
 static int test_dtn_result_get_message() {
 
-  dtn_result result = {0};
+    dtn_result result = {0};
 
-  testrun(0 != dtn_result_get_message(result));
+    testrun(0 != dtn_result_get_message(result));
 
-  dtn_result_set(&result, DTN_ERROR_NO_ERROR, 0);
-  testrun(0 != dtn_result_get_message(result));
+    dtn_result_set(&result, DTN_ERROR_NO_ERROR, 0);
+    testrun(0 != dtn_result_get_message(result));
 
-  char const *MESSAGE = "Geir nu garmr mjoek fyr gnipahellir";
+    char const *MESSAGE = "Geir nu garmr mjoek fyr gnipahellir";
 
-  testrun(dtn_result_set(&result, 100, MESSAGE));
-  testrun(0 == strcmp(MESSAGE, dtn_result_get_message(result)));
+    testrun(dtn_result_set(&result, 100, MESSAGE));
+    testrun(0 == strcmp(MESSAGE, dtn_result_get_message(result)));
 
-  dtn_result_clear(&result);
+    dtn_result_clear(&result);
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*----------------------------------------------------------------------------*/
 
 static int test_dtn_result_clear() {
 
-  testrun(!dtn_result_clear(0));
+    testrun(!dtn_result_clear(0));
 
-  dtn_result result = {0};
+    dtn_result result = {0};
 
-  testrun(dtn_result_clear(&result));
+    testrun(dtn_result_clear(&result));
 
-  testrun(0 == result.error_code);
-  testrun(0 == result.message);
+    testrun(0 == result.error_code);
+    testrun(0 == result.message);
 
-  result.message = strdup("himinbjoerg");
-  result.error_code = 1243;
+    result.message = strdup("himinbjoerg");
+    result.error_code = 1243;
 
-  testrun(dtn_result_clear(&result));
+    testrun(dtn_result_clear(&result));
 
-  testrun(0 == result.error_code);
-  testrun(0 == result.message);
+    testrun(0 == result.error_code);
+    testrun(0 == result.message);
 
-  return testrun_log_success();
+    return testrun_log_success();
 }
 
 /*
@@ -117,12 +116,12 @@ static int test_dtn_result_clear() {
 
 int all_tests() {
 
-  testrun_init();
-  testrun_test(test_dtn_result_set);
-  testrun_test(test_dtn_result_get_message);
-  testrun_test(test_dtn_result_clear);
+    testrun_init();
+    testrun_test(test_dtn_result_set);
+    testrun_test(test_dtn_result_get_message);
+    testrun_test(test_dtn_result_clear);
 
-  return testrun_counter;
+    return testrun_counter;
 }
 
 /*

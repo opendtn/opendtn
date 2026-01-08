@@ -28,20 +28,20 @@
         ------------------------------------------------------------------------
 */
 
+#include <getopt.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <getopt.h>
 
-#include <dtn_base/dtn_getopt.h>
 #include <dtn_base/dtn_convert.h>
-#include <dtn_base/dtn_string.h>
 #include <dtn_base/dtn_event_loop.h>
+#include <dtn_base/dtn_getopt.h>
 #include <dtn_base/dtn_item.h>
 #include <dtn_base/dtn_item_json.h>
+#include <dtn_base/dtn_string.h>
 #include <dtn_base/dtn_utils.h>
 
 #include <dtn_core/dtn_app.h>
@@ -58,22 +58,22 @@ struct userdata {
     int socket;
     char *password;
     pthread_t thread;
-
 };
 
 /*---------------------------------------------------------------------------*/
 
-static bool cb_login(void *userdata, int socket, dtn_item *msg){
+static bool cb_login(void *userdata, int socket, dtn_item *msg) {
 
     UNUSED(socket);
 
-    struct userdata *self = (struct userdata*)(userdata);
+    struct userdata *self = (struct userdata *)(userdata);
 
     UNUSED(self);
 
-    if (!dtn_event_get_response(msg)) goto error;
+    if (!dtn_event_get_response(msg))
+        goto error;
 
-    if (0 != dtn_event_get_error_code(msg)){
+    if (0 != dtn_event_get_error_code(msg)) {
 
         char *string = dtn_item_to_json(msg);
         dtn_log_error("LOGIN FAILED %s", string);
@@ -94,17 +94,18 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool cb_load_routes(void *userdata, int socket, dtn_item *msg){
+static bool cb_load_routes(void *userdata, int socket, dtn_item *msg) {
 
     UNUSED(socket);
 
-    struct userdata *self = (struct userdata*)(userdata);
+    struct userdata *self = (struct userdata *)(userdata);
 
     UNUSED(self);
 
-    if (!dtn_event_get_response(msg)) goto error;
+    if (!dtn_event_get_response(msg))
+        goto error;
 
-    if (0 != dtn_event_get_error_code(msg)){
+    if (0 != dtn_event_get_error_code(msg)) {
 
         char *string = dtn_item_to_json(msg);
         dtn_log_error("LOAD ROUTES FAILED %s", string);
@@ -124,17 +125,18 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool cb_send_file(void *userdata, int socket, dtn_item *msg){
+static bool cb_send_file(void *userdata, int socket, dtn_item *msg) {
 
     UNUSED(socket);
 
-    struct userdata *self = (struct userdata*)(userdata);
+    struct userdata *self = (struct userdata *)(userdata);
 
     UNUSED(self);
 
-    if (!dtn_event_get_response(msg)) goto error;
+    if (!dtn_event_get_response(msg))
+        goto error;
 
-    if (0 != dtn_event_get_error_code(msg)){
+    if (0 != dtn_event_get_error_code(msg)) {
 
         char *string = dtn_item_to_json(msg);
         dtn_log_error("SEND FILE FAILED %s", string);
@@ -154,16 +156,17 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool send_login(dtn_app *app, int socket, const char *password){
+static bool send_login(dtn_app *app, int socket, const char *password) {
 
     dtn_item *msg = dtn_event_message_create(NULL, "login");
     dtn_item *par = dtn_event_get_paramenter(msg);
     dtn_item_object_set(par, "password", dtn_item_string(password));
 
-    if (!dtn_app_send_json(app, socket, msg)) goto error;
+    if (!dtn_app_send_json(app, socket, msg))
+        goto error;
 
     dtn_log_debug("LOGIN send at %i", socket);
-    
+
     msg = dtn_item_free(msg);
     return true;
 error:
@@ -174,14 +177,15 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool send_shutdown(dtn_app *app, int socket){
+static bool send_shutdown(dtn_app *app, int socket) {
 
     dtn_item *msg = dtn_event_message_create(NULL, "shutdown");
 
-    if (!dtn_app_send_json(app, socket, msg)) goto error;
+    if (!dtn_app_send_json(app, socket, msg))
+        goto error;
 
     dtn_log_debug("SHUTDOWN send at %i", socket);
-    
+
     msg = dtn_item_free(msg);
     return true;
 error:
@@ -190,19 +194,19 @@ error:
     return false;
 }
 
-
 /*---------------------------------------------------------------------------*/
 
-static bool send_load_routes(dtn_app *app, int socket, const char *path){
+static bool send_load_routes(dtn_app *app, int socket, const char *path) {
 
     dtn_item *msg = dtn_event_message_create(NULL, "load_routes");
     dtn_item *par = dtn_event_get_paramenter(msg);
     dtn_item_object_set(par, "path", dtn_item_string(path));
 
-    if (!dtn_app_send_json(app, socket, msg)) goto error;
+    if (!dtn_app_send_json(app, socket, msg))
+        goto error;
 
     dtn_log_debug("LOAD_ROUTES send at %i", socket);
-    
+
     msg = dtn_item_free(msg);
     return true;
 error:
@@ -213,8 +217,8 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool send_send_file(dtn_app *app, int socket, 
-    const char *source, const char *dest, const char *uri){
+static bool send_send_file(dtn_app *app, int socket, const char *source,
+                           const char *dest, const char *uri) {
 
     dtn_item *msg = dtn_event_message_create(NULL, "send_file");
     dtn_item *par = dtn_event_get_paramenter(msg);
@@ -224,14 +228,15 @@ static bool send_send_file(dtn_app *app, int socket,
     dtn_item_object_set(path, "destination", dtn_item_string(dest));
     dtn_item_object_set(par, "uri", dtn_item_string(uri));
 
-    if (!dtn_app_send_json(app, socket, msg)) goto error;
+    if (!dtn_app_send_json(app, socket, msg))
+        goto error;
 
     dtn_log_debug("SEND_FILE send at %i", socket);
-   /*
-    char *str = dtn_item_to_json(msg);
-    dtn_log_debug("%s", str);
-    str = dtn_data_pointer_free(str);
-    */
+    /*
+     char *str = dtn_item_to_json(msg);
+     dtn_log_debug("%s", str);
+     str = dtn_data_pointer_free(str);
+     */
     msg = dtn_item_free(msg);
     return true;
 error:
@@ -242,14 +247,16 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-static bool print_help(){
+static bool print_help() {
 
     fprintf(stdout, "\nThe following commands are recognized: \n\n");
     fprintf(stdout, "   help        :   print this help\n");
     fprintf(stdout, "   quit        :   quit program\n");
-    fprintf(stdout, "   login       :   send login to server (your password is stored for convinience)\n");
+    fprintf(stdout, "   login       :   send login to server (your password is "
+                    "stored for convinience)\n");
     fprintf(stdout, "   load_routes :   send load_routes to server\n");
-    fprintf(stdout, "   send_file   :   send send_file from path and uri to server\n");
+    fprintf(stdout,
+            "   send_file   :   send send_file from path and uri to server\n");
     fprintf(stdout, "   shutdown    :   shutdown server daemon\n");
 
     return true;
@@ -257,17 +264,18 @@ static bool print_help(){
 
 /*---------------------------------------------------------------------------*/
 
-static bool interact_with_user(struct userdata *userdata){
+static bool interact_with_user(struct userdata *userdata) {
 
-    char buffer[2048]; 
+    char buffer[2048];
     int size = 2028;
 
-    char buffer2[2048]; 
-    char buffer3[2048]; 
+    char buffer2[2048];
+    char buffer3[2048];
 
-    if (!userdata) goto error;
+    if (!userdata)
+        goto error;
 
-    while(1){
+    while (1) {
 
         fprintf(stdout, "Command:\n");
         fgets(buffer, size, stdin);
@@ -293,32 +301,32 @@ static bool interact_with_user(struct userdata *userdata){
         if (0 == strcmp(buffer, "shutdown\n"))
             send_shutdown(userdata->app, userdata->socket);
 
-        if (0 == strcmp(buffer, "load_routes\n")){
+        if (0 == strcmp(buffer, "load_routes\n")) {
 
             fprintf(stdout, "PATH:\n");
             fgets(buffer, size, stdin);
-            buffer[strlen(buffer) - 1 ] = 0;
+            buffer[strlen(buffer) - 1] = 0;
 
             send_load_routes(userdata->app, userdata->socket, buffer);
         }
 
-        if (0 == strcmp(buffer, "send_file\n")){
+        if (0 == strcmp(buffer, "send_file\n")) {
 
             fprintf(stdout, "SOURCE PATH:\n");
             fgets(buffer, size, stdin);
-            buffer[strlen(buffer) - 1 ] = 0;
+            buffer[strlen(buffer) - 1] = 0;
 
             fprintf(stdout, "DEST PATH:\n");
             fgets(buffer2, size, stdin);
-            buffer2[strlen(buffer2) - 1 ] = 0;
+            buffer2[strlen(buffer2) - 1] = 0;
 
             fprintf(stdout, "DTN_URI:\n");
             fgets(buffer3, size, stdin);
-            buffer3[strlen(buffer3) - 1 ] = 0;
+            buffer3[strlen(buffer3) - 1] = 0;
 
-            send_send_file(userdata->app, userdata->socket, buffer, buffer2, buffer3);
+            send_send_file(userdata->app, userdata->socket, buffer, buffer2,
+                           buffer3);
         }
-
     }
 
     dtn_event_loop_stop(userdata->loop);
@@ -329,22 +337,21 @@ error:
 
 /*---------------------------------------------------------------------------*/
 
-void *thread_base_user_interaction(void *x){
+void *thread_base_user_interaction(void *x) {
 
-    struct userdata *userdata = (struct userdata*)x;
+    struct userdata *userdata = (struct userdata *)x;
 
-    interact_with_user(userdata); 
+    interact_with_user(userdata);
 
     dtn_log_debug("User interaction thread exit.");
     return NULL;
 }
 
-
 /*---------------------------------------------------------------------------*/
 
-static void cb_connected(void *userdata, int socket){
+static void cb_connected(void *userdata, int socket) {
 
-    struct userdata *self = (struct userdata*)(userdata);
+    struct userdata *self = (struct userdata *)(userdata);
     self->socket = socket;
     dtn_log_debug("socket is now %i", self->socket);
     dtn_log_info("You need to relogin to server.");
@@ -353,11 +360,11 @@ static void cb_connected(void *userdata, int socket){
 
 /*---------------------------------------------------------------------------*/
 
-static void cb_close(void *userdata, int socket){
+static void cb_close(void *userdata, int socket) {
 
     UNUSED(socket);
 
-    struct userdata *self = (struct userdata*)(userdata);
+    struct userdata *self = (struct userdata *)(userdata);
     self->socket = -1;
     dtn_log_debug("socket is now unconnected");
 
@@ -368,87 +375,88 @@ static void cb_close(void *userdata, int socket){
 
 static void print_usage() {
 
-  fprintf(stdout, "\n");
-  fprintf(stdout,
-          "Connect to Command and Control socket of a DTN node\n");
-  fprintf(stdout, "\n");
-  fprintf(stdout, "USAGE              [OPTIONS]...\n");
-  fprintf(stdout, "\n");
-  fprintf(stdout, "               -x,     --password  password for the connection\n");
-  fprintf(stdout, "               -i,     --host      host to connect to\n");
-  fprintf(stdout, "               -p,     --port      port to connect to\n");
-  fprintf(stdout, "               -h,     --help      print this help\n");
-  fprintf(stdout, "\n");
-  fprintf(stdout, "\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "Connect to Command and Control socket of a DTN node\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "USAGE              [OPTIONS]...\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout,
+            "               -x,     --password  password for the connection\n");
+    fprintf(stdout, "               -i,     --host      host to connect to\n");
+    fprintf(stdout, "               -p,     --port      port to connect to\n");
+    fprintf(stdout, "               -h,     --help      print this help\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "\n");
 
-  return;
+    return;
 }
 
 /*---------------------------------------------------------------------------*/
 
-bool read_command_line_input(int argc, char *argv[], 
-    char **host, uint16_t *port, char **password) {
+bool read_command_line_input(int argc, char *argv[], char **host,
+                             uint16_t *port, char **password) {
 
-  int c = 0;
-  int option_index = 0;
-  bool ok = true;
+    int c = 0;
+    int option_index = 0;
+    bool ok = true;
 
-  while (1) {
+    while (1) {
 
-    static struct option long_options[] = {
+        static struct option long_options[] = {
 
-        /* These options don’t set a flag.
-           We distinguish them by their indices. */
-        {"host", required_argument, 0, 'i'},
-        {"port", required_argument, 0, 'p'},
-        {"password", optional_argument, 0, 'x'},
-        {"help", optional_argument, 0, 'h'},
-        {0, 0, 0, 0}};
+            /* These options don’t set a flag.
+               We distinguish them by their indices. */
+            {"host", required_argument, 0, 'i'},
+            {"port", required_argument, 0, 'p'},
+            {"password", optional_argument, 0, 'x'},
+            {"help", optional_argument, 0, 'h'},
+            {0, 0, 0, 0}};
 
-    /* getopt_long stores the option index here. */
+        /* getopt_long stores the option index here. */
 
-    c = getopt_long(argc, argv, "i:p:?hx:", long_options, &option_index);
+        c = getopt_long(argc, argv, "i:p:?hx:", long_options, &option_index);
 
-    /* Detect the end of the options. */
-    if (c == -1)
-      break;
+        /* Detect the end of the options. */
+        if (c == -1)
+            break;
 
-    switch (c) {
+        switch (c) {
 
-    case 'h':
-      print_usage();
-      goto error;
-      break;
+        case 'h':
+            print_usage();
+            goto error;
+            break;
 
-    case '?':
-      print_usage();
-      goto error;
-      break;
+        case '?':
+            print_usage();
+            goto error;
+            break;
 
-    case 'p':
-        if (optarg){
-            *port = dtn_string_to_uint16(optarg, &ok);
-            if (!ok) goto error;
+        case 'p':
+            if (optarg) {
+                *port = dtn_string_to_uint16(optarg, &ok);
+                if (!ok)
+                    goto error;
+            }
+            break;
+
+        case 'x':
+            *password = optarg;
+            break;
+
+        case 'i':
+            *host = optarg;
+            break;
+
+        default:
+            print_usage();
+            goto error;
         }
-      break;
-
-    case 'x':
-        *password = optarg;
-      break;
-
-    case 'i':
-        *host = optarg;
-      break;
-
-    default:
-      print_usage();
-      goto error;
     }
-  }
 
-  return true;
+    return true;
 error:
-  return false;
+    return false;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -468,17 +476,17 @@ int main(int argc, char **argv) {
         .max.timers = dtn_socket_get_max_supported_runtime_sockets(0)};
 
     loop = dtn_os_event_loop(loop_config);
-    if (!loop) goto error;
+    if (!loop)
+        goto error;
 
     io = dtn_io_create((dtn_io_config){.loop = loop});
-    if (!io) goto error;
+    if (!io)
+        goto error;
 
-    app = dtn_app_create((dtn_app_config){
-        .loop = loop,
-        .io = io
-    });
+    app = dtn_app_create((dtn_app_config){.loop = loop, .io = io});
 
-    if (!app) goto error;
+    if (!app)
+        goto error;
 
     dtn_socket_configuration socket_config = {0};
     socket_config.type = TCP;
@@ -486,15 +494,18 @@ int main(int argc, char **argv) {
     char *password = NULL;
     char *host = NULL;
 
-    if (!read_command_line_input(argc, argv, 
-        &host, &socket_config.port, &password)) goto error;
+    if (!read_command_line_input(argc, argv, &host, &socket_config.port,
+                                 &password))
+        goto error;
 
-    if (!host) goto error;
+    if (!host)
+        goto error;
     strncpy(socket_config.host, host, DTN_HOST_NAME_MAX);
 
-    dtn_log_debug("Connecting to host %s:%i", socket_config.host, socket_config.port);
+    dtn_log_debug("Connecting to host %s:%i", socket_config.host,
+                  socket_config.port);
 
-    if (!password){
+    if (!password) {
         password = getpass("Password: ");
     }
 
@@ -504,11 +515,12 @@ int main(int argc, char **argv) {
     dtn_app_register_connected(app, &userdata, cb_connected);
     dtn_app_register_close(app, &userdata, cb_close);
 
-    int socket = dtn_app_open_connection(app, socket_config, (dtn_io_ssl_config){0});
+    int socket =
+        dtn_app_open_connection(app, socket_config, (dtn_io_ssl_config){0});
     UNUSED(socket);
-    
+
     userdata.socket = socket;
-    
+
     if (!dtn_app_register(app, "login", cb_login, &userdata))
         goto error;
 
@@ -518,10 +530,10 @@ int main(int argc, char **argv) {
     if (!dtn_app_register(app, "send_file", cb_send_file, &userdata))
         goto error;
 
-    int res = pthread_create(&userdata.thread, NULL, thread_base_user_interaction, &userdata);
-    if (res)
-    {
-        printf ("error %d\n", res);
+    int res = pthread_create(&userdata.thread, NULL,
+                             thread_base_user_interaction, &userdata);
+    if (res) {
+        printf("error %d\n", res);
     }
 
     dtn_event_loop_run(loop, DTN_RUN_MAX);
